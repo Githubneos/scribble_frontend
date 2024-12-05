@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Flocker Art
+title: Scribble Chat
 search_exclude: true
 description: Guess the Drawing
 hide: true
@@ -36,30 +36,6 @@ hide: true
                 100% { background-position: 0% 50%; }
             }
 
-            .submenu {
-                display: flex;
-                justify-content: center;
-                padding: 10px;
-                background: rgba(0, 0, 0, 0.6);
-                width: 100%;
-                position: sticky;
-                top: 0;
-                z-index: 1000;
-            }
-
-            .submenu a {
-                color: white;
-                text-decoration: none;
-                margin: 0 15px;
-                padding: 10px 20px;
-                border-radius: 5px;
-                transition: background 0.3s ease;
-            }
-
-            .submenu a:hover {
-                background: rgba(255, 255, 255, 0.3);
-            }
-
             #content {
                 padding: 20px;
                 text-align: center;
@@ -71,9 +47,7 @@ hide: true
                 flex-direction: column;
             }
 
-            #leaderboard-content,
             #chatroom-content {
-                display: none;
                 width: 80%;
                 background: rgba(0, 0, 0, 0.6);
                 padding: 20px;
@@ -120,22 +94,8 @@ hide: true
         `;
         document.head.appendChild(style);
 
-        const submenu = document.createElement('div');
-        submenu.className = 'submenu';
-        submenu.innerHTML = `
-            <a href="#" onclick="showFeature('leaderboard-content')">Leaderboard</a>
-            <a href="#" onclick="showFeature('chatroom-content')">Chatroom</a>
-        `;
-
         const content = document.createElement('div');
         content.id = 'content';
-
-        const leaderboardContent = document.createElement('div');
-        leaderboardContent.id = 'leaderboard-content';
-        leaderboardContent.innerHTML = `
-            <h1>Leaderboard</h1>
-            <p>Coming Soon: Feature under development!</p>
-        `;
 
         const chatroomContent = document.createElement('div');
         chatroomContent.id = 'chatroom-content';
@@ -148,21 +108,8 @@ hide: true
             </div>
         `;
 
-        content.appendChild(leaderboardContent);
         content.appendChild(chatroomContent);
-        app.appendChild(submenu);
         app.appendChild(content);
-
-        window.showFeature = function (featureId) {
-            const allFeatures = ['leaderboard-content', 'chatroom-content'];
-            allFeatures.forEach(id => {
-                document.getElementById(id).style.display = id === featureId ? 'block' : 'none';
-            });
-
-            if (featureId === 'chatroom-content') {
-                fetchMessages(); // Load chat messages when chatroom is active
-            }
-        };
 
         const chatbox = document.getElementById('chatbox');
 
@@ -191,13 +138,13 @@ hide: true
                 message,
                 timestamp: new Date().toLocaleTimeString()
             };
-            displayMessage(newMessage);  // Display immediately in chatbox
-            document.getElementById('message').value = ''; // Clear input
+            displayMessage(newMessage); 
+            document.getElementById('message').value = ''; 
         }
 
         document.getElementById('sendButton').addEventListener('click', sendMessage);
 
-        // Load initial messages when Chatroom is selected
-        showFeature('chatroom-content');
+        // Load initial chat messages
+        fetchMessages();
     });
 </script>
