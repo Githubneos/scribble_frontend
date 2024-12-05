@@ -2,7 +2,7 @@
 layout: post 
 title: Scribbl With users
 search_exclude: true
-permalink: /word_hints/home
+permalink: /home
 menu: nav/scribbl_with_users.html
 author: Zach
 ---
