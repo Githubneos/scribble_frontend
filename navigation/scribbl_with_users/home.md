@@ -137,3 +137,51 @@ This media page allows you to express yourself with hand drawn images, along wit
 </body>
 </html>
 
+<<<<<<< HEAD
+=======
+# Run the application
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = DrawingPad(root)
+    root.mainloop()
+
+<!-- <style>
+  canvas {
+    border: 1px solid black;
+    display: block;
+    margin: 20px auto;
+  }
+</style>
+<canvas id="drawingCanvas" width="800" height="600"></canvas>
+<script>
+  // Select the canvas and get its context
+  const canvas = document.getElementById('drawingCanvas');
+  const ctx = canvas.getContext('2d');
+
+  let isDrawing = false;
+
+  // Event listeners for mouse actions
+  canvas.addEventListener('mousedown', (e) => {
+    isDrawing = true;
+    ctx.beginPath();
+    ctx.moveTo(e.offsetX, e.offsetY);
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (isDrawing) {
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+    }
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    isDrawing = false;
+    ctx.closePath();
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    isDrawing = false;
+  });
+</script>
+>
+>>>>>>> 7a1434da93ef99802ed161acf1fbf84603677a44
