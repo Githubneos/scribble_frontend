@@ -3,6 +3,8 @@ layout: post
 title: Scribble Chat
 search_exclude: true
 description: Guess the Drawing
+permalink: /scribbl_with_users/chatroom/
+Author: Keerthan Karumudi
 hide: true
 ---
 
@@ -148,3 +150,4 @@ hide: true
         fetchMessages();
     });
 </script>
+   

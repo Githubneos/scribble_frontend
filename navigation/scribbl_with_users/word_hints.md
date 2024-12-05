@@ -138,4 +138,3 @@ restartGameButton.addEventListener("click", resetGame);
 </script>
 
 
-### hello?
