@@ -13,114 +13,99 @@ This media page allows you to express yourself with hand drawn images, along wit
 
 ### Drawing Pad
 
-<script>
-const canvas = document.createElement('canvas');
-canvas.width = 500;
-canvas.height = 400;
-document.body.appendChild(canvas);
+import tkinter as tk
+from tkinter.colorchooser import askcolor
 
-const ctx = canvas.getContext('2d');
+class DrawingPad:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Drawing Pad")
 
-const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'gray', 'brown', 'black'];
-let currentColor = 'black';  
-let isDrawing = false;
-let lastX = 0;
-let lastY = 0;
-let drawingHistory = [];
+        # Initialize attributes
+        self.current_color = "black"
+        self.is_eraser = False
+        self.undo_stack = []
+        self.canvas_width = 800
+        self.canvas_height = 600
 
+        # Canvas setup
+        self.canvas = tk.Canvas(root, width=self.canvas_width, height=self.canvas_height, bg="white")
+        self.canvas.pack()
 
-ctx.lineWidth = 5;
-ctx.lineCap = 'round';
-ctx.strokeStyle = currentColor;
+        # Buttons and controls
+        self.controls_frame = tk.Frame(root)
+        self.controls_frame.pack(pady=10)
 
+        self.color_buttons = [
+            "red", "orange", "yellow", "green", "blue",
+            "purple", "pink", "gray", "brown", "black"
+        ]
+        for color in self.color_buttons:
+            button = tk.Button(
+                self.controls_frame,
+                bg=color,
+                width=2, height=1,
+                command=lambda col=color: self.set_color(col)
+            )
+            button.pack(side="left", padx=2)
 
-colors.forEach(color => {
-  const button = document.createElement('button');
-  button.style.backgroundColor = color;
-  button.addEventListener('click', () => changeColor(color));
-  document.body.appendChild(button);
-});
+        self.eraser_button = tk.Button(self.controls_frame, text="Eraser", command=self.toggle_eraser)
+        self.eraser_button.pack(side="left", padx=5)
 
-const undoButton = document.createElement('button');
-undoButton.textContent = 'Undo Last Action';
-undoButton.addEventListener('click', undo);
-document.body.appendChild(undoButton);
+        self.undo_button = tk.Button(self.controls_frame, text="Undo", command=self.undo_last_action)
+        self.undo_button.pack(side="left", padx=5)
 
+        self.clear_button = tk.Button(self.controls_frame, text="Clear All", command=self.clear_canvas)
+        self.clear_button.pack(side="left", padx=5)
 
-const clearButton = document.createElement('button');
-clearButton.textContent = 'Clear All';
-clearButton.addEventListener('click', clearCanvas);
-document.body.appendChild(clearButton);
+        # Bind canvas events
+        self.canvas.bind("<Button-1>", self.start_drawing)
+        self.canvas.bind("<B1-Motion>", self.draw)
 
+        self.last_x, self.last_y = None, None
 
-const eraserButton = document.createElement('button');
-eraserButton.textContent = 'Toggle Eraser';
-eraserButton.addEventListener('click', toggleEraser);
-document.body.appendChild(eraserButton);
+    def set_color(self, color):
+        self.is_eraser = False
+        self.current_color = color
 
+    def toggle_eraser(self):
+        self.is_eraser = not self.is_eraser
+        self.current_color = "white" if self.is_eraser else "black"
 
-canvas.addEventListener('mousedown', (e) => {
-  isDrawing = true;
-  [lastX, lastY] = [e.offsetX, e.offsetY];
-});
+    def start_drawing(self, event):
+        self.last_x, self.last_y = event.x, event.y
+        # Save the current state of the canvas for undo
+        self.undo_stack.append(self.canvas.create_image(0, 0, anchor="nw", image=self.get_canvas_snapshot()))
 
+    def draw(self, event):
+        x, y = event.x, event.y
+        if self.last_x and self.last_y:
+            self.canvas.create_line(
+                self.last_x, self.last_y, x, y,
+                fill=self.current_color, width=5
+            )
+        self.last_x, self.last_y = x, y
 
-canvas.addEventListener('mousemove', (e) => {
-  if (!isDrawing) return;
-  ctx.beginPath();
-  ctx.moveTo(lastX, lastY);
-  ctx.lineTo(e.offsetX, e.offsetY);
-  ctx.stroke();
-  [lastX, lastY] = [e.offsetX, e.offsetY];
-});
+    def undo_last_action(self):
+        if self.undo_stack:
+            last_action = self.undo_stack.pop()
+            self.canvas.delete(last_action)
 
+    def clear_canvas(self):
+        self.canvas.delete("all")
+        self.undo_stack.clear()
 
-canvas.addEventListener('mouseup', () => {
-  if (isDrawing) {
-    isDrawing = false;
-    saveDrawingState();
-  }
-});
+    def get_canvas_snapshot(self):
+        # Create an image snapshot of the canvas for undo
+        self.root.update()
+        x = self.root.winfo_rootx() + self.canvas.winfo_x()
+        y = self.root.winfo_rooty() + self.canvas.winfo_y()
+        width = self.canvas_width
+        height = self.canvas_height
+        return tk.PhotoImage(file=self.canvas.postscript(x=x, y=y, width=width, height=height))
 
-canvas.addEventListener('mouseout', () => {
-  if (isDrawing) {
-    isDrawing = false;
-    saveDrawingState();
-  }
-});
-
-
-function changeColor(color) {
-  currentColor = color;
-  ctx.strokeStyle = color;
-}
-
-
-let isEraser = false;
-function toggleEraser() {
-  isEraser = !isEraser;
-  ctx.strokeStyle = isEraser ? 'white' : currentColor;
-}
-
-
-function saveDrawingState() {
-  drawingHistory.push(canvas.toDataURL());
-}
-
-
-function undo() {
-  if (drawingHistory.length === 0) return;
-  drawingHistory.pop();
-  const lastState = drawingHistory[drawingHistory.length - 1];
-  const img = new Image();
-  img.src = lastState;
-  img.onload = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
-  img.onload = () => ctx.drawImage(img, 0, 0);
-}
-
-
-function clearCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawingHistory = [];  
-} 
-</script>
+# Run the application
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = DrawingPad(root)
+    root.mainloop()
