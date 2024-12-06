@@ -2,8 +2,8 @@
 layout: post
 title: Scribble Chat
 search_exclude: true
-description: Guess the Drawing
-permalink: /scribbl_with_users/chatroom/
+description: Chatroom
+permalink: /chatroom
 Author: Keerthan Karumudi
 hide: true
 ---
