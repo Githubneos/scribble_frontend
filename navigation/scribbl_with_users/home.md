@@ -37,12 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentColor = 'black';
     let isEraser = false;
     const colors = ['black', 'red', 'blue', 'green', 'purple', 'orange'];
-    
+
     colors.forEach(color => {
         const button = document.createElement('button');
         button.style.cssText = `
             background: ${color};
-            border: none;
+            border: ${color === currentColor ? '2px solid white' : 'none'};
             width: 30px;
             height: 30px;
             margin: 0 5px;
@@ -52,9 +52,44 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         button.addEventListener('click', () => {
             currentColor = color;
+            isEraser = false;
+            updateButtonStates();
         });
         toolbar.appendChild(button);
     });
+
+    const eraserButton = document.createElement('button');
+    eraserButton.textContent = '⌫';
+    eraserButton.style.cssText = `
+        background: white;
+        border: none;
+        padding: 5px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 0 5px;
+        font-weight: bold;
+    `;
+    eraserButton.addEventListener('click', () => {
+        isEraser = true;
+        updateButtonStates();
+    });
+    toolbar.appendChild(eraserButton);
+
+    const saveButton = document.createElement('button');
+    saveButton.textContent = '💾';
+    saveButton.style.cssText = `
+        background: #FF6A88;
+        color: white;
+        border: none;
+        padding: 5px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 0 5px;
+        font-weight: bold;
+    `;
+    saveButton.addEventListener('click', saveDrawing);
+    toolbar.appendChild(saveButton);
+
     const resetButton = document.createElement('button');
     resetButton.textContent = 'Reset';
     resetButton.style.cssText = `
@@ -105,5 +140,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     app.appendChild(toolbar);
     app.appendChild(canvas);
+
+    function updateButtonStates() {
+        toolbar.querySelectorAll('button').forEach(btn => {
+            btn.style.border = 'none';
+        });
+        if (!isEraser) {
+            const activeButton = Array.from(toolbar.querySelectorAll('button'))
+                .find(btn => btn.style.background === currentColor);
+            if (activeButton) activeButton.style.border = '2px solid white';
+        } else {
+            eraserButton.style.border = '2px solid #FF6A88';
+        }
+    }
+
+    function saveDrawing() {
+        const link = document.createElement('a');
+        link.download = 'drawing.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+
+    function draw(e) {
+        if (!drawing) return;
+        const x = e.type.includes('touch') ? 
+            e.touches[0].clientX - canvas.offsetLeft : 
+            e.offsetX;
+        const y = e.type.includes('touch') ? 
+            e.touches[0].clientY - canvas.offsetTop : 
+            e.offsetY;
+
+        ctx.strokeStyle = isEraser ? 'white' : currentColor;
+        ctx.lineWidth = isEraser ? brushSize.value * 2 : brushSize.value;
+        ctx.lineCap = 'round';
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        drawing = true;
+        ctx.beginPath();
+        const touch = e.touches[0];
+        ctx.moveTo(
+            touch.clientX - canvas.offsetLeft,
+            touch.clientY - canvas.offsetTop
+        );
+    });
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', () => {
+        drawing = false;
+        ctx.closePath();
+    });
+
+    canvas.addEventListener('mousemove', draw);
 });
 </script>
