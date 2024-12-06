@@ -15,25 +15,29 @@ This media page allows you to express yourself with hand drawn images, along wit
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const app = document.createElement('div');
-    document.body.appendChild(app);
-    app.style.cssText = `
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        background: linear-gradient(135deg, #FF9A8B, #FF6A88, #FF99AC, #845EC2, #D65DB1);
-        margin: 0;
-    `;
     const toolbar = document.createElement('div');
     toolbar.style.cssText = `
         display: flex;
         justify-content: center;
+        align-items: center;
         margin-bottom: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px;
+        border-radius: 10px;
     `;
-    const colors = ['black', 'red', 'blue', 'green', 'purple', 'orange'];
+
+   const brushSize = document.createElement('input');
+    brushSize.type = 'range';
+    brushSize.min = '1';
+    brushSize.max = '20';
+    brushSize.value = '2';
+    brushSize.style.margin = '0 10px';
+    toolbar.appendChild(brushSize);
+
     let currentColor = 'black';
+    let isEraser = false;
+    const colors = ['black', 'red', 'blue', 'green', 'purple', 'orange'];
+    
     colors.forEach(color => {
         const button = document.createElement('button');
         button.style.cssText = `
