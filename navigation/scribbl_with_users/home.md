@@ -13,105 +13,113 @@ This media page allows you to express yourself with hand drawn images, along wit
 
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const app = document.createElement('div');
-    document.body.appendChild(app);
+const canvas = document.createElement('canvas');
+canvas.width = 500;
+canvas.height = 400;
+document.body.appendChild(canvas);
 
-    app.style.cssText = `
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        background: linear-gradient(135deg, #FF9A8B, #FF6A88, #FF99AC, #845EC2, #D65DB1);
-        margin: 0;
-    `;
+const ctx = canvas.getContext('2d');
 
-    const toolbar = document.createElement('div');
-    toolbar.style.cssText = `
-        display: flex;
-        justify-content: center;
-        margin-bottom: 10px;
-    `;
+const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'gray', 'brown', 'black'];
+let currentColor = 'black';  
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+let drawingHistory = [];
 
-    const colors = ['black', 'red', 'blue', 'green', 'purple', 'orange'];
-    let currentColor = 'black';
 
-    colors.forEach(color => {
-        const button = document.createElement('button');
-        button.style.cssText = `
-            background: ${color};
-            border: none;
-            width: 30px;
-            height: 30px;
-            margin: 0 5px;
-            border-radius: 50%;
-            cursor: pointer;
-            outline: none;
-        `;
-        button.addEventListener('click', () => {
-            currentColor = color;
-        });
-        toolbar.appendChild(button);
-    });
+ctx.lineWidth = 5;
+ctx.lineCap = 'round';
+ctx.strokeStyle = currentColor;
 
-    const resetButton = document.createElement('button');
-    resetButton.textContent = 'Reset';
-    resetButton.style.cssText = `
-        background: #FF6A88;
-        color: white;
-        border: none;
-        padding: 5px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-left: 10px;
-        font-weight: bold;
-    `;
-    resetButton.addEventListener('click', resetCanvas);
-    toolbar.appendChild(resetButton);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = 800;
-    canvas.height = 600;
-    canvas.style.cssText = `
-        border: 2px solid black;
-        background: white;
-        cursor: crosshair;
-    `;
-    const ctx = canvas.getContext('2d');
-
-    let drawing = false;
-
-    canvas.addEventListener('mousedown', (e) => {
-        drawing = true;
-        ctx.beginPath();
-        ctx.moveTo(e.offsetX, e.offsetY);
-    });
-
-    canvas.addEventListener('mousemove', (e) => {
-        if (drawing) {
-            ctx.strokeStyle = currentColor;
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.stroke();
-        }
-    });
-
-    canvas.addEventListener('mouseup', () => {
-        drawing = false;
-        ctx.closePath();
-    });
-
-    canvas.addEventListener('mouseleave', () => {
-        drawing = false;
-    });
-
-    function resetCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    app.appendChild(toolbar);
-    app.appendChild(canvas);
+colors.forEach(color => {
+  const button = document.createElement('button');
+  button.style.backgroundColor = color;
+  button.addEventListener('click', () => changeColor(color));
+  document.body.appendChild(button);
 });
+
+const undoButton = document.createElement('button');
+undoButton.textContent = 'Undo Last Action';
+undoButton.addEventListener('click', undo);
+document.body.appendChild(undoButton);
+
+
+const clearButton = document.createElement('button');
+clearButton.textContent = 'Clear All';
+clearButton.addEventListener('click', clearCanvas);
+document.body.appendChild(clearButton);
+
+
+const eraserButton = document.createElement('button');
+eraserButton.textContent = 'Toggle Eraser';
+eraserButton.addEventListener('click', toggleEraser);
+document.body.appendChild(eraserButton);
+
+
+canvas.addEventListener('mousedown', (e) => {
+  isDrawing = true;
+  [lastX, lastY] = [e.offsetX, e.offsetY];
+});
+
+
+canvas.addEventListener('mousemove', (e) => {
+  if (!isDrawing) return;
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(e.offsetX, e.offsetY);
+  ctx.stroke();
+  [lastX, lastY] = [e.offsetX, e.offsetY];
+});
+
+
+canvas.addEventListener('mouseup', () => {
+  if (isDrawing) {
+    isDrawing = false;
+    saveDrawingState();
+  }
+});
+
+canvas.addEventListener('mouseout', () => {
+  if (isDrawing) {
+    isDrawing = false;
+    saveDrawingState();
+  }
+});
+
+
+function changeColor(color) {
+  currentColor = color;
+  ctx.strokeStyle = color;
+}
+
+
+let isEraser = false;
+function toggleEraser() {
+  isEraser = !isEraser;
+  ctx.strokeStyle = isEraser ? 'white' : currentColor;
+}
+
+
+function saveDrawingState() {
+  drawingHistory.push(canvas.toDataURL());
+}
+
+
+function undo() {
+  if (drawingHistory.length === 0) return;
+  drawingHistory.pop();
+  const lastState = drawingHistory[drawingHistory.length - 1];
+  const img = new Image();
+  img.src = lastState;
+  img.onload = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+  img.onload = () => ctx.drawImage(img, 0, 0);
+}
+
+
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawingHistory = [];  
+} 
 </script>
