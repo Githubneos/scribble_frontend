@@ -1,4 +1,4 @@
-title: DNHS Flocker
+title: Scribble Sigmas
 description: "Social Media for Del Norte High School"
 owner_name: Keertha
 github_username: Githubneos
@@ -17,9 +17,4 @@ plugins:
   - jekyll-remote-theme
 header_pages:
   - navigation/ai.md
-  - navigation/shared_interests/home.md
-  - navigation/create_and_compete/home.md
-  - navigation/voteforthegoat/home.md
-  - navigation/share_and_care/home.md
-  - navigation/rate_and_relate/home.md
   - navigation/scribbl_with_users/home.md
