@@ -2,8 +2,8 @@ title: DNHS Flocker
 description: "Social Media for Del Norte High School"
 owner_name: Keertha
 github_username: Githubneos
-github_repo: "Scribble_Frontend" 
-baseurl: "/Scribble_Frontend"
+github_repo: "Scribble-Frontend" 
+baseurl: "/Scribble-Frontend"
 future: true
 remote_theme: jekyll/minima
 minima:
