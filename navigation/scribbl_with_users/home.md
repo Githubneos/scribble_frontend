@@ -11,7 +11,6 @@ author: Zach
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-<<<<<<< HEAD
     const app = document.querySelector('#app');
     const toolbar = document.createElement('div');
     toolbar.style.cssText = `
@@ -24,92 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
         border-radius: 10px;
         gap: 10px;
         flex-wrap: wrap;
-=======
-  // Create the container for the drawing app
-  const apdp = document.createElement('div');
-  document.body.appendChild(app);
-
-  app.style.cssText = `
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
-    margin: 0;
-    overflow: hidden;
-  `;
-
-  // Create the canvas with a white background and black border
-  const canvas = document.createElement('canvas');
-  canvas.width = 500;
-  canvas.height = 400;
-  canvas.style.cssText = `
-    background: white;
-    border: 5px solid black;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    display: block;
-    margin: 20px auto;
-  `;
-  app.appendChild(canvas);
-
-  const ctx = canvas.getContext('2d');
-  ctx.lineWidth = 5;
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = 'black';
-
-  const colors = [
-    '#FF0000', '#FF4500', '#FFA500', '#FFD700', // reds & oranges
-    '#32CD32', '#00FF00', '#008000', '#00FA9A', // greens
-    '#87CEEB', '#1E90FF', '#0000FF', '#000080', // blues
-    '#800080', '#FF00FF', '#FF69B4', '#FFC0CB', // purples & pinks
-    '#8B4513', '#A0522D', '#000000', '#FFFFFF'  // browns & basics
-  ];
-  let currentColor = 'black';
-  let isDrawing = false;
-  let lastX = 0;
-  let lastY = 0;
-  let drawingHistory = [];
-  let isEraser = false;
-
-  // Add brush size control
-  let brushSizes = [2, 5, 10, 15, 20];
-  let currentSize = 5;
-
-  // Create the toolbar
-  const toolbar = document.createElement('div');
-  toolbar.style.cssText = `
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-    background: rgba(255,255,255,0.2);
-    padding: 15px;
-    border-radius: 10px;
-  `;
-  app.appendChild(toolbar);
-
-  // Add brush size buttons
-  const brushSizeContainer = document.createElement('div');
-  brushSizeContainer.style.cssText = `
-    display: flex;
-    gap: 5px;
-    align-items: center;
-    margin-left: 10px;
-  `;
-  
-  brushSizes.forEach(size => {
-    const button = document.createElement('button');
-    button.style.cssText = `
-      width: ${size + 10}px;
-      height: ${size + 10}px;
-      border-radius: 50%;
-      background: #444;
-      border: none;
-      cursor: pointer;
->>>>>>> 8598950 (edit??? kinda confused bc someone changing the code rn so pls stop)
     `;
 
     const colorPicker = document.createElement('input');
