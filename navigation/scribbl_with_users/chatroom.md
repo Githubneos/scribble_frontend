@@ -3,7 +3,7 @@ layout: post
 title: Scribble Chat
 search_exclude: true
 description: Chatroom
-permalink: /chatroom
+permalink: scribbl_with_users/chatroom
 Author: Keerthan Karumudi
 hide: true
 ---
