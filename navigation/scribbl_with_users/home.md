@@ -9,6 +9,13 @@ author: Zach
 
 ## Welcome to Scribbl With Users
 
+<div id="app"></div>
+<div id="chat-container" style="margin-top: 20px;">
+    <div id="messages" style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"></div>
+    <input type="text" id="message-input" placeholder="Type your message..." style="width: 80%; padding: 5px;">
+    <button id="send-button" style="padding: 5px 10px;">Send</button>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.querySelector('#app');
@@ -141,6 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
         cursor: crosshair;
     `;
     const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     let drawing = false;
 
     canvas.addEventListener('mousedown', (e) => {
@@ -168,8 +177,50 @@ document.addEventListener('DOMContentLoaded', () => {
         drawing = false;
     });
 
+<<<<<<< HEAD
+=======
+    function resetCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function saveDrawing() {
+        const link = document.createElement('a');
+        link.download = 'drawing.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+
+    backgroundToggle.addEventListener('click', () => {
+        const newBackground = canvas.style.background === 'black' ? 'white' : 'black';
+        canvas.style.background = newBackground;
+        ctx.fillStyle = newBackground;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    });
+
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const messagesDiv = document.getElementById('messages');
+
+    function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+            const messageElement = document.createElement('div');
+            messageElement.textContent = `You: ${message}`;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            messageInput.value = '';
+        }
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+>>>>>>> 544b23f2c9292828c18896709d7c007b13de7cee
     app.appendChild(toolbar);
     app.appendChild(canvas);
 });
 </script>
-<div id="app"></div>
