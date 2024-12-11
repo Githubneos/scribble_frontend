@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         border-radius: 10px;
         gap: 10px;
         flex-wrap: wrap;
-  `;
+    `;
 
     const colorPicker = document.createElement('input');
     colorPicker.type = 'color';
@@ -149,93 +149,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-  // Add Undo button
-  const undoButton = document.createElement('button');
-  undoButton.textContent = 'Undo';
-  undoButton.style.cssText = `
-    padding: 5px 15px;
-    background: #444;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  `;
-  undoButton.addEventListener('click', undo);
-  toolbar.appendChild(undoButton);
-
-  // Add Clear button
-  const clearButton = document.createElement('button');
-  clearButton.textContent = 'Clear All';
-  clearButton.style.cssText = `
-    padding: 5px 15px;
-    background: #ff6a00;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  `;
-  clearButton.addEventListener('click', clearCanvas);
-  toolbar.appendChild(clearButton);
-
-  // Add Eraser button
-  const eraserButton = document.createElement('button');
-  eraserButton.textContent = 'Eraser';
-  eraserButton.style.cssText = `
-    padding: 5px 15px;
-    background: #666;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  `;
-  eraserButton.addEventListener('click', toggleEraser);
-  toolbar.appendChild(eraserButton);
-
-  // Event listeners for drawing
-  canvas.addEventListener('mousedown', (e) => {
-    isDrawing = true;
-    [lastX, lastY] = [e.offsetX, e.offsetY];
-  });
-
-  canvas.addEventListener('mousemove', (e) => {
-    if (!isDrawing) return;
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.stroke();
-    [lastX, lastY] = [e.offsetX, e.offsetY];
-  });
-
-  canvas.addEventListener('mouseup', () => {
-    if (isDrawing) {
-      isDrawing = false;
-      saveDrawingState();
+    function saveDrawing() {
+        const link = document.createElement('a');
+        link.download = 'drawing.png';
+        link.href = canvas.toDataURL();
+        link.click();
     }
-  });
-
-  canvas.addEventListener('mouseout', () => {
-    if (isDrawing) {
-      isDrawing = false;
-      saveDrawingState();
-    }
-  });
->>>>>>> 3910c34bd943331787e9bdde7cf95cf0db516cc0
-
-  // Add touch support for mobile devices
-  canvas.addEventListener('touchstart', handleTouchStart, false);
-  canvas.addEventListener('touchmove', handleTouchMove, false);
-  canvas.addEventListener('touchend', handleTouchEnd, false);
-
-  function handleTouchStart(e) {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    isDrawing = true;
-    [lastX, lastY] = [
-      touch.clientX - rect.left,
-      touch.clientY - rect.top
-    ];
-  }
 
     backgroundToggle.addEventListener('click', () => {
         canvas.style.background = canvas.style.background === 'black' ? 'white' : 'black';
