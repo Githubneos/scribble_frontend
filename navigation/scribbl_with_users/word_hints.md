@@ -2,7 +2,7 @@
 layout: post
 title: Word Hints
 menu: nav/scribbl_with_users.html
-permalink: /word_hints
+permalink: scribbl_with_users/word_hints
 author: Ian
 ---
 
