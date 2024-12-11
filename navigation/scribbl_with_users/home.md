@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Toolbar setup
     const toolbar = document.createElement('div');
     toolbar.style.cssText = `
         display: flex;
@@ -38,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         flex-wrap: wrap;
     `;
 
-    // Color picker
     const colorPicker = document.createElement('input');
     colorPicker.type = 'color';
     colorPicker.value = '#000000';
@@ -58,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
         isEraser = false;
     });
 
-    // Brush size slider
     const brushSize = document.createElement('input');
     brushSize.type = 'range';
     brushSize.min = '1';
@@ -67,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
     brushSize.style.cssText = 'margin: 0 10px;';
     toolbar.appendChild(brushSize);
 
-    // Eraser button
     const eraserButton = document.createElement('button');
     eraserButton.textContent = 'Eraser';
     eraserButton.style.cssText = `
@@ -84,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     toolbar.appendChild(eraserButton);
 
-    // Background toggle button
     const backgroundToggle = document.createElement('button');
     backgroundToggle.textContent = 'Toggle Background';
     backgroundToggle.style.cssText = `
@@ -101,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     toolbar.appendChild(backgroundToggle);
 
-    // Save button
     const saveButton = document.createElement('button');
     saveButton.textContent = 'Save';
     saveButton.style.cssText = `
@@ -121,7 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     toolbar.appendChild(saveButton);
 
-    // Reset button
     const resetButton = document.createElement('button');
     resetButton.textContent = 'Reset';
     resetButton.style.cssText = `
@@ -138,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     toolbar.appendChild(resetButton);
 
-    // Canvas setup
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
@@ -177,8 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         drawing = false;
     });
 
-<<<<<<< HEAD
-=======
     function resetCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
@@ -219,7 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
->>>>>>> 544b23f2c9292828c18896709d7c007b13de7cee
     app.appendChild(toolbar);
     app.appendChild(canvas);
 });
