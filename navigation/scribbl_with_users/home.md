@@ -236,53 +236,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-<<<<<<< HEAD
     function saveDrawing() {
         const link = document.createElement('a');
         link.download = 'drawing.png';
         link.href = canvas.toDataURL();
         link.click();
     }
-=======
-  // Add touch support for mobile devices
-  canvas.addEventListener('touchstart', handleTouchStart, false);
-  canvas.addEventListener('touchmove', handleTouchMove, false);
-  canvas.addEventListener('touchend', handleTouchEnd, false);
-
-  function handleTouchStart(e) {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    isDrawing = true;
-    [lastX, lastY] = [
-      touch.clientX - rect.left,
-      touch.clientY - rect.top
-    ];
-  }
-
-  function handleTouchMove(e) {
-    e.preventDefault();
-    if (!isDrawing) return;
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    [lastX, lastY] = [x, y];
-  }
-
-  function handleTouchEnd(e) {
-    e.preventDefault();
-    if (isDrawing) {
-      isDrawing = false;
-      saveDrawingState();
-    }
-  }
->>>>>>> 8598950 (edit??? kinda confused bc someone changing the code rn so pls stop)
 
     backgroundToggle.addEventListener('click', () => {
         canvas.style.background = canvas.style.background === 'black' ? 'white' : 'black';
