@@ -1,6 +1,6 @@
 ---
 layout: post 
-title: Scribbl With users
+title: Scribbl With Users
 search_exclude: true
 permalink: /home
 menu: nav/scribbl_with_users.html
@@ -12,6 +12,12 @@ author: Zach
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.querySelector('#app');
+    if (!app) {
+        console.error('Error: #app container not found. Ensure the div with id "app" is in the HTML.');
+        return;
+    }
+
+    // Toolbar setup
     const toolbar = document.createElement('div');
     toolbar.style.cssText = `
         display: flex;
@@ -25,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         flex-wrap: wrap;
     `;
 
+    // Color picker
     const colorPicker = document.createElement('input');
     colorPicker.type = 'color';
     colorPicker.value = '#000000';
@@ -44,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isEraser = false;
     });
 
+    // Brush size slider
     const brushSize = document.createElement('input');
     brushSize.type = 'range';
     brushSize.min = '1';
@@ -52,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     brushSize.style.cssText = 'margin: 0 10px;';
     toolbar.appendChild(brushSize);
 
+    // Eraser button
     const eraserButton = document.createElement('button');
     eraserButton.textContent = 'Eraser';
     eraserButton.style.cssText = `
@@ -68,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     toolbar.appendChild(eraserButton);
 
+    // Background toggle button
     const backgroundToggle = document.createElement('button');
     backgroundToggle.textContent = 'Toggle Background';
     backgroundToggle.style.cssText = `
@@ -79,8 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
         cursor: pointer;
         font-weight: bold;
     `;
+    backgroundToggle.addEventListener('click', () => {
+        canvas.style.background = canvas.style.background === 'black' ? 'white' : 'black';
+    });
     toolbar.appendChild(backgroundToggle);
 
+    // Save button
     const saveButton = document.createElement('button');
     saveButton.textContent = 'Save';
     saveButton.style.cssText = `
@@ -92,9 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
         cursor: pointer;
         font-weight: bold;
     `;
-    saveButton.addEventListener('click', saveDrawing);
+    saveButton.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'drawing.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
     toolbar.appendChild(saveButton);
 
+    // Reset button
     const resetButton = document.createElement('button');
     resetButton.textContent = 'Reset';
     resetButton.style.cssText = `
@@ -106,9 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
         cursor: pointer;
         font-weight: bold;
     `;
-    resetButton.addEventListener('click', resetCanvas);
+    resetButton.addEventListener('click', () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
     toolbar.appendChild(resetButton);
 
+    // Canvas setup
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
@@ -143,21 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     canvas.addEventListener('mouseleave', () => {
         drawing = false;
-    });
-
-    function resetCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    function saveDrawing() {
-        const link = document.createElement('a');
-        link.download = 'drawing.png';
-        link.href = canvas.toDataURL();
-        link.click();
-    }
-
-    backgroundToggle.addEventListener('click', () => {
-        canvas.style.background = canvas.style.background === 'black' ? 'white' : 'black';
     });
 
     app.appendChild(toolbar);
