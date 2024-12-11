@@ -15,9 +15,9 @@ hide: true
         const app = document.getElementById('app');
 
         app.style.cssText = `
-            background: linear-gradient(135deg, #ff5f6d, #ffc371, #47cf73, #2d9bf0, #6a11cb, #ff6a00);
-            background-size: 400% 400%;
-            animation: vibrantBG 10s ease infinite;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            background-size: 200% 200%;
+            animation: subtleBG 15s ease infinite;
             font-family: Arial, sans-serif;
             color: white;
             margin: 0;
@@ -32,7 +32,7 @@ hide: true
 
         const style = document.createElement('style');
         style.textContent = `
-            @keyframes vibrantBG {
+            @keyframes subtleBG {
                 0% { background-position: 0% 50%; }
                 50% { background-position: 100% 50%; }
                 100% { background-position: 0% 50%; }
