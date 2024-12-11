@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
   canvas.style.cssText = `
     background: white;
     border: 5px solid black;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
     display: block;
     margin: 20px auto;
   `;
@@ -44,13 +46,23 @@ document.addEventListener('DOMContentLoaded', () => {
   ctx.lineCap = 'round';
   ctx.strokeStyle = 'black';
 
-  const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'gray', 'brown', 'black'];
+  const colors = [
+    '#FF0000', '#FF4500', '#FFA500', '#FFD700', // reds & oranges
+    '#32CD32', '#00FF00', '#008000', '#00FA9A', // greens
+    '#87CEEB', '#1E90FF', '#0000FF', '#000080', // blues
+    '#800080', '#FF00FF', '#FF69B4', '#FFC0CB', // purples & pinks
+    '#8B4513', '#A0522D', '#000000', '#FFFFFF'  // browns & basics
+  ];
   let currentColor = 'black';
   let isDrawing = false;
   let lastX = 0;
   let lastY = 0;
   let drawingHistory = [];
   let isEraser = false;
+
+  // Add brush size control
+  let brushSizes = [2, 5, 10, 15, 20];
+  let currentSize = 5;
 
   // Create the toolbar
   const toolbar = document.createElement('div');
@@ -60,20 +72,51 @@ document.addEventListener('DOMContentLoaded', () => {
     gap: 10px;
     flex-wrap: wrap;
     margin-top: 10px;
+    background: rgba(255,255,255,0.2);
+    padding: 15px;
+    border-radius: 10px;
   `;
   app.appendChild(toolbar);
 
-  // Add color buttons
+  // Add brush size buttons
+  const brushSizeContainer = document.createElement('div');
+  brushSizeContainer.style.cssText = `
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    margin-left: 10px;
+  `;
+  
+  brushSizes.forEach(size => {
+    const button = document.createElement('button');
+    button.style.cssText = `
+      width: ${size + 10}px;
+      height: ${size + 10}px;
+      border-radius: 50%;
+      background: #444;
+      border: none;
+      cursor: pointer;
+    `;
+    button.addEventListener('click', () => changeBrushSize(size));
+    brushSizeContainer.appendChild(button);
+  });
+  toolbar.appendChild(brushSizeContainer);
+
+  // Update color buttons styling
   colors.forEach(color => {
     const button = document.createElement('button');
     button.style.cssText = `
       background-color: ${color};
-      border: none;
+      border: 2px solid ${color === '#FFFFFF' ? '#000000' : color};
       width: 30px;
       height: 30px;
       border-radius: 50%;
       cursor: pointer;
       outline: none;
+      transition: transform 0.2s;
+      &:hover {
+        transform: scale(1.1);
+      }
     `;
     button.addEventListener('click', () => changeColor(color));
     toolbar.appendChild(button);
@@ -150,17 +193,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Add touch support for mobile devices
+  canvas.addEventListener('touchstart', handleTouchStart, false);
+  canvas.addEventListener('touchmove', handleTouchMove, false);
+  canvas.addEventListener('touchend', handleTouchEnd, false);
+
+  function handleTouchStart(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    isDrawing = true;
+    [lastX, lastY] = [
+      touch.clientX - rect.left,
+      touch.clientY - rect.top
+    ];
+  }
+
+  function handleTouchMove(e) {
+    e.preventDefault();
+    if (!isDrawing) return;
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    [lastX, lastY] = [x, y];
+  }
+
+  function handleTouchEnd(e) {
+    e.preventDefault();
+    if (isDrawing) {
+      isDrawing = false;
+      saveDrawingState();
+    }
+  }
+
   // Function to change color
   function changeColor(color) {
     isEraser = false;
     currentColor = color;
     ctx.strokeStyle = color;
+    ctx.lineWidth = currentSize;
   }
 
   // Function to toggle eraser
   function toggleEraser() {
     isEraser = !isEraser;
-    ctx.strokeStyle = isEraser ? 'white' : currentColor;
+    if (isEraser) {
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 20; // Larger size for eraser
+    } else {
+      ctx.strokeStyle = currentColor;
+      ctx.lineWidth = currentSize;
+    }
   }
 
   // Function to save drawing state
@@ -185,6 +274,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawingHistory = [];
+  }
+
+  // Add function to change brush size
+  function changeBrushSize(size) {
+    currentSize = size;
+    ctx.lineWidth = size;
   }
 });
 </script>
