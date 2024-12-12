@@ -1,10 +1,13 @@
 ---
 layout: post
 title: Competition
-menu: nav/scribbl_with_users.html
-permalink: /Competition
-author: Ian
+search_exclude: true
+description: Competition
+permalink: /competition
+menu: nav/scribble_draw.html
+Author: Ian
 ---
+
 <div>
     <style>
         div {

@@ -1,11 +1,13 @@
 ---
-layout: post 
-title: Scribbl With users
+layout: post
+title: Leaderboard
 search_exclude: true
+description: Leaderboard
 permalink: /leaderboard
-menu: nav/scribbl_with_users.html
-author: Maxwell Gaudinez
+menu: nav/scribble_draw.html
+Author: Max
 ---
+
 <div>
     <style>
         div {
