@@ -9,207 +9,157 @@ author: Zach
 
 ## Welcome to Scribbl With Users
 
-<div id="app"></div>
-<div id="chat-container" style="margin-top: 20px;">
-    <div id="messages" style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"></div>
-    <input type="text" id="message-input" placeholder="Type your message..." style="width: 80%; padding: 5px;">
-    <button id="send-button" style="padding: 5px 10px;">Send</button>
-</div>
-
+<table>
+    <tr>
+        <td><a href="{{site.baseurl}}/chatroom">Chat with Friends</a></td>
+        <td><a href="{{site.baseurl}}/Competition">Competitive</a></td>
+        <td><a href="{{site.baseurl}}/leaderboard">Leaderboard</a></td>
+    </tr>
+</table>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const app = document.querySelector('#app');
-    if (!app) {
-        console.error('Error: #app container not found. Ensure the div with id "app" is in the HTML.');
-        return;
+  const app = document.createElement('div');
+  document.body.appendChild(app);
+  app.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+    margin: 0;
+    overflow: hidden;
+  `;
+  const canvas = document.createElement('canvas');
+  canvas.width = 500;
+  canvas.height = 400;
+  canvas.style.cssText = `
+    background: white;
+    border: 5px solid black;
+    display: block;
+    margin: 20px auto;
+  `;
+  app.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'black';
+  const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'gray', 'brown', 'black'];
+  let currentColor = 'black';
+  let isDrawing = false;
+  let lastX = 0;
+  let lastY = 0;
+  let drawingHistory = [];
+  let isEraser = false;
+  const toolbar = document.createElement('div');
+  toolbar.style.cssText = `
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  `;
+  app.appendChild(toolbar);
+  colors.forEach(color => {
+    const button = document.createElement('button');
+    button.style.cssText = `
+      background-color: ${color};
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      outline: none;
+    `;
+    button.addEventListener('click', () => changeColor(color));
+    toolbar.appendChild(button);
+  });
+  const undoButton = document.createElement('button');
+  undoButton.textContent = 'Undo';
+  undoButton.style.cssText = `
+    padding: 5px 15px;
+    background: #444;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  `;
+  undoButton.addEventListener('click', undo);
+  toolbar.appendChild(undoButton);
+  const clearButton = document.createElement('button');
+  clearButton.textContent = 'Clear All';
+  clearButton.style.cssText = `
+    padding: 5px 15px;
+    background: #FF6A00;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  `;
+  clearButton.addEventListener('click', clearCanvas);
+  toolbar.appendChild(clearButton);
+  const eraserButton = document.createElement('button');
+  eraserButton.textContent = 'Eraser';
+  eraserButton.style.cssText = `
+    padding: 5px 15px;
+    background: #666;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  `;
+  eraserButton.addEventListener('click', toggleEraser);
+  toolbar.appendChild(eraserButton);
+  canvas.addEventListener('mousedown', (e) => {
+    isDrawing = true;
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+  });
+  canvas.addEventListener('mousemove', (e) => {
+    if (!isDrawing) return;
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+  });
+  canvas.addEventListener('mouseup', () => {
+    if (isDrawing) {
+      isDrawing = false;
+      saveDrawingState();
     }
-
-    const toolbar = document.createElement('div');
-    toolbar.style.cssText = `
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 10px;
-        background: rgba(255, 255, 255, 0.3);
-        padding: 10px;
-        border-radius: 10px;
-        gap: 10px;
-        flex-wrap: wrap;
-    `;
-
-    const colorPicker = document.createElement('input');
-    colorPicker.type = 'color';
-    colorPicker.value = '#000000';
-    colorPicker.style.cssText = `
-        width: 40px;
-        height: 40px;
-        border: none;
-        cursor: pointer;
-    `;
-    toolbar.appendChild(colorPicker);
-
-    let currentColor = colorPicker.value;
-    let isEraser = false;
-
-    colorPicker.addEventListener('input', () => {
-        currentColor = colorPicker.value;
-        isEraser = false;
-    });
-
-    const brushSize = document.createElement('input');
-    brushSize.type = 'range';
-    brushSize.min = '1';
-    brushSize.max = '50';
-    brushSize.value = '5';
-    brushSize.style.cssText = 'margin: 0 10px;';
-    toolbar.appendChild(brushSize);
-
-    const eraserButton = document.createElement('button');
-    eraserButton.textContent = 'Eraser';
-    eraserButton.style.cssText = `
-        background: white;
-        color: black;
-        border: 2px solid #000;
-        padding: 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-    `;
-    eraserButton.addEventListener('click', () => {
-        isEraser = true;
-    });
-    toolbar.appendChild(eraserButton);
-
-    const backgroundToggle = document.createElement('button');
-    backgroundToggle.textContent = 'Toggle Background';
-    backgroundToggle.style.cssText = `
-        background: #000;
-        color: white;
-        border: none;
-        padding: 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-    `;
-    backgroundToggle.addEventListener('click', () => {
-        canvas.style.background = canvas.style.background === 'black' ? 'white' : 'black';
-    });
-    toolbar.appendChild(backgroundToggle);
-
-    const saveButton = document.createElement('button');
-    saveButton.textContent = 'Save';
-    saveButton.style.cssText = `
-        background: #28a745;
-        color: white;
-        border: none;
-        padding: 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-    `;
-    saveButton.addEventListener('click', () => {
-        const link = document.createElement('a');
-        link.download = 'drawing.png';
-        link.href = canvas.toDataURL();
-        link.click();
-    });
-    toolbar.appendChild(saveButton);
-
-    const resetButton = document.createElement('button');
-    resetButton.textContent = 'Reset';
-    resetButton.style.cssText = `
-        background: #dc3545;
-        color: white;
-        border: none;
-        padding: 10px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-    `;
-    resetButton.addEventListener('click', () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    });
-    toolbar.appendChild(resetButton);
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 800;
-    canvas.height = 600;
-    canvas.style.cssText = `
-        border: 2px solid black;
-        background: white;
-        cursor: crosshair;
-    `;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    let drawing = false;
-
-    canvas.addEventListener('mousedown', (e) => {
-        drawing = true;
-        ctx.beginPath();
-        ctx.moveTo(e.offsetX, e.offsetY);
-    });
-
-    canvas.addEventListener('mousemove', (e) => {
-        if (drawing) {
-            ctx.strokeStyle = isEraser ? 'white' : currentColor;
-            ctx.lineWidth = brushSize.value;
-            ctx.lineCap = 'round';
-            ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.stroke();
-        }
-    });
-
-    canvas.addEventListener('mouseup', () => {
-        drawing = false;
-        ctx.closePath();
-    });
-
-    canvas.addEventListener('mouseleave', () => {
-        drawing = false;
-    });
-
-    function resetCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+  canvas.addEventListener('mouseout', () => {
+    if (isDrawing) {
+      isDrawing = false;
+      saveDrawingState();
     }
-
-    function saveDrawing() {
-        const link = document.createElement('a');
-        link.download = 'drawing.png';
-        link.href = canvas.toDataURL();
-        link.click();
-    }
-
-    backgroundToggle.addEventListener('click', () => {
-        const newBackground = canvas.style.background === 'black' ? 'white' : 'black';
-        canvas.style.background = newBackground;
-        ctx.fillStyle = newBackground;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    });
-
-    const messageInput = document.getElementById('message-input');
-    const sendButton = document.getElementById('send-button');
-    const messagesDiv = document.getElementById('messages');
-
-    function sendMessage() {
-        const message = messageInput.value.trim();
-        if (message) {
-            const messageElement = document.createElement('div');
-            messageElement.textContent = `You: ${message}`;
-            messagesDiv.appendChild(messageElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            messageInput.value = '';
-        }
-    }
-
-    sendButton.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
-
-    app.appendChild(toolbar);
-    app.appendChild(canvas);
+  });
+  function changeColor(color) {
+    isEraser = false;
+    currentColor = color;
+    ctx.strokeStyle = color;
+  }
+  function toggleEraser() {
+    isEraser = !isEraser;
+    ctx.strokeStyle = isEraser ? 'white' : currentColor;
+  }
+  function saveDrawingState() {
+    drawingHistory.push(canvas.toDataURL());
+  }
+  function undo() {
+    if (drawingHistory.length === 0) return;
+    drawingHistory.pop();
+    const lastState = drawingHistory[drawingHistory.length - 1];
+    const img = new Image();
+    img.src = lastState || '';
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    };
+  }
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawingHistory = [];
+  }
 });
 </script>
