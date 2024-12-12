@@ -1,9 +1,10 @@
 ---
 layout: post 
-title: Scribbl With Users
+title: Scribble With Users
 search_exclude: true
-permalink: /home
-menu: nav/scribbl_with_users.html
+description: Drawing Board
+permalink: /drawingboard
+menu: nav/scribble_draw.html
 author: Zach
 ---
 

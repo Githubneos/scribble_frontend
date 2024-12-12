@@ -3,9 +3,10 @@ layout: post
 title: Scribble Chat
 search_exclude: true
 description: Chatroom
-permalink: scribbl_with_users/chatroom
-menu: nav/scribbl_with_users.html
+permalink: /chatroom
+menu: nav/scribble_draw.html
 Author: Keerthan Karumudi
+hide: true
 ---
 
 <div id="app"></div>

@@ -1,8 +1,10 @@
 ---
 layout: post
 title: Word Hints
-menu: nav/scribbl_with_users.html
-permalink: scribbl_with_users/word_hints
+search_exclude: true
+description: Word Hints
+permalink: /wordhints
+menu: nav/scribbl_draw.html
 author: Ian
 ---
 
