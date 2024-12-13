@@ -6,7 +6,6 @@ description: Chatroom
 permalink: /chatroom
 menu: nav/scribble_draw.html
 Author: Keerthan Karumudi
-hide: true
 ---
 
 <div id="app"></div>
