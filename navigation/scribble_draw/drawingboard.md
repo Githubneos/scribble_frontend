@@ -4,7 +4,7 @@ title: Scribble With Users
 search_exclude: true
 description: Drawing Board
 permalink: /drawingboard
-menu: /nav/scribble_draw.html
+menu: /nav/scribble_draw
 author: Zach
 ---
 

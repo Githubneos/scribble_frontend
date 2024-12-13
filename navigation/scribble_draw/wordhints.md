@@ -4,7 +4,7 @@ title: Word Hints
 search_exclude: true
 description: Word Hints
 permalink: /wordhints
-menu: /nav/scribble_draw.html
+menu: /nav/scribble_draw
 author: Ian
 ---
 

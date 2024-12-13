@@ -4,7 +4,7 @@ title: Competition
 search_exclude: true
 description: Competition
 permalink: /competition
-menu: /nav/scribble_draw.html
+menu: /nav/scribble_draw
 Author: Ian
 ---
 
