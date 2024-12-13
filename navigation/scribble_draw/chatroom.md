@@ -4,7 +4,7 @@ title: Scribble Chat
 search_exclude: true
 description: Chatroom
 permalink: /chatroom
-menu: nav/scribble_draw.html
+menu: /nav/scribble_draw.html
 Author: Keerthan Karumudi
 ---
 
