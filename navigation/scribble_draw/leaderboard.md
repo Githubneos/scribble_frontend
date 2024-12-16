@@ -4,7 +4,6 @@ title: Leaderboard
 search_exclude: true
 description: Leaderboard
 permalink: /leaderboard
-menu: /nav/scribble_draw
 Author: Daksha
 ---
 
