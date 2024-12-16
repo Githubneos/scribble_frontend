@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     saveButton.addEventListener('click', () => {
         const link = document.createElement('a');
-        link.download = 'drawing.png';
+        link.download = 'drawing.jpeg';
         link.href = canvas.toDataURL();
         link.click();
     });
