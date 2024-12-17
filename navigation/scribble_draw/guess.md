@@ -6,7 +6,6 @@ description: Chatroom
 permalink: /guessing
 menu: nav/scribble_draw
 Author: Keerthan
-hide: true
 ---
 <div>
     <style>
