@@ -1,9 +1,9 @@
 ---
 layout: post
-title: Flocker Art
+title: Drawing Board
 search_exclude: true
-description: Guess the Drawing
-hide: true
+description: Drawing Board
+Author: Zach
 ---
 
 ## Welcome to Scribbl With Users
