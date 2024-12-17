@@ -4,7 +4,6 @@ title: Scribble Guess
 search_exclude: true
 description: Chatroom
 permalink: /guessing
-menu: nav/scribble_draw
 Author: Keerthan
 ---
 <div>

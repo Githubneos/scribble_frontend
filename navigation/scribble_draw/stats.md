@@ -5,7 +5,6 @@ title: Scribble stats
 search_exclude: true
 description: statistics page
 permalink: /stats
-menu: nav/scribble_draw
 Author: Keerthan
 hide: true
 ---
