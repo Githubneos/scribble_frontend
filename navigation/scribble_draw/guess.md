@@ -2,8 +2,8 @@
 layout: post
 title: Scribble Guess
 search_exclude: true
-description: Chatroom
-permalink: /guessing
+description: Scribble Guess
+permalink: /guess
 Author: Keerthan
 ---
 <div>

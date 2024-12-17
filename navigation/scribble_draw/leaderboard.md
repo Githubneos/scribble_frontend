@@ -1,8 +1,8 @@
 ---
 layout: post
-title: Scribble Guess
+title: Leaderboard
 search_exclude: true
-description: Chatroom
+description: Leaderboard
 permalink: /leaderboard
 Author: Daksha
 ---
