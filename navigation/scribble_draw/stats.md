@@ -4,7 +4,7 @@ title: Scribble stats
 search_exclude: true
 description: statistics page
 permalink: /stats
-Author: Keerthan
+Author: Maxwell
 hide: true
 ---
 
