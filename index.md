@@ -17,13 +17,15 @@ hide: true
     </tr>
 </table>
 
+
+## Welcome to Scribbl With Users
+
 <div id="app"></div>
 <div id="chat-container" style="margin-top: 20px;">
     <div id="messages" style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"></div>
     <input type="text" id="message-input" placeholder="Type your message..." style="width: 80%; padding: 5px;">
     <button id="send-button" style="padding: 5px 10px;">Send</button>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.querySelector('#app');
@@ -31,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error: #app container not found. Ensure the div with id "app" is in the HTML.');
         return;
     }
-
     const toolbar = document.createElement('div');
     toolbar.style.cssText = `
         display: flex;
@@ -44,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         gap: 10px;
         flex-wrap: wrap;
     `;
-
     const colorPicker = document.createElement('input');
     colorPicker.type = 'color';
     colorPicker.value = '#000000';
@@ -55,15 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
         cursor: pointer;
     `;
     toolbar.appendChild(colorPicker);
-
     let currentColor = colorPicker.value;
     let isEraser = false;
-
     colorPicker.addEventListener('input', () => {
         currentColor = colorPicker.value;
         isEraser = false;
     });
-
     const brushSize = document.createElement('input');
     brushSize.type = 'range';
     brushSize.min = '1';
@@ -71,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
     brushSize.value = '5';
     brushSize.style.cssText = 'margin: 0 10px;';
     toolbar.appendChild(brushSize);
-
     const eraserButton = document.createElement('button');
     eraserButton.textContent = 'Eraser';
     eraserButton.style.cssText = `
@@ -87,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
         isEraser = true;
     });
     toolbar.appendChild(eraserButton);
-
     const backgroundToggle = document.createElement('button');
     backgroundToggle.textContent = 'Toggle Background';
     backgroundToggle.style.cssText = `
@@ -103,11 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.style.background = canvas.style.background === 'black' ? 'white' : 'black';
     });
     toolbar.appendChild(backgroundToggle);
-
     const saveButton = document.createElement('button');
     saveButton.textContent = 'Save';
     saveButton.style.cssText = `
-        background: #28a745;
+        background: #28A745;
         color: white;
         border: none;
         padding: 10px;
@@ -122,11 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
         link.click();
     });
     toolbar.appendChild(saveButton);
-
     const resetButton = document.createElement('button');
     resetButton.textContent = 'Reset';
     resetButton.style.cssText = `
-        background: #dc3545;
+        background: #DC3545;
         color: white;
         border: none;
         padding: 10px;
@@ -138,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     });
     toolbar.appendChild(resetButton);
-
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
@@ -151,13 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     let drawing = false;
-
     canvas.addEventListener('mousedown', (e) => {
         drawing = true;
         ctx.beginPath();
         ctx.moveTo(e.offsetX, e.offsetY);
     });
-
     canvas.addEventListener('mousemove', (e) => {
         if (drawing) {
             ctx.strokeStyle = isEraser ? 'white' : currentColor;
@@ -167,38 +157,31 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.stroke();
         }
     });
-
     canvas.addEventListener('mouseup', () => {
         drawing = false;
         ctx.closePath();
     });
-
     canvas.addEventListener('mouseleave', () => {
         drawing = false;
     });
-
     function resetCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-
     function saveDrawing() {
         const link = document.createElement('a');
         link.download = 'drawing.png';
         link.href = canvas.toDataURL();
         link.click();
     }
-
     backgroundToggle.addEventListener('click', () => {
         const newBackground = canvas.style.background === 'black' ? 'white' : 'black';
         canvas.style.background = newBackground;
         ctx.fillStyle = newBackground;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     });
-
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
     const messagesDiv = document.getElementById('messages');
-
     function sendMessage() {
         const message = messageInput.value.trim();
         if (message) {
@@ -209,14 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
             messageInput.value = '';
         }
     }
-
     sendButton.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             sendMessage();
         }
     });
-
     app.appendChild(toolbar);
     app.appendChild(canvas);
 });
