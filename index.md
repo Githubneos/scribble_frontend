@@ -14,6 +14,7 @@ hide: true
         <td><a href="{{site.baseurl}}/guessing">Guess Game </a></td>
         <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
         <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
+        <td><a href="{{site.baseurl}}/about">About Us</a></td>
     </tr>
 </table>
 

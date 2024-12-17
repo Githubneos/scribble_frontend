@@ -3,9 +3,10 @@ layout: post
 title: Scribble Guess
 search_exclude: true
 description: Chatroom
-permalink: /guessing
+permalink: /about 
 Author: Keerthan
 ---
+
 <div>
     <style>
         canvas {
@@ -14,12 +15,10 @@ Author: Keerthan
             margin: 20px auto;
             background-color: #f4f4f9;
         }
-
-        .controls {
+         .controls {
             text-align: center;
             margin: 10px;
         }
-
         .gallery {
             display: flex;
             flex-wrap: wrap;
@@ -27,7 +26,6 @@ Author: Keerthan
             gap: 10px;
             margin-top: 20px;
         }
-
         .gallery img {
             width: 100px;
             height: 100px;
@@ -35,29 +33,23 @@ Author: Keerthan
             border: 2px solid #000;
             cursor: pointer;
         }
-
-        .hint {
+         .hint {
             font-size: 1.2em;
             color: #333;
             text-align: center;
             margin-top: 10px;
         }
     </style>
-
     <canvas id="drawingCanvas" width="500" height="500"></canvas>
-
     <div class="controls">
         <button id="saveDrawing">Save Drawing</button>
         <button id="clearCanvas">Clear Canvas</button>
     </div>
-
-    <div class="gallery" id="drawingGallery"></div>
-
-    <div class="controls">
+     <div class="gallery" id="drawingGallery"></div>
+         <div class="controls">
         <input type="text" id="guessInput" placeholder="Guess what it is">
         <button id="submitGuess">Submit Guess</button>
     </div>
-
     <div class="hint" id="hintArea"></div>
 </div>
 
