@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ---
 layout: post
 title: Scribble stats
@@ -130,5 +129,3 @@ hide: true
         updateStatistics();
     </script>
 </div>
-=======
->>>>>>> 639f913 (commit)d
