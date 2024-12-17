@@ -1,11 +1,10 @@
 ---
 layout: post
-title: Scribble stats
+title: Scribble Stats
 search_exclude: true
-description: statistics page
+description: Stats page
 permalink: /stats
-Author: Keerthan
-hide: true
+Author: Max
 ---
 
 <div>
