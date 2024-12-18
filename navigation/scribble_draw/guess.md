@@ -2,8 +2,13 @@
 layout: post
 title: Scribble Guess
 search_exclude: true
+<<<<<<< HEAD
 description: Scribble Guess
 permalink: /guess
+=======
+description: Chatroom
+permalink: /about 
+>>>>>>> 41895bf (save)
 Author: Keerthan
 ---
 
