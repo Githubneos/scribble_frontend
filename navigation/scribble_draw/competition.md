@@ -107,8 +107,8 @@ Author: Ian
     let lineWidth = parseInt(lineWidthPicker.value);
     let erasing = false;
 
-    let timer = null; // Timer reference for setTimeout (if used)
     let interval = null; // Reference for the interval (setInterval)
+    let timerStarted = false; // Track if the timer has already started
 
     // Setup drawing
     canvas.addEventListener('mousedown', startDrawing);
@@ -116,6 +116,17 @@ Author: Ian
     canvas.addEventListener('mousemove', draw);
 
     function startDrawing() {
+        // If timer hasn't started yet, start it automatically
+        if (!timerStarted) {
+            let timeInSeconds = parseInt(timerInput.value);
+
+            if (isNaN(timeInSeconds) || timeInSeconds <= 0) {
+                // If no valid timer value entered, pick a random value between 20-100 seconds
+                timeInSeconds = Math.floor(Math.random() * (100 - 20 + 1)) + 20;
+            }
+
+            startTimer(timeInSeconds);
+        }
         drawingAllowed = true;
         ctx.beginPath();
     }
@@ -169,21 +180,13 @@ Author: Ian
         erasing = false;
     });
 
-    // Timer Functionality
-    startButton.addEventListener('click', () => {
-        const timeInSeconds = parseInt(timerInput.value);
+    // Timer functionality (handles both random and user-defined time)
+    function startTimer(timeInSeconds) {
+        // Start timer only if it's not already started
+        if (timerStarted) return;
 
-        if (isNaN(timeInSeconds) || timeInSeconds <= 0) {
-            alert('Please enter a valid time in seconds.');
-            return;
-        }
-
-        // Clear any existing timer or interval to prevent overlap
-        if (interval) {
-            clearInterval(interval);
-        }
-
-        drawingAllowed = true;
+        timerStarted = true;
+        startButton.disabled = true;  // Disable the start button after the timer starts
         timerDisplay.textContent = `Timer: ${timeInSeconds} seconds left`;
 
         let timeRemaining = timeInSeconds;
@@ -195,10 +198,18 @@ Author: Ian
 
             if (timeRemaining <= 0) {
                 clearInterval(interval);
-                drawingAllowed = false;
+                drawingAllowed = false;  // Disable drawing after the timer ends
                 timerDisplay.textContent = "Timer: Time's up!";
                 alert('Time is up! Hope you enjoyed drawing!');
+
+                // Disable drawing and prevent re-enabling of the timer
+                canvas.style.pointerEvents = "none";  // Disable canvas interaction
+                startButton.disabled = true;  // Disable the timer button again after the timer ends
+                eraseButton.disabled = true;  // Disable the erase button
+                clearButton.disabled = true;  // Disable the clear board button
             }
         }, 1000);
-    });
+    }
+
 </script>
+
