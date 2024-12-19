@@ -107,7 +107,8 @@ Author: Ian
     let lineWidth = parseInt(lineWidthPicker.value);
     let erasing = false;
 
-    let timer = null;
+    let timer = null; // Timer reference for setTimeout (if used)
+    let interval = null; // Reference for the interval (setInterval)
 
     // Setup drawing
     canvas.addEventListener('mousedown', startDrawing);
@@ -177,15 +178,18 @@ Author: Ian
             return;
         }
 
-        if (timer) {
-            clearTimeout(timer);
+        // Clear any existing timer or interval to prevent overlap
+        if (interval) {
+            clearInterval(interval);
         }
 
         drawingAllowed = true;
         timerDisplay.textContent = `Timer: ${timeInSeconds} seconds left`;
 
         let timeRemaining = timeInSeconds;
-        const interval = setInterval(() => {
+
+        // Start a new interval for the countdown
+        interval = setInterval(() => {
             timeRemaining--;
             timerDisplay.textContent = `Timer: ${timeRemaining} seconds left`;
 
