@@ -4,292 +4,210 @@ title: Scribble Guess
 search_exclude: true
 description: Scribble Guess
 permalink: /guess
-Author: Keerthan
+author: Keerthan
 ---
 
 <div>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
         canvas {
             border: 2px solid #000;
             display: block;
             margin: 20px auto;
-            background-color: #f4f4f9;
+            background-color: #fff;
         }
-         .controls {
+        .controls {
             text-align: center;
             margin: 10px;
         }
-        .gallery {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .gallery img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border: 2px solid #000;
-            cursor: pointer;
-        }
-         .hint {
+        .hint {
             font-size: 1.2em;
-            color: #333;
+            color: #555;
             text-align: center;
+            margin-top: 10px;
+        }
+        .message {
+            font-size: 1.2em;
             margin-top: 10px;
         }
     </style>
     <canvas id="drawingCanvas" width="500" height="500"></canvas>
     <div class="controls">
-        <button id="saveDrawing">Save Drawing</button>
-        <button id="clearCanvas">Clear Canvas</button>
-    </div>
-     <div class="gallery" id="drawingGallery"></div>
-         <div class="controls">
-        <input type="text" id="guessInput" placeholder="Guess what it is">
+        <input type="text" id="guessInput" placeholder="Your Guess" autofocus>
         <button id="submitGuess">Submit Guess</button>
+        <button id="hintButton">Get Hint</button>
+        <button id="resetGame">Reset Game</button>
     </div>
-    <div class="hint" id="hintArea"></div>
+     <div class="hint" id="hintArea">Hint: ???</div>
+    <div class="message" id="messageArea"></div>
 </div>
 
 <script>
-    const canvas = document.getElementById('drawingCanvas');
-    const ctx = canvas.getContext('2d');
-    const saveButton = document.getElementById('saveDrawing');
-    const clearButton = document.getElementById('clearCanvas');
-    const gallery = document.getElementById('drawingGallery');
-    const guessInput = document.getElementById('guessInput');
-    const submitGuess = document.getElementById('submitGuess');
-    const hintArea = document.getElementById('hintArea');
+const canvas = document.getElementById('drawingCanvas');
+const ctx = canvas.getContext('2d');
+const guessInput = document.getElementById('guessInput');
+const submitGuess = document.getElementById('submitGuess');
+const hintButton = document.getElementById('hintButton');
+const resetGame = document.getElementById('resetGame');
+const hintArea = document.getElementById('hintArea');
+const messageArea = document.getElementById('messageArea');
 
-    let isDrawing = false;
-    let drawings = [];
-    let currentDrawing = null;
-
-    const hints = {
-        "cat": "It's a popular pet with whiskers.",
-        "dog": "Man's best friend.",
-        "house": "It's where people live.",
-        "car": "A vehicle with four wheels.",
-        "tree": "It has leaves and grows in forests."
-    };
-
-    canvas.addEventListener('mousedown', () => isDrawing = true);
-    canvas.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('mousemove', draw);
-
-    function draw(event) {
-        if (!isDrawing) return;
-
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#000';
-
-        ctx.lineTo(event.offsetX, event.offsetY);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(event.offsetX, event.offsetY);
-    }
-
-    clearButton.addEventListener('click', () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-    });
-
-    saveButton.addEventListener('click', () => {
-        const drawing = canvas.toDataURL();
-        const label = prompt("What is this drawing?").toLowerCase();
-        if (!label) return;
-
-        drawings.push({ label, drawing });
-        displayGallery();
-        clearButton.click();
-    });
-
-    function displayGallery() {
-        gallery.innerHTML = '';
-        drawings.forEach((entry, index) => {
-            const img = document.createElement('img');
-            img.src = entry.drawing;
-            img.dataset.label = entry.label;
-            img.dataset.index = index;
-
-            img.addEventListener('click', () => {
-                currentDrawing = entry;
-                hintArea.textContent = "";
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const image = new Image();
-                image.src = entry.drawing;
-                image.onload = () => ctx.drawImage(image, 0, 0);
-            });
-
-            gallery.appendChild(img);
-        });
-    }
-
-    submitGuess.addEventListener('click', () => {
-        if (!currentDrawing) {
-            alert("Please select a drawing first.");
-            return;
+// Game setup
+const drawings = [
+    {
+        label: "cat",
+        hintSteps: [
+            "It is a common pet.",
+            "It says 'meow'.",
+            "It has whiskers and pointy ears."
+        ],
+        draw: () => {
+            ctx.beginPath();
+            ctx.arc(250, 200, 50, 0, Math.PI * 2); // Head
+            ctx.moveTo(220, 180);
+            ctx.lineTo(240, 140); // Left ear
+            ctx.lineTo(260, 180);
+            ctx.moveTo(280, 180);
+            ctx.lineTo(300, 140); // Right ear
+            ctx.lineTo(320, 180);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(240, 210, 5, 0, Math.PI * 2); // Left eye
+            ctx.arc(260, 210, 5, 0, Math.PI * 2); // Right eye
+            ctx.moveTo(250, 220);
+            ctx.lineTo(250, 230); // Nose to mouth
+            ctx.moveTo(250, 230);
+            ctx.lineTo(240, 240); // Left mouth
+            ctx.moveTo(250, 230);
+            ctx.lineTo(260, 240); // Right mouth
+            ctx.stroke();
         }
-
-        const guess = guessInput.value.trim().toLowerCase();
-        if (guess === currentDrawing.label) {
-            alert("Correct! You guessed it.");
-            hintArea.textContent = "";
-        } else {
-            alert("Try again!");
+    },
+    {
+        label: "tree",
+        hintSteps: [
+            "It is tall and green.",
+            "It has leaves and a trunk.",
+            "It provides shade in summer."
+        ],
+        draw: () => {
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(230, 300, 40, 100); // Trunk
+            ctx.beginPath();
+            ctx.arc(250, 250, 50, 0, Math.PI * 2); // Foliage
+            ctx.fillStyle = '#228B22';
+            ctx.fill();
         }
-
-        guessInput.value = '';
-    });
-
-    // Hint functionality
-    function giveHint(label) {
-        if (hints[label]) {
-            hintArea.textContent = `Hint: ${hints[label]}`;
-        } else {
-            hintArea.textContent = "No hints available for this drawing.";
+    },
+    {
+        label: "house",
+        hintSteps: [
+            "It is where people live.",
+            "It has a roof and walls.",
+            "It often has a door and windows."
+        ],
+        draw: () => {
+            ctx.fillStyle = '#FF6347';
+            ctx.fillRect(200, 250, 100, 100); // Base
+            ctx.beginPath();
+            ctx.moveTo(200, 250);
+            ctx.lineTo(250, 200); // Roof
+            ctx.lineTo(300, 250);
+            ctx.closePath();
+            ctx.fillStyle = '#FFD700';
+            ctx.fill();
         }
     }
+];
 
-    gallery.addEventListener('click', (event) => {
-        if (event.target.tagName === 'IMG') {
-            const label = event.target.dataset.label;
-            giveHint(label);
-        }
-    });
-</script>
+// Game state
+let currentDrawing = null;
+let hintIndex = 0;
 
-<script>
-const setupDiv = document.createElement("div");
-const secretWordLabel = document.createElement("label");
-secretWordLabel.textContent = "Enter the secret word:";
-const secretWordInput = document.createElement("input");
-secretWordInput.type = "password";
-const startButton = document.createElement("button");
-startButton.textContent = "Start Game";
-setupDiv.appendChild(secretWordLabel);
-setupDiv.appendChild(secretWordInput);
-setupDiv.appendChild(startButton);
-document.body.appendChild(setupDiv);
+function startGame() {
+    // Randomly select a drawing
+    currentDrawing = drawings[Math.floor(Math.random() * drawings.length)];
+    hintIndex = 0;
 
-const gameDiv = document.createElement("div");
-gameDiv.style.display = "none";
-const hiddenWordElement = document.createElement("p");
-hiddenWordElement.className = "hidden-word";
-const hintElement = document.createElement("p");
-hintElement.className = "hint";
-const messageElement = document.createElement("p");
-messageElement.className = "message";
-const guessInput = document.createElement("input");
-const submitGuessButton = document.createElement("button");
-submitGuessButton.textContent = "Submit Guess";
-const restartGameButton = document.createElement("button");
-restartGameButton.textContent = "Restart Game";
-restartGameButton.style.display = "none";
-
-gameDiv.appendChild(hiddenWordElement);
-gameDiv.appendChild(guessInput);
-gameDiv.appendChild(submitGuessButton);
-gameDiv.appendChild(hintElement);
-gameDiv.appendChild(messageElement);
-gameDiv.appendChild(restartGameButton);
-document.body.appendChild(gameDiv);
-
-let secretWord = "";
-let hiddenWord = "";
-let maxAttempts = 5;
-let attemptsLeft = maxAttempts;
-let hintRevealed = 0;
-
-function hideWord(word) {
-    return '*'.repeat(word.length);
-}
-
-function giveHint(word, revealedCount) {
-    const hintArray = Array.from(hiddenWord);
-    const revealIndices = new Set();
-    while (revealIndices.size < revealedCount) {
-        revealIndices.add(Math.floor(Math.random() * word.length));
-    }
-    revealIndices.forEach(index => {
-        hintArray[index] = word[index];
-    });
-    return hintArray.join('');
-}
-
-function resetGame() {
-    secretWord = "";
-    hiddenWord = "";
-    attemptsLeft = maxAttempts;
-    hintRevealed = 0;
-    hiddenWordElement.textContent = "";
-    hintElement.textContent = "";
-    messageElement.textContent = "";
+    // Reset canvas and hints
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    currentDrawing.draw();
+    hintArea.textContent = "Hint: ???";
+    messageArea.textContent = "";
     guessInput.value = "";
-    setupDiv.style.display = "block";
-    gameDiv.style.display = "none";
-    restartGameButton.style.display = "none";
 }
 
-function handleGuess() {
+// Hint functionality
+hintButton.addEventListener('click', () => {
+    if (!currentDrawing) return;
+    if (hintIndex < currentDrawing.hintSteps.length) {
+        hintArea.textContent = `Hint: ${currentDrawing.hintSteps[hintIndex]}`;
+        hintIndex++;
+    } else {
+        hintArea.textContent = "No more hints available.";
+    }
+});
+
+// Guess submission
+submitGuess.addEventListener('click', () => {
     const guess = guessInput.value.trim().toLowerCase();
-    guessInput.value = "";
 
     if (!guess) {
-        messageElement.textContent = "Please enter a guess.";
+        messageArea.textContent = "Please enter a guess!";
         return;
     }
 
-    if (guess === secretWord) {
-        messageElement.style.color = "green";
-        messageElement.textContent = "Congratulations! You've guessed the word!";
-        restartGameButton.style.display = "inline-block";
-        return;
-    }
-
-    attemptsLeft--;
-    messageElement.style.color = "red";
-    messageElement.textContent = `Wrong guess. Attempts left: ${attemptsLeft}.`;
-
-    if (attemptsLeft <= 0) {
-        messageElement.textContent = `Game Over! The correct word was: "${secretWord}"`;
-        restartGameButton.style.display = "inline-block";
-    } else if (attemptsLeft <= maxAttempts - Math.ceil(secretWord.length * 0.25)) {
-        hintRevealed = Math.ceil(secretWord.length * 0.25);
-        hiddenWord = giveHint(secretWord, hintRevealed);
-        hiddenWordElement.textContent = hiddenWord;
-        hintElement.textContent = `Hint: ${hiddenWord}`;
-    }
-}
-
-startButton.addEventListener("click", () => {
-    secretWord = secretWordInput.value.trim().toLowerCase();
-    if (secretWord) {
-        hiddenWord = hideWord(secretWord);
-        hiddenWordElement.textContent = hiddenWord;
-        attemptsLeft = maxAttempts;
-        hintRevealed = 0;
-        hintElement.textContent = "";
-        messageElement.textContent = "";
-        setupDiv.style.display = "none";
-        gameDiv.style.display = "block";
+    if (guess === currentDrawing.label) {
+        messageArea.textContent = "Correct! You guessed it!";
+        messageArea.style.color = "green";
     } else {
-        alert("Please enter a valid word!");
+        messageArea.textContent = "Wrong guess! Try again.";
+        messageArea.style.color = "red";
     }
 });
 
-submitGuessButton.addEventListener("click", handleGuess);
-guessInput.addEventListener("keypress", (event) => {
-    if (event.key === "Enter") {
-        event.preventDefault(); 
-        handleGuess();
-    }
-});
+// Reset game
+resetGame.addEventListener('click', startGame);
 
-restartGameButton.addEventListener("click", resetGame);
+// Start the first game
+startGame();
 </script>
 
+ <script>
+        const submitGuess = async (user, guess) => {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/submit_guess', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user, guess }),
+                });
 
+                const data = await response.json();
+                console.log('Response:', data);
+            } catch (error) {
+                console.error('Error submitting guess:', error);
+            }
+        };
+
+        // Attach an event listener to the form to handle the submission
+        document.getElementById('guessForm').addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent the form from refreshing the page
+
+            const username = document.getElementById('username').value;
+            const guess = document.getElementById('guess').value;
+
+            if (username && guess) {
+                submitGuess(username, guess);
+            } else {
+                console.error('Both username and guess are required.');
+            }
+        });
+    </script>
