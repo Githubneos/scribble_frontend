@@ -210,6 +210,15 @@ Author: Ian
             }
         }, 1000);
     }
-
+    function saveDrawing() {
+        const canvasData = canvas.toDataURL(); // Base64 string of the canvas
+            fetch('/api/save_drawing', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ strokes: canvasData })
+            }).then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+    }
 </script>
 
