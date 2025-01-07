@@ -122,7 +122,7 @@ Author: Ian
 
             if (isNaN(timeInSeconds) || timeInSeconds <= 0) {
                 // If no valid timer value entered, pick a random value between 20-100 seconds
-                timeInSeconds = Math.floor(Math.random() * (100 - 20 + 1)) + 20;
+                timeInSeconds = Math.floor(Math.random() * (30 - 20 + 1)) + 20;
             }
 
             startTimer(timeInSeconds);
