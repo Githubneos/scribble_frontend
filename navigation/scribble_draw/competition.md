@@ -1,4 +1,3 @@
----
 layout: post
 title: Competition
 search_exclude: true
@@ -90,6 +89,7 @@ Author: Ian
     <p id="timer-display">Timer: Not started</p>
     <div class="footer">Enjoy your time creating art and having fun!</div>
 </div>
+<button id="save-button">Save Drawing</button>
 
 <script>
     const canvas = document.getElementById('drawing-board');
@@ -114,6 +114,9 @@ Author: Ian
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mousemove', draw);
+
+    // Getting button from html
+    document.getElementById('save-button').addEventListener('click', saveDrawing);
 
     function startDrawing() {
         // If timer hasn't started yet, start it automatically
@@ -211,8 +214,7 @@ Author: Ian
         }, 1000);
     }
     function saveDrawing() {
-        const canvasData = canvas.toDataURL(); 
-        // Base64 string of the canvas
+        const canvasData = canvas.toDataURL(); // Base64 string of the canvas
 
         // Step 1: Save the drawing on the server
         fetch('/api/save_drawing', {
@@ -231,4 +233,3 @@ Author: Ian
         link.click(); // Trigger the download
     }
 </script>
-
