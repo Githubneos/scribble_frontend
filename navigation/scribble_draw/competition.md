@@ -211,14 +211,24 @@ Author: Ian
         }, 1000);
     }
     function saveDrawing() {
-        const canvasData = canvas.toDataURL(); // Base64 string of the canvas
-            fetch('/api/save_drawing', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ strokes: canvasData })
-            }).then(response => response.json())
-            .then(data => console.log(data))
-            .catch(error => console.error('Error:', error));
+        const canvasData = canvas.toDataURL(); 
+        // Base64 string of the canvas
+
+        // Step 1: Save the drawing on the server
+        fetch('/api/save_drawing', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ canvasData })
+        })
+            .then(response => response.json())
+            .then(data => console.log("Saved on server:", data))
+            .catch(error => console.error("Error saving on server:", error));
+
+        // Step 2: Prompt the user to save the drawing locally
+        const link = document.createElement('a');
+        link.href = canvasData;
+        link.download = 'drawing.png'; // Default filename
+        link.click(); // Trigger the download
     }
 </script>
 
