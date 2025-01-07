@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     toolbar.appendChild(eraserButton);
     const backgroundToggle = document.createElement('button');
-    backgroundToggle.textContent = 'Toggle Background';
+    backgroundToggle.textContent = 'Clear';
     backgroundToggle.style.cssText = `
         background: #000;
         color: white;
