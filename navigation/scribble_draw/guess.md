@@ -3,7 +3,7 @@ layout: post
 title: Scribble Guess
 search_exclude: true
 description: Chatroom
->>>>>>> 3003c4d6fa73ed5b7ab5711048ef426188e4eff1
+permalink: /about 
 Author: Keerthan
 ---
 
