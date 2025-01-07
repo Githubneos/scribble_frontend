@@ -105,7 +105,6 @@ Author: Daksha
             { name: "Bob", score: 200 },
             { name: "Charlie", score: 100 }
         ];
-
         function renderLeaderboard() {
             const tbody = document.getElementById('leaderboard');
             tbody.innerHTML = "";
@@ -120,7 +119,6 @@ Author: Daksha
                 tbody.appendChild(row);
             });
         }
-
         function addEntry() {
             const nameInput = document.getElementById('name').value.trim();
             const scoreInput = parseInt(document.getElementById('score').value);
@@ -131,7 +129,6 @@ Author: Daksha
                 alert('Please enter a valid name and score!');
             }
         }
-
         document.getElementById('addButton').addEventListener('click', addEntry);
         renderLeaderboard();
     </script>
