@@ -11,7 +11,7 @@ Author: Zach
 <table>
     <tr>
         <td><a href="{{site.baseurl}}/competition">Comepetitive</a></td>
-        <td><a href="{{site.baseurl}}/guessing">Guess Game </a></td>
+        <td><a href="{{site.baseurl}}/guess">Guess Game </a></td>
         <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
         <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
         <td><a href="{{site.baseurl}}/about">About Us</a></td>
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     toolbar.appendChild(eraserButton);
     const backgroundToggle = document.createElement('button');
-    backgroundToggle.textContent = 'Toggle Background';
+    backgroundToggle.textContent = 'Clear';
     backgroundToggle.style.cssText = `
         background: #000;
         color: white;

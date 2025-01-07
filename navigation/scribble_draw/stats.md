@@ -11,11 +11,11 @@ Author: Max
     <style>
      
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #1E3C72, #2A5298);
-            color: white;
+            background: #121212;
+            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,108 +23,128 @@ Author: Max
         }
         .statistics-container {
             width: 90%;
-            max-width: 800px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.7);
+            text-align: center;
         }
         .statistics-header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
         }
         .statistics-header h1 {
-            font-size: 2.5rem;
-            margin: 0;
+            font-size: 3rem;
+            font-weight: bold;
         }
         .statistics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 30px;
         }
         .stat-card {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 20px;
+            background: linear-gradient(145deg, #2d2d2d, #252525);
+            border-radius: 15px;
+            padding: 40px;
             text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            width: 250px;
+            cursor: pointer;
+            position: relative;
         }
         .stat-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.7);
         }
         .stat-value {
-            font-size: 2rem;
+            font-size: 4rem;
             font-weight: bold;
+            color: #00ffcc;
         }
         .stat-label {
             margin-top: 10px;
-            font-size: 1rem;
-            color: #CFD8DC;
+            font-size: 1.4rem;
+            color: #ffcc00;
+        }
+        .stat-emoji {
+            font-size: 3rem;
+            position: absolute;
+            top: -30px;
+            right: -30px;
         }
         .hint {
-            margin-top: 15px;
+            margin-top: 40px;
             text-align: center;
-            font-size: 0.9rem;
-            color: #FFAB00;
+            font-size: 1.5rem;
+            color: #ffcc00;
+            font-style: italic;
         }
-        @media (max-width: 600px) {
-            .statistics-header h1 {
-                font-size: 1.8rem;
+        @media (max-width: 768px) {
+            .statistics-container {
+                padding: 20px;
             }
             .stat-card {
-                padding: 15px;
+                padding: 20px;
+                width: 200px;
             }
-            .stat-value {
-                font-size: 1.5rem;
-            }
-            .stat-label {
-                font-size: 0.8rem;
+            .statistics-header h1 {
+                font-size: 2rem;
             }
         }
     </style>
     <div class="statistics-container">
         <div class="statistics-header">
-            <h1>Game Statistics</h1>
+            <h1>🎮 Game Statistics 🎯</h1>
         </div>
         <div class="statistics-grid">
             <div class="stat-card">
+                <div class="stat-emoji">🏆</div>
                 <div class="stat-value" id="total-rounds">0</div>
                 <div class="stat-label">Total Rounds</div>
             </div>
             <div class="stat-card">
+                <div class="stat-emoji">✅</div>
                 <div class="stat-value" id="correct-guesses">0</div>
                 <div class="stat-label">Correct Guesses</div>
             </div>
             <div class="stat-card">
+                <div class="stat-emoji">❌</div>
                 <div class="stat-value" id="wrong-guesses">0</div>
                 <div class="stat-label">Wrong Guesses</div>
             </div>
             <div class="stat-card">
+                <div class="stat-emoji">💡</div>
                 <div class="stat-value" id="hint-uses">0</div>
                 <div class="stat-label">Hints Used</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-emoji">🔥</div>
+                <div class="stat-value" id="streaks">0</div>
+                <div class="stat-label">Current Streak</div>
+            </div>
         </div>
-        <div class="hint" id="hint">Use hints wisely to improve your score!</div>
+        <div class="hint" id="hint">🌟 Use hints wisely to boost your score! 🌟</div>
     </div>
     <script>
-        // Example statistics data
         const statistics = {
             totalRounds: 10,
             correctGuesses: 7,
             wrongGuesses: 3,
             hintUses: 2,
+            streaks: 5
         };
-        // Function to update statistics dynamically
+
         function updateStatistics() {
             document.getElementById('total-rounds').textContent = statistics.totalRounds;
             document.getElementById('correct-guesses').textContent = statistics.correctGuesses;
             document.getElementById('wrong-guesses').textContent = statistics.wrongGuesses;
             document.getElementById('hint-uses').textContent = statistics.hintUses;
+            document.getElementById('streaks').textContent = statistics.streaks;
         }
-        // Call update function on page load
+
         updateStatistics();
     </script>
 </div>
