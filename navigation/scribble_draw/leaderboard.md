@@ -9,132 +9,73 @@ Author: Daksha
 
 <div>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #121212;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .leaderboard-container {
-            width: 90%;
-            max-width: 1000px;
-            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.7);
+        div {
+            font-family: Arial, sans-serif;
             text-align: center;
-        }
-        h1 {
-            font-size: 3rem;
+            background-color: #F4F4F9;
+            padding: 20px;
         }
         table {
-            width: 100%;
-            margin-top: 30px;
+            width: 50%;
+            margin: 20px auto;
             border-collapse: collapse;
-            border-radius: 15px;
-            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         th, td {
-            padding: 15px;
-            text-align: center;
+            padding: 10px;
+            text-align: left;
             border-bottom: 1px solid #ddd;
         }
         th {
-            background: #00ffcc;
-            color: #121212;
-            font-size: 1.2rem;
-        }
-        tr:nth-child(even) {
-            background: #2d2d2d;
+            background-color: #4CAF50;
+            color: white;
         }
         tr:hover {
-            background: #00ffcc;
-            color: #121212;
-            transition: 0.3s;
+            background-color: #F1F1F1;
         }
         .form-container {
-            margin-top: 30px;
+            margin: 20px auto;
+            width: 50%;
             display: flex;
-            justify-content: center;
-            gap: 15px;
+            gap: 10px;
         }
-        input, button {
-            padding: 15px;
-            border-radius: 10px;
-            border: none;
-            font-size: 1rem;
+        input {
+            padding: 10px;
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
         button {
-            background: #00ffcc;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
-            color: #121212;
         }
         button:hover {
-            background: #ffcc00;
-            transition: 0.3s;
+            background-color: #45A049;
         }
     </style>
-    <div class="leaderboard-container">
-        <h1>🏆 Leaderboard 🏆</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Name</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboard">
-                <!-- Leaderboard rows will be populated here -->
-            </tbody>
-        </table>
-        <div class="form-container">
-            <input type="text" id="name" placeholder="Enter Name">
-            <input type="number" id="score" placeholder="Enter Score">
-            <button id="addButton">Add Entry</button>
-        </div>
+    <h1>Leaderboard</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody id="leaderboard">
+            <!-- Rows will be dynamically inserted here -->
+        </tbody>
+    </table>
+    <div class="form-container">
+        <input type="text" id="name" placeholder="Enter name">
+        <input type="number" id="score" placeholder="Enter score">
+        <button id="addButton">Add to Leaderboard</button>
     </div>
-<<<<<<< HEAD
-    <script>
-        const leaderboard = [
-            { name: "Alice", score: 150 },
-            { name: "Bob", score: 200 },
-            { name: "Charlie", score: 100 }
-        ];
-        function renderLeaderboard() {
-            const tbody = document.getElementById('leaderboard');
-            tbody.innerHTML = "";
-            leaderboard.sort((a, b) => b.score - a.score);
-            leaderboard.forEach((entry, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${entry.name}</td>
-                    <td>${entry.score}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-        function addEntry() {
-            const nameInput = document.getElementById('name').value.trim();
-            const scoreInput = parseInt(document.getElementById('score').value);
-            if (nameInput && !isNaN(scoreInput)) {
-                leaderboard.push({ name: nameInput, score: scoreInput });
-                renderLeaderboard();
-            } else {
-                alert('Please enter a valid name and score!');
-            }
-        }
-        document.getElementById('addButton').addEventListener('click', addEntry);
-        renderLeaderboard();
-    </script>
-</div>
-=======
 </div>
 <script>
     let leaderboard = [];
@@ -212,4 +153,3 @@ Author: Daksha
 </script>
 
 
->>>>>>> bb22e7b (commit)
