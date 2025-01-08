@@ -1,3 +1,4 @@
+---
 layout: post
 title: Competition
 search_exclude: true
