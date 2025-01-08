@@ -99,6 +99,7 @@ Author: Daksha
             <button id="addButton">Add Entry</button>
         </div>
     </div>
+<<<<<<< HEAD
     <script>
         const leaderboard = [
             { name: "Alice", score: 150 },
@@ -133,3 +134,82 @@ Author: Daksha
         renderLeaderboard();
     </script>
 </div>
+=======
+</div>
+<script>
+    let leaderboard = [];
+
+    async function fetchLeaderboard() {
+        try {
+            const response = await fetch('http://localhost:5001/api/leaderboard');
+            const data = await response.json();
+            leaderboard = data.map(item => ({
+                name: `${item.profile_name} - ${item.drawing_name}`,
+                score: item.score
+            }));
+            renderLeaderboard();
+        } catch (error) {
+            console.error('Error fetching leaderboard:', error);
+        }
+    }
+
+    function renderLeaderboard() {
+        const tbody = document.getElementById('leaderboard');
+        tbody.innerHTML = ""; // Clear existing rows
+        // Sort the leaderboard by score in descending order
+        leaderboard.sort((a, b) => b.score - a.score);
+        leaderboard.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${entry.name}</td>
+                <td>${entry.score}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async function addEntry() {
+        const nameInput = document.getElementById('name');
+        const scoreInput = document.getElementById('score');
+        const name = nameInput.value.trim();
+        const score = parseInt(scoreInput.value);
+        
+        if (name && !isNaN(score)) {
+            try {
+                // Send POST request to API
+                const response = await fetch('http://localhost:5001/api/leaderboard', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, score })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to add entry');
+                }
+
+                // Refresh the leaderboard
+                await fetchLeaderboard();
+
+                // Clear input fields
+                nameInput.value = "";
+                scoreInput.value = "";
+            } catch (error) {
+                console.error('Error adding entry:', error);
+                alert('Failed to add entry to leaderboard');
+            }
+        } else {
+            alert('Please enter both a name and a valid score.');
+        }
+    }
+
+    document.getElementById('addButton').addEventListener('click', addEntry);
+    
+    // Initial fetch and render
+    fetchLeaderboard();
+</script>
+
+
+>>>>>>> bb22e7b (commit)
