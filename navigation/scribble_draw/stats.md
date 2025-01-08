@@ -8,8 +8,7 @@ Author: Max
 ---
 
 <div>
-    <style>
-     
+    <style> 
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
@@ -136,7 +135,6 @@ Author: Max
             hintUses: 2,
             streaks: 5
         };
-
         function updateStatistics() {
             document.getElementById('total-rounds').textContent = statistics.totalRounds;
             document.getElementById('correct-guesses').textContent = statistics.correctGuesses;
@@ -144,7 +142,6 @@ Author: Max
             document.getElementById('hint-uses').textContent = statistics.hintUses;
             document.getElementById('streaks').textContent = statistics.streaks;
         }
-
         updateStatistics();
     </script>
 </div>
