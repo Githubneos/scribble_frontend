@@ -2,15 +2,9 @@
 layout: post
 title: Scribble Guess
 search_exclude: true
-<<<<<<< HEAD
-description: Chatroom
-permalink: /about 
-Author: Keerthan
-=======
 description: Scribble Guess
 permalink: /guess
 author: Keerthan
->>>>>>> 7741614 (merge conflict)
 ---
 
 <div>
