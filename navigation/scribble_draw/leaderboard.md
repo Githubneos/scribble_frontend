@@ -259,5 +259,3 @@ Author: Daksha
     
     fetchLeaderboard();
 </script>
-
-
