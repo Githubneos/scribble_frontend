@@ -135,6 +135,15 @@ Author: Max
             hintUses: 2,
             streaks: 5
         };
+        const hints = [
+            "🌟 Use hints wisely to boost your score! 🌟",
+            "🎯 Every correct guess increases your streak! Keep it up! 🔥",
+            "🔄 Remember: each round is a chance to improve! 🏆",
+            "💡 Hints help, but too many can cost you points! ⚖️",
+            "🏅 A good strategy is key to success! Plan your guesses! 🧠",
+            "🎉 Don't forget to celebrate your correct guesses! 🎉",
+            "⏳ Time is precious! Use your hints strategically! ⏱️"
+        ];
         function updateStatistics() {
             document.getElementById('total-rounds').textContent = statistics.totalRounds;
             document.getElementById('correct-guesses').textContent = statistics.correctGuesses;
@@ -142,6 +151,11 @@ Author: Max
             document.getElementById('hint-uses').textContent = statistics.hintUses;
             document.getElementById('streaks').textContent = statistics.streaks;
         }
+        function setRandomHint() {
+            const randomIndex = Math.floor(Math.random() * hints.length);
+            document.getElementById('hint').textContent = hints[randomIndex];
+        }
+        setRandomHint();  // Set a random hint each time the page is refreshed
         updateStatistics();
     </script>
 </div>
