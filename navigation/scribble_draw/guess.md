@@ -44,17 +44,36 @@ author: Keerthan
         <button id="hintButton">Get Hint</button>
         <button id="resetGame">Reset Game</button>
     </div>
-     <div class="hint" id="hintArea">Hint: ???</div>
+    <div class="hint" id="hintArea">Hint: ???</div>
     <div class="message" id="messageArea"></div>
+
+    <div>
+        <h1>Submit Your Guess</h1>
+        <form id="guessForm">
+            <label for="user">User:</label>
+            <input type="text" id="user" name="user" required><br><br>
+            
+            <label for="guess">Guess:</label>
+            <input type="text" id="guess" name="guess" required><br><br>
+            
+            <label for="is_correct">Is Correct:</label>
+            <input type="checkbox" id="is_correct" name="is_correct"><br><br>
+            
+            <label for="drawing_id">Drawing ID:</label>
+            <input type="number" id="drawing_id" name="drawing_id" required><br><br>
+            
+            <button type="submit">Submit Guess</button>
+        </form>
+    </div>
 </div>
 
 <script>
 const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
 const guessInput = document.getElementById('guessInput');
-const submitGuess = document.getElementById('submitGuess');
+const submitGuessButton = document.getElementById('submitGuess');
 const hintButton = document.getElementById('hintButton');
-const resetGame = document.getElementById('resetGame');
+const resetGameButton = document.getElementById('resetGame');
 const hintArea = document.getElementById('hintArea');
 const messageArea = document.getElementById('messageArea');
 
@@ -131,11 +150,9 @@ let currentDrawing = null;
 let hintIndex = 0;
 
 function startGame() {
-    // Randomly select a drawing
     currentDrawing = drawings[Math.floor(Math.random() * drawings.length)];
     hintIndex = 0;
 
-    // Reset canvas and hints
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     currentDrawing.draw();
     hintArea.textContent = "Hint: ???";
@@ -143,7 +160,6 @@ function startGame() {
     guessInput.value = "";
 }
 
-// Hint functionality
 hintButton.addEventListener('click', () => {
     if (!currentDrawing) return;
     if (hintIndex < currentDrawing.hintSteps.length) {
@@ -154,8 +170,7 @@ hintButton.addEventListener('click', () => {
     }
 });
 
-// Guess submission
-submitGuess.addEventListener('click', () => {
+submitGuessButton.addEventListener('click', async () => {
     const guess = guessInput.value.trim().toLowerCase();
 
     if (!guess) {
@@ -170,44 +185,33 @@ submitGuess.addEventListener('click', () => {
         messageArea.textContent = "Wrong guess! Try again.";
         messageArea.style.color = "red";
     }
+
+    const user = document.getElementById('user').value;
+    const isCorrect = guess === currentDrawing.label;
+    const drawingId = drawings.indexOf(currentDrawing) + 1; // For example, if cat is selected, the ID will be 1
+
+    const payload = { user, guess, is_correct: isCorrect, drawing_id: drawingId };
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/submit_guess', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            console.log('Guess submitted successfully:', data);
+        } else {
+            console.error('Error:', data.error);
+        }
+    } catch (error) {
+        console.error('Error submitting guess:', error);
+    }
 });
 
-// Reset game
-resetGame.addEventListener('click', startGame);
+resetGameButton.addEventListener('click', startGame);
 
 // Start the first game
 startGame();
 </script>
-
- <script>
-        const submitGuess = async (user, guess) => {
-            try {
-                const response = await fetch('http://127.0.0.1:5000/api/submit_guess', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ user, guess }),
-                });
-
-                const data = await response.json();
-                console.log('Response:', data);
-            } catch (error) {
-                console.error('Error submitting guess:', error);
-            }
-        };
-
-        // Attach an event listener to the form to handle the submission
-        document.getElementById('guessForm').addEventListener('submit', (event) => {
-            event.preventDefault(); // Prevent the form from refreshing the page
-
-            const username = document.getElementById('username').value;
-            const guess = document.getElementById('guess').value;
-
-            if (username && guess) {
-                submitGuess(username, guess);
-            } else {
-                console.error('Both username and guess are required.');
-            }
-        });
-    </script>
