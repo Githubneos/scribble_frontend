@@ -82,56 +82,7 @@ Author: Max
             color: #ffcc00;
             font-style: italic;
         }
-        /* Modal Styling */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 999;
-            display: none;
-        }
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 400px;
-            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            display: none;
-        }
-        .modal h2 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            color: #00ffcc;
-        }
-        .modal p {
-            font-size: 1.2rem;
-            color: #fff;
-        }
-        .modal .close-btn {
-            background: #ff5555;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background 0.3s;
-        }
-        .modal .close-btn:hover {
-            background: #ff3333;
-        }
     </style>
-    <!-- Statistics Container -->
     <div class="statistics-container">
         <div class="statistics-header">
             <h1>🎮 Game Statistics 🎯</h1>
@@ -165,63 +116,20 @@ Author: Max
         </div>
         <div class="hint" id="hint">🌟 Use hints wisely to boost your score! 🌟</div>
     </div>
-    <!-- Modal and Overlay -->
-    <div class="overlay" id="overlay" onclick="closeModal()"></div>
-    <div class="modal" id="modal">
-        <h2 id="modal-title">Detail</h2>
-        <p id="modal-detail">Detailed information will appear here.</p>
-        <button class="close-btn" onclick="closeModal()">Close</button>
-    </div>
     <script>
-        const statistics = {
-            totalRounds: 10,
-            correctGuesses: 7,
-            wrongGuesses: 3,
-            hintUses: 2,
-            streaks: 5
-        };
-        const details = {
-            totalRounds: "The total number of rounds you've played in the game so far.",
-            correctGuesses: "The number of times you guessed correctly during the game.",
-            wrongGuesses: "The number of incorrect guesses made during gameplay.",
-            hintUses: "The total number of hints you used to help with your guesses.",
-            streaks: "The highest number of consecutive correct guesses in the game."
-        };
-        const hints = [
-            "🌟 Use hints wisely to boost your score! 🌟",
-            "🎯 Every correct guess increases your streak! Keep it up! 🔥",
-            "🔄 Remember: each round is a chance to improve! 🏆",
-            "💡 Hints help, but too many can cost you points! ⚖️",
-            "🏅 A good strategy is key to success! Plan your guesses! 🧠",
-            "🎉 Don't forget to celebrate your correct guesses! 🎉",
-            "⏳ Time is precious! Use your hints strategically! ⏱️"
-        ];
-        function updateStatistics() {
-            document.getElementById("total-rounds").textContent = statistics.totalRounds;
-            document.getElementById("correct-guesses").textContent = statistics.correctGuesses;
-            document.getElementById("wrong-guesses").textContent = statistics.wrongGuesses;
-            document.getElementById("hint-uses").textContent = statistics.hintUses;
-            document.getElementById("streaks").textContent = statistics.streaks;
+        async function fetchStatistics() {
+            try {
+                const response = await fetch('http://localhost:8887/api/statistics');
+                const data = await response.json();
+                document.getElementById("total-rounds").textContent = data.total_rounds;
+                document.getElementById("correct-guesses").textContent = data.correct_guesses;
+                document.getElementById("wrong-guesses").textContent = data.wrong_guesses;
+                document.getElementById("hint-uses").textContent = data.hints_used;
+                document.getElementById("streaks").textContent = data.current_streak;
+            } catch (error) {
+                console.error('Error fetching statistics:', error);
+            }
         }
-        function setRandomHint() {
-            const randomIndex = Math.floor(Math.random() * hints.length);
-            document.getElementById("hint").textContent = hints[randomIndex];
-        }
-        function showDetail(stat) {
-            const modal = document.getElementById("modal");
-            const overlay = document.getElementById("overlay");
-            document.getElementById("modal-title").textContent = stat
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase());
-            document.getElementById("modal-detail").textContent = details[stat];
-            modal.style.display = "block";
-            overlay.style.display = "block";
-        }
-        function closeModal() {
-            document.getElementById("modal").style.display = "none";
-            document.getElementById("overlay").style.display = "none";
-        }
-        setRandomHint();
-        updateStatistics();
+        fetchStatistics();
     </script>
 </div>
