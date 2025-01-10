@@ -24,7 +24,13 @@ author: Keerthan
         }
         .controls {
             text-align: center;
-            margin: 10px;
+            margin-top: 20px;
+        }
+        .controls button {
+            font-size: 1rem;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
         }
         .hint {
             font-size: 1.2em;

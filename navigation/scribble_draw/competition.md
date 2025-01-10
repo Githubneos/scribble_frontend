@@ -90,6 +90,7 @@ Author: Ian
     <p id="timer-display">Timer: Not started</p>
     <div class="footer">Enjoy your time creating art and having fun!</div>
 </div>
+<button id="save-button">Save Drawing</button>
 
 <script>
     const canvas = document.getElementById('drawing-board');
@@ -115,6 +116,9 @@ Author: Ian
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mousemove', draw);
 
+    // Getting button from html
+    document.getElementById('save-button').addEventListener('click', saveDrawing);
+
     function startDrawing() {
         // If timer hasn't started yet, start it automatically
         if (!timerStarted) {
@@ -122,7 +126,7 @@ Author: Ian
 
             if (isNaN(timeInSeconds) || timeInSeconds <= 0) {
                 // If no valid timer value entered, pick a random value between 20-100 seconds
-                timeInSeconds = Math.floor(Math.random() * (100 - 20 + 1)) + 20;
+                timeInSeconds = Math.floor(Math.random() * (30 - 20 + 1)) + 20;
             }
 
             startTimer(timeInSeconds);
@@ -210,6 +214,23 @@ Author: Ian
             }
         }, 1000);
     }
+    function saveDrawing() {
+        const canvasData = canvas.toDataURL(); // Base64 string of the canvas
 
+        // Step 1: Save the drawing on the server
+        fetch('/api/save_drawing', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ canvasData })
+        })
+            .then(response => response.json())
+            .then(data => console.log("Saved on server:", data))
+            .catch(error => console.error("Error saving on server:", error));
+
+        // Step 2: Prompt the user to save the drawing locally
+        const link = document.createElement('a');
+        link.href = canvasData;
+        link.download = 'drawing.png'; // Default filename
+        link.click(); // Trigger the download
+    }
 </script>
-
