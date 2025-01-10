@@ -9,18 +9,23 @@ Author: Daksha
 
 <div class="leaderboard-container">
     <style>
+        body {
+            background: linear-gradient(135deg, #e0f7fa, #80deea); /* Light blue gradient */
+            background-attachment: fixed; /* Keep background fixed */
+        }
+
         .leaderboard-container {
             font-family: 'Poppins', Arial, sans-serif;
             max-width: 800px;
             margin: 2rem auto;
             padding: 2rem;
-            background: linear-gradient(145deg, #f6f8ff, #ffffff);
+            background: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
             border-radius: 20px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
         }
 
         .leaderboard-title {
-            color: #000000;
+            color: #000000;  /* Title color set to black */
             font-size: 2.5rem;
             margin-bottom: 2rem;
             text-align: center;
@@ -38,7 +43,7 @@ Author: Daksha
             padding: 1.5rem;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .input-group {
@@ -97,22 +102,7 @@ Author: Daksha
             padding: 15px;
             background: white;
             border: 1px solid #eee;
-        }
-
-        .leaderboard-table tr:nth-child(1) td {
-            background: linear-gradient(145deg, #ffd700, #ffc800);
-            font-weight: bold;
-        }
-
-        .leaderboard-table tr:nth-child(2) td {
-            background: linear-gradient(145deg, #C0C0C0, #B8B8B8);
-            font-weight: bold;
-        }
-
-        .leaderboard-table tr:nth-child(3) td {
-            background: linear-gradient(145deg, #CD7F32, #C77730);
-            font-weight: bold;
-            color: white;
+            color: #000000; /* Set text color to black for all table cells */
         }
 
         @media (max-width: 768px) {
@@ -129,16 +119,16 @@ Author: Daksha
 
     <h1 class="leaderboard-title">Scribble Masters</h1>
     
-    <!-- Simplified Manual Input Form -->
+    <!-- Manual Input Form -->
     <div class="form-container">
         <div class="input-group">
             <input type="text" id="profileName" placeholder="Profile Name" class="form-input">
-            <input type="number" id="score" placeholder="Score (0-100)" class="form-input" style="color: white;">
+            <input type="number" id="score" placeholder="Score (0-100)" class="form-input" style="color: black;"> <!-- Changed to black -->
             <button onclick="addEntry()" class="submit-button">Add to Leaderboard</button>
         </div>
     </div>
 
-    <!-- Simplified Leaderboard Table -->
+    <!-- Leaderboard Table -->
     <table class="leaderboard-table">
         <thead>
             <tr>
@@ -155,10 +145,13 @@ Author: Daksha
 
 <script>
     // API endpoint
-    const API_URL = 'http://0.0.0.0:8887/api/leaderboard';
+    const API_URL = 'http://127.0.0.1:8887/api/leaderboard'; // Update this to your backend API URL
 
     // Fetch and display leaderboard
     async function fetchLeaderboard() {
+        const tbody = document.getElementById('leaderboard');
+        tbody.innerHTML = '';
+
         try {
             const response = await fetch(API_URL);
             if (!response.ok) throw new Error('Failed to fetch leaderboard');
@@ -166,8 +159,7 @@ Author: Daksha
             displayLeaderboard(data);
         } catch (error) {
             console.error('Error:', error);
-            document.getElementById('leaderboard').innerHTML = 
-                '<tr><td colspan="3" style="color: #000000;">Error loading leaderboard. Please try again later.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" style="color: #000000;">Error loading leaderboard. Please try again later.</td></tr>';
         }
     }
 
@@ -192,7 +184,7 @@ Author: Daksha
         });
     }
 
-    // Add new entry
+    // Add new entry manually
     async function addEntry() {
         const profileName = document.getElementById('profileName').value.trim();
         const score = parseInt(document.getElementById('score').value);
@@ -228,7 +220,7 @@ Author: Daksha
             document.getElementById('profileName').value = '';
             document.getElementById('score').value = '';
 
-            // Refresh leaderboard
+            // Refresh leaderboard display
             await fetchLeaderboard();
         } catch (error) {
             console.error('Error:', error);
