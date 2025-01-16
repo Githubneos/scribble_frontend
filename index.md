@@ -162,21 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.addEventListener('mouseleave', () => {
         drawing = false;
     });
-    function resetCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-    function saveDrawing() {
-        const link = document.createElement('a');
-        link.download = 'drawing.png';
-        link.href = canvas.toDataURL();
-        link.click();
-    }
-    backgroundToggle.addEventListener('click', () => {
-        const newBackground = canvas.style.background === 'black' ? 'white' : 'black';
-        canvas.style.background = newBackground;
-        ctx.fillStyle = newBackground;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    });
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
     const messagesDiv = document.getElementById('messages');
