@@ -211,21 +211,41 @@ Author: Ian
                 startButton.disabled = true;  // Disable the timer button again after the timer ends
                 eraseButton.disabled = true;  // Disable the erase button
                 clearButton.disabled = true;  // Disable the clear board button
+
+                // Save the drawing and submit the entry
+                saveDrawing();
             }
         }, 1000);
     }
+
     function saveDrawing() {
         const canvasData = canvas.toDataURL(); // Base64 string of the canvas
+
+        // Prompt the user for their name, time spent, and number of drawings
+        const userName = prompt("Enter your name:");
+        const timeSpent = parseInt(prompt("Enter the time spent (in minutes):"));
+        const drawingsCount = parseInt(prompt("Enter the number of drawings:"));
+
+        if (!userName || isNaN(timeSpent) || isNaN(drawingsCount)) {
+            alert("Invalid input. Please try again.");
+            return;
+        }
 
         // Step 1: Save the drawing on the server
         fetch('/api/save_drawing', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ canvasData })
+            body: JSON.stringify({ canvasData, userName, timeSpent, drawingsCount })
         })
             .then(response => response.json())
-            .then(data => console.log("Saved on server:", data))
-            .catch(error => console.error("Error saving on server:", error));
+            .then(data => {
+                console.log("Saved on server:", data);
+                alert('Drawing and entry submitted successfully!');
+            })
+            .catch(error => {
+                console.error("Error saving on server:", error);
+                alert('Error submitting entry. Please try again later.');
+            });
 
         // Step 2: Prompt the user to save the drawing locally
         const link = document.createElement('a');
