@@ -111,13 +111,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const userName = prompt("Enter your name (optional):") || "Anonymous";
         const drawingName = prompt("Enter the name of your drawing (optional):") || "Untitled";
         const drawingData = canvas.toDataURL("image/jpeg");
-    const link = document.createElement('a');
+     const link = document.createElement('a');
         link.download = `${userName}_${drawingName}.jpeg`;
         link.href = drawingData;
         link.click();
-  alert(`Drawing saved! Name: ${userName}, Drawing: ${drawingName}`);
+    fetch('/api/save-drawing', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_name: userName,
+                drawing_name: drawingName,
+                drawing: drawingData
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(`Drawing saved! Name: ${userName}, Drawing: ${drawingName}`);
+            } else {
+                alert(`Error: ${data.error}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
     });
-     toolbar.appendChild(saveButton);
+    toolbar.appendChild(saveButton);
     const resetButton = document.createElement('button');
     resetButton.textContent = 'Reset';
     resetButton.style.cssText = `
