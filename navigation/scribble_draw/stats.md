@@ -99,23 +99,52 @@ Author: Max
         <div class="input-section">
             <h2>Update Statistics</h2>
             <form class="input-form" onsubmit="return updateStatistics(event)">
-                <label for="correct-guesses-input">Correct Guesses</label>
+                <label for="correct-guesses-input">Correct Guesses:</label>
                 <input type="number" id="correct-guesses-input" min="0">
-                <label for="wrong-guesses-input">Wrong Guesses</label>
+                <label for="wrong-guesses-input">Wrong Guesses:</label>
                 <input type="number" id="wrong-guesses-input" min="0">
                 <button class="submit-button" type="submit">Update Stats</button>
             </form>
-            <div class="notification" id="notification" style="display: none;"></div>
+            <div class="notification" id="notification"></div>
         </div>
     </div>
     <script type="module">
-        import { pythonURI, fetchOptions } from '{{ site.baseurl }}/assets/js/api/config.js';
-
-        async function fetchStatistics() {
+        const pythonURI = 'http://localhost:8887';
+        async function updateStatistics(event) {
+            event.preventDefault();
+            const correct = parseInt(document.getElementById('correct-guesses-input').value) || 0;
+            const wrong = parseInt(document.getElementById('wrong-guesses-input').value) || 0;
             try {
                 const response = await fetch(`${pythonURI}/api/statistics`, {
-                    ...fetchOptions
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        correct: correct,
+                        wrong: wrong
+                    })
                 });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                document.getElementById('notification').textContent = 'Stats updated successfully!';
+                document.getElementById('notification').style.display = 'block';
+                // Refresh stats display
+                fetchStatistics();                
+                // Clear form
+                document.getElementById('correct-guesses-input').value = '';
+                document.getElementById('wrong-guesses-input').value = '';
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('notification').textContent = 'Error updating stats';
+                document.getElementById('notification').style.display = 'block';
+            }
+        }
+        async function fetchStatistics() {
+            try {
+                const response = await fetch(`${pythonURI}/api/statistics`);
                 const data = await response.json();
                 document.getElementById('total-rounds').textContent = data.total_rounds;
                 document.getElementById('correct-guesses').textContent = data.correct_guesses;
@@ -124,42 +153,8 @@ Author: Max
                 console.error('Error fetching statistics:', error);
             }
         }
-
-        async function updateStatistics(event) {
-            event.preventDefault();
-            const correctGuesses = document.getElementById('correct-guesses-input').value;
-            const wrongGuesses = document.getElementById('wrong-guesses-input').value;
-            if (!correctGuesses && !wrongGuesses) {
-                showNotification('Please enter values to update.', 'error');
-                return;
-            }
-            const payload = {
-                correct: parseInt(correctGuesses) || 0,
-                wrong: parseInt(wrongGuesses) || 0
-            };
-            try {
-                const response = await fetch(`${pythonURI}/api/statistics`, {
-                    ...fetchOptions,
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                if (result.status === 'success') {
-                    showNotification('Statistics updated successfully!', 'success');
-                    fetchStatistics();
-                } else {
-                    showNotification('Failed to update statistics.', 'error');
-                }
-            } catch (error) {
-                console.error('Error updating statistics:', error);
-                showNotification('An error occurred. Please try again.', 'error');
-            }
-        }
-
         window.updateStatistics = updateStatistics;
         window.onload = fetchStatistics;
     </script>
 </div>
+
