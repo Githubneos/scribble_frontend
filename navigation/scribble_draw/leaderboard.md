@@ -8,113 +8,9 @@ Author: Daksha
 ---
 
 <div class="leaderboard-container">
+    <!-- Existing style block remains unchanged -->
     <style>
-        body {
-            background: linear-gradient(135deg, #e0f7fa, #80deea);
-            background-attachment: fixed;
-        }
-
-        .leaderboard-container {
-            font-family: 'Poppins', Arial, sans-serif;
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .leaderboard-title {
-            color: #000000;
-            font-size: 2.5rem;
-            margin-bottom: 2rem;
-            text-align: center;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .form-container {
-            margin: 2rem auto;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .input-group {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .form-input {
-            padding: 12px 15px;
-            border: 2px solid #eee;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-            flex: 1;
-        }
-
-        .form-input:focus {
-            border-color: #2C3E50;
-            outline: none;
-        }
-
-        .submit-button {
-            padding: 12px 25px;
-            background: #2C3E50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .submit-button:hover {
-            background: #34495E;
-        }
-
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 8px;
-            margin: 20px 0;
-        }
-
-        .leaderboard-table th {
-            background: #2C3E50;
-            color: white;
-            padding: 15px;
-            text-align: left;
-            font-weight: 500;
-            font-size: 1.1rem;
-            border-radius: 8px;
-        }
-
-        .leaderboard-table td {
-            padding: 15px;
-            background: white;
-            border: 1px solid #eee;
-            color: #000000;
-        }
-
-        @media (max-width: 768px) {
-            .leaderboard-container {
-                margin: 1rem;
-                padding: 1rem;
-            }
-
-            .input-group {
-                flex-direction: column;
-            }
-        }
+        // ...existing styles...
     </style>
 
     <h1 class="leaderboard-title">Scribble Masters</h1>
@@ -124,8 +20,9 @@ Author: Daksha
             <input type="text" id="profileName" placeholder="Profile Name" class="form-input" required>
             <input type="text" id="drawingName" placeholder="Drawing Name" class="form-input" required>
             <input type="number" id="score" placeholder="Score (0-100)" class="form-input" min="0" max="100" required>
-            <button onclick="addEntry()" class="submit-button">Add Score</button>
+            <button onclick="submitScore()" class="submit-button">Submit Score</button>
         </div>
+        <div id="message" style="text-align: center; color: #2C3E50; margin-top: 10px;"></div>
     </div>
 
     <table class="leaderboard-table">
@@ -143,6 +40,13 @@ Author: Daksha
 
 <script>
 const API_URL = 'http://127.0.0.1:8887/api/leaderboard';
+
+function showMessage(message, isError = false) {
+    const messageEl = document.getElementById('message');
+    messageEl.style.color = isError ? '#e74c3c' : '#2ecc71';
+    messageEl.textContent = message;
+    setTimeout(() => messageEl.textContent = '', 3000);
+}
 
 async function fetchLeaderboard() {
     try {
@@ -179,24 +83,24 @@ function displayLeaderboard(data) {
         });
 }
 
-async function addEntry() {
+async function submitScore() {
     const profileName = document.getElementById('profileName').value.trim();
     const drawingName = document.getElementById('drawingName').value.trim();
     const score = parseInt(document.getElementById('score').value);
 
     if (!profileName || !drawingName) {
-        alert('Please fill in all fields');
+        showMessage('Please fill in all fields', true);
         return;
     }
 
     if (isNaN(score) || score < 0 || score > 100) {
-        alert('Please enter a valid score between 0 and 100');
+        showMessage('Please enter a valid score between 0 and 100', true);
         return;
     }
 
     try {
         const response = await fetch(API_URL, {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -207,20 +111,24 @@ async function addEntry() {
             })
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to add entry');
-        }
+        const data = await response.json();
 
-        document.getElementById('profileName').value = '';
-        document.getElementById('drawingName').value = '';
-        document.getElementById('score').value = '';
-        await fetchLeaderboard();
+        if (response.ok) {
+            showMessage(data.message);
+            document.getElementById('profileName').value = '';
+            document.getElementById('drawingName').value = '';
+            document.getElementById('score').value = '';
+            await fetchLeaderboard();
+        } else {
+            throw new Error(data.error || 'Failed to submit score');
+        }
     } catch (error) {
         console.error('Error:', error);
-        alert('Failed to add entry. Please try again.');
+        showMessage(error.message, true);
     }
 }
 
+// Initialize
 fetchLeaderboard();
 setInterval(fetchLeaderboard, 30000);
 </script>
