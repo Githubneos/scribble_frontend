@@ -8,9 +8,126 @@ Author: Daksha
 ---
 
 <div class="leaderboard-container">
-    <!-- Existing style block remains unchanged -->
     <style>
-        // ...existing styles...
+        body {
+            background: linear-gradient(135deg, #e0f7fa, #80deea);
+            background-attachment: fixed;
+        }
+
+        .leaderboard-container {
+            font-family: 'Poppins', Arial, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .leaderboard-title {
+            color: #000000;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .form-container {
+            margin: 2rem auto;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-input {
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            flex: 1;
+        }
+
+        .form-input:focus {
+            border-color: #2C3E50;
+            outline: none;
+        }
+
+        .submit-button, .delete-btn {
+            padding: 12px 25px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-button {
+            background: #2C3E50;
+        }
+
+        .submit-button:hover {
+            background: #34495E;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            margin: 20px 0;
+        }
+
+        .leaderboard-table th {
+            background: #2C3E50;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+            font-size: 1.1rem;
+            border-radius: 8px;
+        }
+
+        .leaderboard-table td {
+            padding: 15px;
+            background: white;
+            border: 1px solid #eee;
+            color: #000000;
+        }
+
+        @media (max-width: 768px) {
+            .leaderboard-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+        }
     </style>
 
     <h1 class="leaderboard-title">Scribble Masters</h1>
@@ -32,6 +149,7 @@ Author: Daksha
                 <th>Player</th>
                 <th>Drawing</th>
                 <th>Score</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody id="leaderboard"></tbody>
@@ -57,7 +175,7 @@ async function fetchLeaderboard() {
     } catch (error) {
         console.error('Error:', error);
         document.getElementById('leaderboard').innerHTML = 
-            '<tr><td colspan="4" style="text-align: center;">Error loading leaderboard</td></tr>';
+            '<tr><td colspan="5" style="text-align: center;">Error loading leaderboard</td></tr>';
     }
 }
 
@@ -66,7 +184,7 @@ function displayLeaderboard(data) {
     tbody.innerHTML = '';
 
     if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No entries yet</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No entries yet</td></tr>';
         return;
     }
 
@@ -78,6 +196,10 @@ function displayLeaderboard(data) {
                 <td>${entry.profile_name}</td>
                 <td>${entry.drawing_name}</td>
                 <td>${entry.score}</td>
+                <td>
+                    <button onclick="deleteEntry('${entry.profile_name}', '${entry.drawing_name}')" 
+                            class="delete-btn">Delete</button>
+                </td>
             `;
             tbody.appendChild(row);
         });
@@ -121,6 +243,28 @@ async function submitScore() {
             await fetchLeaderboard();
         } else {
             throw new Error(data.error || 'Failed to submit score');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage(error.message, true);
+    }
+}
+
+async function deleteEntry(profileName, drawingName) {
+    if (!confirm('Are you sure you want to delete this entry?')) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/${encodeURIComponent(profileName)}/${encodeURIComponent(drawingName)}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            showMessage('Entry deleted successfully');
+            await fetchLeaderboard();
+        } else {
+            throw new Error(data.error || 'Failed to delete entry');
         }
     } catch (error) {
         console.error('Error:', error);
