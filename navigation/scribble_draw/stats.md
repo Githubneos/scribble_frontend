@@ -12,108 +12,133 @@ Author: Max
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             background: #121212;
             color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
         }
         .statistics-container {
-            width: 90%;
-            min-width: 1200px;
+            width: 100%;
             max-width: 1200px;
+            margin: 0 auto;
             background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            text-align: center;
         }
         .statistics-header h1 {
             font-size: 2.8rem;
-            font-weight: bold;
+            text-align: center;
+            margin-bottom: 40px;
             color: #ffcc00;
         }
-        .statistics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .stat-card {
-            background: linear-gradient(145deg, #2d2d2d, #252525);
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1e1e1e;
             border-radius: 15px;
-            padding: 30px;
+            overflow: hidden;
+        }
+        .stats-table th, .stats-table td {
+            padding: 15px;
             text-align: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid #333;
         }
-        .input-section {
-            margin-top: 40px;
+        .stats-table th {
+            background: #2d2d2d;
+            color: #00ffcc;
+            cursor: pointer;
+            position: relative;
         }
-        .input-form label {
-            display: block;
-            margin: 10px 0 5px;
+        .stats-table th:hover {
+            background: #363636;
+        }
+        .stats-table tr:hover {
+            background: #252525;
+        }
+        .stats-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .input-form {
+            margin-top: 30px;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 15px;
         }
         .input-form input {
             padding: 10px;
-            width: 100%;
-            border-radius: 8px;
+            margin: 10px;
+            background: #2d2d2d;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 5px;
         }
-        .submit-button {
-            margin-top: 20px;
+        .input-form button {
             padding: 10px 20px;
             background: #00ffcc;
+            color: #121212;
             border: none;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
         }
-        .notification {
-            margin-top: 20px;
-            font-size: 1rem;
-            color: #00ffcc;
-            font-weight: bold;
+        .input-form button:hover {
+            background: #00ccaa;
+        }
+        #notification {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
         }
     </style>
     <div class="statistics-container">
         <div class="statistics-header">
             <h1>🎮 Game Statistics 🎯</h1>
         </div>
-        <div class="statistics-grid">
-            <div class="stat-card">
-                <div class="stat-emoji">🏆</div>
-                <div class="stat-value" id="total-rounds">0</div>
-                <div class="stat-label">Total Rounds</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-emoji">✅</div>
-                <div class="stat-value" id="correct-guesses">0</div>
-                <div class="stat-label">Correct Guesses</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-emoji">❌</div>
-                <div class="stat-value" id="wrong-guesses">0</div>
-                <div class="stat-label">Wrong Guesses</div>
-            </div>
-        </div>
-        <!-- Manual Input Section -->
-        <div class="input-section">
-            <h2>Update Statistics</h2>
-            <form class="input-form" onsubmit="return updateStatistics(event)">
-                <label for="correct-guesses-input">Correct Guesses:</label>
-                <input type="number" id="correct-guesses-input" min="0">
-                <label for="wrong-guesses-input">Wrong Guesses:</label>
-                <input type="number" id="wrong-guesses-input" min="0">
-                <button class="submit-button" type="submit">Update Stats</button>
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Username</th>
+                    <th onclick="sortTable(1)">Correct Guesses</th>
+                    <th onclick="sortTable(2)">Wrong Guesses</th>
+                    <th onclick="sortTable(3)">Win Rate</th>
+                </tr>
+            </thead>
+            <tbody id="stats-body"></tbody>
+        </table>
+        
+        <div class="input-form">
+            <h2 style="color: #ffcc00;">Add New Statistics</h2>
+            <form onsubmit="return updateStatistics(event)">
+                <input type="text" id="username-input" placeholder="Username" required>
+                <input type="number" id="correct-guesses-input" placeholder="Correct Guesses" required>
+                <input type="number" id="wrong-guesses-input" placeholder="Wrong Guesses" required>
+                <button type="submit">Update Stats</button>
             </form>
-            <div class="notification" id="notification"></div>
+            <div id="notification"></div>
         </div>
     </div>
+
     <script type="module">
         const pythonURI = 'http://localhost:8887';
+
+        async function fetchStatistics() {
+            try {
+                const response = await fetch(`${pythonURI}/api/statistics/all`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                updateTable(data);
+            } catch (error) {
+                console.error('Error fetching statistics:', error);
+                showNotification('Error fetching statistics', 'error');
+            }
+        }
+
         async function updateStatistics(event) {
             event.preventDefault();
+            const username = document.getElementById('username-input').value;
             const correct = parseInt(document.getElementById('correct-guesses-input').value) || 0;
             const wrong = parseInt(document.getElementById('wrong-guesses-input').value) || 0;
+
             try {
                 const response = await fetch(`${pythonURI}/api/statistics`, {
                     method: 'POST',
@@ -121,38 +146,73 @@ Author: Max
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
+                        username: username,
                         correct: correct,
                         wrong: wrong
                     })
                 });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const result = await response.json();
-                document.getElementById('notification').textContent = 'Stats updated successfully!';
-                document.getElementById('notification').style.display = 'block';
-                // Refresh stats display
-                fetchStatistics();                
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const data = await response.json();
+                showNotification('Stats updated successfully!', 'success');
+                
                 // Clear form
+                document.getElementById('username-input').value = '';
                 document.getElementById('correct-guesses-input').value = '';
                 document.getElementById('wrong-guesses-input').value = '';
+                
+                // Update table with new data
+                updateTable(data);
+                
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('notification').textContent = 'Error updating stats';
-                document.getElementById('notification').style.display = 'block';
+                showNotification('Error updating stats', 'error');
             }
         }
-        async function fetchStatistics() {
-            try {
-                const response = await fetch(`${pythonURI}/api/statistics`);
-                const data = await response.json();
-                document.getElementById('total-rounds').textContent = data.total_rounds;
-                document.getElementById('correct-guesses').textContent = data.correct_guesses;
-                document.getElementById('wrong-guesses').textContent = data.wrong_guesses;
-            } catch (error) {
-                console.error('Error fetching statistics:', error);
-            }
+
+        function updateTable(data) {
+            const tbody = document.getElementById('stats-body');
+            tbody.innerHTML = '';
+            data.forEach(user => {
+                const totalGuesses = user.correct_guesses + user.wrong_guesses;
+                const winRate = ((user.correct_guesses / (totalGuesses || 1)) * 100).toFixed(1);
+                const row = `
+                    <tr>
+                        <td>${user.username}</td>
+                        <td>${user.correct_guesses}</td>
+                        <td>${user.wrong_guesses}</td>
+                        <td>${winRate}%</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
         }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            notification.style.background = type === 'success' ? '#00ffcc' : '#ff4444';
+            notification.style.color = '#121212';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function sortTable(n) {
+            const table = document.querySelector('.stats-table');
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+            rows.sort((a, b) => {
+                const aVal = a.cells[n].textContent;
+                const bVal = b.cells[n].textContent;
+                return aVal.localeCompare(bVal, undefined, {numeric: true});
+            });
+            const tbody = table.querySelector('tbody');
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        window.sortTable = sortTable;
         window.updateStatistics = updateStatistics;
         window.onload = fetchStatistics;
     </script>
