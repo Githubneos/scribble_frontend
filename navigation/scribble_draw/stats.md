@@ -89,6 +89,26 @@ Author: Max
             border-radius: 5px;
             display: none;
         }
+        .delete-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background: #cc3333;
+        }
+        #user-select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #2d2d2d;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 5px;
+        }
     </style>
     <div class="statistics-container">
         <div class="statistics-header">
@@ -107,7 +127,10 @@ Author: Max
         </table>
         
         <div class="input-form">
-            <h2 style="color: #ffcc00;">Add New Statistics</h2>
+            <h2 style="color: #ffcc00;">Update Statistics</h2>
+            <select id="user-select" onchange="handleUserSelect()">
+                <option value="">Create New User</option>
+            </select>
             <form onsubmit="return updateStatistics(event)">
                 <input type="text" id="username-input" placeholder="Username" required>
                 <input type="number" id="correct-guesses-input" placeholder="Correct Guesses" required>
@@ -127,6 +150,7 @@ Author: Max
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 updateTable(data);
+                populateUserSelect(data);
             } catch (error) {
                 console.error('Error fetching statistics:', error);
                 showNotification('Error fetching statistics', 'error');
@@ -183,11 +207,43 @@ Author: Max
                         <td>${user.correct_guesses}</td>
                         <td>${user.wrong_guesses}</td>
                         <td>${winRate}%</td>
+                        <td>
+                            <button onclick="deleteUser('${user.username}')" class="delete-btn">
+                                Delete
+                            </button>
+                        </td>
                     </tr>
                 `;
                 tbody.innerHTML += row;
             });
         }
+
+        // Add delete function
+        async function deleteUser(username) {
+            if (!confirm(`Are you sure you want to delete stats for ${username}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${pythonURI}/api/statistics/${username}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                showNotification(`Deleted stats for ${username}`, 'success');
+                fetchStatistics();
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error deleting stats', 'error');
+            }
+        }
+
+        // Add to window scope
+        window.deleteUser = deleteUser;
 
         function showNotification(message, type) {
             const notification = document.getElementById('notification');
@@ -212,9 +268,58 @@ Author: Max
             rows.forEach(row => tbody.appendChild(row));
         }
 
+        function populateUserSelect(data) {
+            const userSelect = document.getElementById('user-select');
+            userSelect.innerHTML = '<option value="">Create New User</option>';
+            data.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.username;
+                option.textContent = user.username;
+                userSelect.appendChild(option);
+            });
+        }
+
+        async function fetchUsers() {
+            try {
+                const response = await fetch(`${pythonURI}/api/statistics/all`);
+                const data = await response.json();
+                const select = document.getElementById('user-select');
+                select.innerHTML = '<option value="">Create New User</option>';
+                data.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.username;
+                    option.textContent = user.username;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        }
+
+        async function handleUserSelect() {
+            const select = document.getElementById('user-select');
+            const username = document.getElementById('username-input');
+            if (select.value) {
+                username.value = select.value;
+                username.readOnly = true;
+            } else {
+                username.value = '';
+                username.readOnly = false;
+            }
+        }
+
+        // Add to window scope and onload
+        window.handleUserSelect = handleUserSelect;
+        window.onload = () => {
+            fetchStatistics();
+            fetchUsers();
+        };
+
         window.sortTable = sortTable;
         window.updateStatistics = updateStatistics;
-        window.onload = fetchStatistics;
     </script>
 </div>
+
+
+
 
