@@ -142,7 +142,7 @@ Author: Max
     </div>
 
     <script type="module">
-        const pythonURI = 'http://localhost:8209';
+        const pythonURI = 'http://localhost:8887';
 
         async function fetchStatistics() {
             try {
