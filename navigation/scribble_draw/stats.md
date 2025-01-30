@@ -59,87 +59,35 @@ Author: Max
             border-bottom: none;
         }
         .input-form {
-            background: rgba(30, 30, 30, 0.95);
-            border-radius: 12px;
-            padding: 30px;
             margin-top: 30px;
-        }
-        .input-form .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .input-form h2 {
-            font-size: 1.8rem;
-            margin-bottom: 25px;
-            background: linear-gradient(135deg, #ffcc00, #ff9900);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        #user-select {
-            width: 100%;
-            padding: 12px 15px;
-            background: #242424;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: #fff;
-            margin-bottom: 20px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        #user-select:focus {
-            border-color: #00ffcc;
-            box-shadow: 0 0 0 2px rgba(0, 255, 204, 0.1);
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 15px;
         }
         .input-form input {
-            flex: 1;
-            padding: 12px 15px;
-            background: #242424;
+            padding: 10px;
+            margin: 10px;
+            background: #2d2d2d;
             border: 1px solid #333;
-            border-radius: 8px;
             color: #fff;
-            font-size: 1rem;
-        }
-        .input-form input:focus {
-            border-color: #00ffcc;
-            box-shadow: 0 0 0 2px rgba(0, 255, 204, 0.1);
-            outline: none;
-        }
-        .input-form input::placeholder {
-            color: #666;
-            transition: all 0.3s ease;
-        }
-        .input-form input:focus::placeholder {
-            opacity: 0;
-            transform: translateY(-10px);
+            border-radius: 5px;
         }
         .input-form button {
-            width: 100%;
-            padding: 12px;
-            background: #2d2d2d;
-            color: #fff;
+            padding: 10px 20px;
+            background: #00ffcc;
+            color: #121212;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.2s ease;
         }
         .input-form button:hover {
-            background: #363636;
+            background: #00ccaa;
         }
         #notification {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 500;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
-        }
-        #notification.show {
-            opacity: 1;
-            transform: translateY(0);
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
         }
         .delete-btn {
             background: #ff4444;
@@ -151,6 +99,15 @@ Author: Max
         }
         .delete-btn:hover {
             background: #cc3333;
+        }
+        #user-select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #2d2d2d;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 5px;
         }
     </style>
     <div class="statistics-container">
@@ -175,11 +132,9 @@ Author: Max
                 <option value="">Create New User</option>
             </select>
             <form onsubmit="return updateStatistics(event)">
-                <div class="input-group">
-                    <input type="text" id="username-input" placeholder="Username" required>
-                    <input type="number" id="correct-guesses-input" placeholder="Correct Guesses" required>
-                    <input type="number" id="wrong-guesses-input" placeholder="Wrong Guesses" required>
-                </div>
+                <input type="text" id="username-input" placeholder="Username" required>
+                <input type="number" id="correct-guesses-input" placeholder="Correct Guesses" required>
+                <input type="number" id="wrong-guesses-input" placeholder="Wrong Guesses" required>
                 <button type="submit">Update Stats</button>
             </form>
             <div id="notification"></div>
