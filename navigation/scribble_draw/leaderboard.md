@@ -9,113 +9,131 @@ Author: Daksha
 
 <div class="leaderboard-container">
     <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #283593;
+            --background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            --text-color: #2c3e50;
+            --card-bg: #ffffff;
+            --error: #e74c3c;
+            --success: #2ecc71;
+        }
+
         body {
-            background: linear-gradient(135deg, #e0f7fa, #80deea);
-            background-attachment: fixed;
+            background: var(--background);
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-color);
         }
 
         .leaderboard-container {
-            font-family: 'Poppins', Arial, sans-serif;
-            max-width: 800px;
-            margin: 2rem auto;
+            max-width: 1000px;
+            margin: 3rem auto;
             padding: 2rem;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
         }
 
         .leaderboard-title {
-            color: #000000;
+            color: var(--primary-color);
             font-size: 2.5rem;
-            margin-bottom: 2rem;
             text-align: center;
-            font-weight: 600;
+            font-weight: 700;
+            margin-bottom: 2rem;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
 
         .form-container {
-            margin: 2rem auto;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
         }
 
         .input-group {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-bottom: 1rem;
         }
 
         .form-input {
-            padding: 12px 15px;
-            border: 2px solid #eee;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 1rem;
-            transition: border-color 0.3s ease;
-            flex: 1;
+            color: var(--text-color);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .form-input:focus {
-            border-color: #2C3E50;
+            border-color: var(--primary-color);
             outline: none;
         }
 
-        .submit-button, .delete-btn {
-            padding: 12px 25px;
+        .submit-button {
+            background: var(--primary-color);
             color: white;
             border: none;
+            padding: 12px 24px;
             border-radius: 8px;
-            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .submit-button {
-            background: #2C3E50;
+            transition: all 0.3s ease;
         }
 
         .submit-button:hover {
-            background: #34495E;
+            background: var(--secondary-color);
+            transform: translateY(-2px);
         }
 
         .delete-btn {
-            background: #e74c3c;
-            padding: 5px 10px;
-            font-size: 0.9rem;
+            background: var(--error);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
         .delete-btn:hover {
-            background: #c0392b;
+            opacity: 0.9;
         }
 
         .leaderboard-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0 8px;
-            margin: 20px 0;
+            margin-top: 2rem;
         }
 
         .leaderboard-table th {
-            background: #2C3E50;
+            background: var(--primary-color);
             color: white;
-            padding: 15px;
+            padding: 16px;
             text-align: left;
-            font-weight: 500;
-            font-size: 1.1rem;
-            border-radius: 8px;
+            font-weight: 600;
         }
 
         .leaderboard-table td {
-            padding: 15px;
-            background: white;
-            border: 1px solid #eee;
-            color: #000000;
+            background: var(--card-bg);
+            padding: 16px;
+            color: var(--text-color);
+        }
+
+        .leaderboard-table tr:hover td {
+            background: #f8f9fa;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
         }
 
         @media (max-width: 768px) {
@@ -125,7 +143,11 @@ Author: Daksha
             }
 
             .input-group {
-                flex-direction: column;
+                grid-template-columns: 1fr;
+            }
+
+            .leaderboard-title {
+                font-size: 2rem;
             }
         }
     </style>
@@ -139,7 +161,7 @@ Author: Daksha
             <input type="number" id="score" placeholder="Score (0-100)" class="form-input" min="0" max="100" required>
             <button onclick="submitScore()" class="submit-button">Submit Score</button>
         </div>
-        <div id="message" style="text-align: center; color: #2C3E50; margin-top: 10px;"></div>
+        <div id="message"></div>
     </div>
 
     <table class="leaderboard-table">
@@ -161,7 +183,8 @@ const API_URL = 'http://127.0.0.1:8887/api/leaderboard';
 
 function showMessage(message, isError = false) {
     const messageEl = document.getElementById('message');
-    messageEl.style.color = isError ? '#e74c3c' : '#2ecc71';
+    messageEl.style.backgroundColor = isError ? '#fee2e2' : '#dcfce7';
+    messageEl.style.color = isError ? '#dc2626' : '#16a34a';
     messageEl.textContent = message;
     setTimeout(() => messageEl.textContent = '', 3000);
 }
@@ -272,7 +295,7 @@ async function deleteEntry(profileName, drawingName) {
     }
 }
 
-// Initialize
+// Initialize and auto-refresh
 fetchLeaderboard();
 setInterval(fetchLeaderboard, 30000);
 </script>
