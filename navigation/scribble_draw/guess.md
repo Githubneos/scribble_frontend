@@ -146,52 +146,47 @@ async function editGuess(button) {
     const resultCell = row.querySelector('.result');
     const newGuess = prompt("Edit your guess:", guessCell.textContent);
 
-    if (!newGuess) return;
+    if (!newGuess) return;  // Cancel if no new guess is provided
 
     const isCorrect = newGuess.toLowerCase() === currentDrawing.label.toLowerCase();
 
-    try {
-        // Log the data being sent
-        console.log("Sending PUT request...");
-        const requestBody = {
-            user: row.cells[0].textContent,
-            guess: newGuess,
-            is_correct: isCorrect
-        };
+    const requestBody = {
+        user: row.cells[0].textContent,  // User's name (from the row)
+        guess: newGuess,                 // The updated guess
+        is_correct: isCorrect            // Whether the guess is correct or not
+    };
 
-        // Log the request body
-        console.log("Request body:", requestBody);
+    try {
+        console.log("Sending PUT request...");
 
         const response = await fetch('http://127.0.0.1:8887/api/guesses', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
             body: JSON.stringify(requestBody)
         });
 
-        // Check if the response is OK (status 200-299)
+        console.log('Response:', response);
+
         if (!response.ok) {
             const errorData = await response.json();
             console.error('Error response from backend:', errorData);
             throw new Error(`Error: ${errorData.error || 'Unknown error'}`);
         }
 
-        // Parse the response as JSON
-        const result = await response.json();
-        console.log('Guess updated:', result);
+        const updatedGuess = await response.json();
+        console.log('Guess updated:', updatedGuess);
 
-        // Update the UI based on the response
-        guessCell.textContent = newGuess;
-        resultCell.textContent = isCorrect ? 'Correct' : 'Incorrect';
+        // Update the UI with the new guess and result
+        guessCell.textContent = updatedGuess.guess;  // Update the guess in the table
+        resultCell.textContent = updatedGuess.is_correct ? 'Correct' : 'Incorrect';  // Update the result in the table
+
     } catch (error) {
         console.error('Error updating guess:', error);
-        messageArea.textContent = `Error updating: ${error.message}`;
+        alert(`Error updating guess: ${error.message}`);
     }
 }
-
-
-
-
-
 
 async function deleteGuess(button) {
   const row = button.parentElement.parentElement;
