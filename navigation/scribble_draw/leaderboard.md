@@ -191,10 +191,10 @@ function showMessage(message, isError = false) {
 
 async function fetchLeaderboard() {
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(`${API_URL}/list`);
         if (!response.ok) throw new Error('Failed to fetch leaderboard');
         const data = await response.json();
-        displayLeaderboard(data);
+        displayLeaderboard(data.entries || []);
     } catch (error) {
         console.error('Error:', error);
         document.getElementById('leaderboard').innerHTML = 
@@ -202,16 +202,16 @@ async function fetchLeaderboard() {
     }
 }
 
-function displayLeaderboard(data) {
+function displayLeaderboard(entries) {
     const tbody = document.getElementById('leaderboard');
     tbody.innerHTML = '';
 
-    if (!data || data.length === 0) {
+    if (!entries || entries.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No entries yet</td></tr>';
         return;
     }
 
-    data.sort((a, b) => b.score - a.score)
+    entries.sort((a, b) => b.score - a.score)
         .forEach((entry, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -259,7 +259,7 @@ async function submitScore() {
         const data = await response.json();
 
         if (response.ok) {
-            showMessage(data.message);
+            showMessage('Score submitted successfully');
             document.getElementById('profileName').value = '';
             document.getElementById('drawingName').value = '';
             document.getElementById('score').value = '';
@@ -277,8 +277,15 @@ async function deleteEntry(profileName, drawingName) {
     if (!confirm('Are you sure you want to delete this entry?')) return;
     
     try {
-        const response = await fetch(`${API_URL}/${encodeURIComponent(profileName)}/${encodeURIComponent(drawingName)}`, {
-            method: 'DELETE'
+        const response = await fetch(API_URL, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                profile_name: profileName,
+                drawing_name: drawingName
+            })
         });
 
         const data = await response.json();
