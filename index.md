@@ -15,11 +15,8 @@ Author: Zach
         <td><a href="{{site.baseurl}}/leaderboard">Leaderboard</a></td>
         <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
         <td><a href="{{site.baseurl}}/about">About Us</a></td>
-        <td><a href="{{site.baseurl}}/deploy">Deployment Blog</a></td>
     </tr>
 </table>
-
-<p>Scribble is a site allowing users to draw images and compete against others with leaderboards, general stats, and a timed competition.</p>
 
 <div id="app"></div>
 <div id="chat-container" style="margin-top: 20px;">
