@@ -2,8 +2,8 @@ title: Scribble Sigmas
 description: "Social Media for Del Norte High School"
 owner_name: Keertha
 github_username: Githubneos
-github_repo: "scribble-frontend" 
-baseurl: "/scribble-frontend"
+github_repo: "scribble_frontend" 
+baseurl: "/scribble_frontend"
 future: true
 remote_theme: jekyll/minima
 minima:
