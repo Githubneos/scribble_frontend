@@ -5,7 +5,6 @@ search_exclude: true
 description: Deployment Blog for qualifying AWS account.
 permalink: /deploy
 Author: Ian
-hide: true
 ---
 
 **Step 1: Accessing AWS EC2**
