@@ -17,19 +17,19 @@ Connect to your instance using SSH:
 ssh -i your-key.pem ubuntu@your-aws-instance-ip
 ```
 
-## Step 2: Setting Up Your Application
+## Step 2: Setting Up Application
 
 ### 1. Finding an Available Port
-Run the following command in your EC2 terminal to check for available ports:
+Run the following command in EC2 terminal to check for available ports:
 
 ```sh
 docker ps
 ```
 
-Our class port is 802_, scribble's port is 8023
+Our class port is 802_, scribble's port goes to 8023
 
 ### 2. Setting Up Docker on Localhost
-Ensure your Docker configuration files match the deployment environment:
+Ensure Docker configuration files match the deployment environment:
 
 If docker.io/python doesn't work, make sure the versions match up
 
@@ -81,13 +81,15 @@ export var pythonURI;
 if (location.hostname === "localhost" || location.hostname === "127.0.0.1") { //Main domain
     pythonURI = "http://localhost:8023"; //Our port (8023)
 } else {
-    pythonURI = "https://scribble_backend.nighthawkcodingsociety.com";
+    pythonURI = "https://scribble_backend.stu.nighthawkcodingsociety.com";
 }
 ```
 
 ## Step 3: Server Setup
 
 ### 1. Clone Backend Repository
+
+Ensure repo's don't have an uppercase for formatting purposes.
 ```sh
 cd ~
 git clone https://github.com/scribble_backend.git scribble_backend
@@ -106,11 +108,11 @@ curl localhost:8023
 
 ## Step 4: Configuring DNS with Route 53
 Go to AWS Route 53  
-Select your hosted zone and add a new CNAME record:
+Select hosted zone and add a new CNAME record:
 
 | Name       | Type  | Value                                |
 |------------|------|--------------------------------------|
-| flask2025  | CNAME | csp.nighthawkcodingsociety.com     |
+| scribble  | CNAME | scribble.stu.nighthawkcodingsociety.com     |
 
 ## Step 5: Setting Up Nginx as a Reverse Proxy
 
@@ -155,10 +157,10 @@ Install Certbot and configure HTTPS:
 sudo apt update && sudo apt install certbot python3-certbot-nginx -y
 sudo certbot --nginx
 ```
-Follow the prompts to select your domain and enable HTTPS.
+Follow the prompts to select domain and enable HTTPS.
 
 ## Step 7: Deployment Updates
-Whenever you update your code:
+Whenever you update code:
 
 ### Pull the latest changes:
 ```sh
