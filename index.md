@@ -15,18 +15,21 @@ Author: Zach
         <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
         <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
         <td><a href="{{site.baseurl}}/about">About Us</a></td>
+        <td><a href="{{site.baseurl}}/deploy">Deploy Blog</a></td>
     </tr>
 </table>
 
 <div id="app"></div>
 <div class="form-container" style="margin-top: 20px;">
-    <div class="input-group">
-        <input type="text" id="drawingName" placeholder="Drawing Name" class="form-input" required>
-        <input type="number" id="guessTime" placeholder="Guess Time (seconds)" class="form-input" min="1" required>
-        <button onclick="saveDrawing()" class="submit-button">Save</button>
+    <div class="input-group" style="display: flex; flex-direction: column; gap: 10px;">
+        <input type="text" id="userName" placeholder="Your Name" class="form-input" style="height: 3rem;" required>
+        <input type="text" id="drawingName" placeholder="Drawing Name" class="form-input" style="height: 3rem;" required>
+        <input type="number" id="guessTime" placeholder="Guess Time (10-120 seconds)" class="form-input" style="height: 3rem;" min="10" max="120" required>
+        <button onclick="saveDrawing()" class="submit-button" style="align-self: flex-end; height: 3rem;">Send</button>
     </div>
     <div id="message"></div>
 </div>
+<div style="margin-top: 20px;"></div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.querySelector('#app');
@@ -61,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
     colorPicker.addEventListener('input', () => {
         currentColor = colorPicker.value;
         isEraser = false;
+        eraserButton.style.background = 'white';
+        eraserButton.style.color = 'black';
     });
     const brushSize = document.createElement('input');
     brushSize.type = 'range';
@@ -81,13 +86,20 @@ document.addEventListener('DOMContentLoaded', () => {
         font-weight: bold;
     `;
     eraserButton.addEventListener('click', () => {
-        isEraser = true;
+        isEraser = !isEraser;
+        if (isEraser) {
+            eraserButton.style.background = 'black';
+            eraserButton.style.color = 'white';
+        } else {
+            eraserButton.style.background = 'white';
+            eraserButton.style.color = 'black';
+        }
     });
     toolbar.appendChild(eraserButton);
-    const saveButton = document.createElement('button');
-    saveButton.textContent = 'Save';
-    saveButton.style.cssText = `
-        background: #28A745;
+    const undoButton = document.createElement('button');
+    undoButton.textContent = 'Undo';
+    undoButton.style.cssText = `
+        background: #FFC107;
         color: white;
         border: none;
         padding: 10px;
@@ -95,38 +107,19 @@ document.addEventListener('DOMContentLoaded', () => {
         cursor: pointer;
         font-weight: bold;
     `;
-    saveButton.addEventListener('click', () => {
-        const userName = prompt("Enter your name (optional):") || "Anonymous";
-        const drawingName = prompt("Enter the name of your drawing (optional):") || "Untitled";
-        const drawingData = canvas.toDataURL("image/jpeg");
-        const link = document.createElement('a');
-        link.download = `${userName}_${drawingName}.jpeg`;
-        link.href = drawingData;
-        link.click();
-        fetch('/api/save-drawing', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                user_name: userName,
-                drawing_name: drawingName,
-                drawing: drawingData
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                alert(`Drawing saved! Name: ${userName}, Drawing: ${drawingName}`);
-            } else {
-                alert(`Error: ${data.error}`);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+    undoButton.addEventListener('click', () => {
+        if (undoStack.length > 0) {
+            undoStack.pop();
+            const lastImage = undoStack.length > 0 ? undoStack[undoStack.length - 1] : null;
+            const img = new Image();
+            img.src = lastImage || '';
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+        }
     });
-    toolbar.appendChild(saveButton);
+    toolbar.appendChild(undoButton);
     const resetButton = document.createElement('button');
     resetButton.textContent = 'Reset';
     resetButton.style.cssText = `
@@ -140,8 +133,28 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     resetButton.addEventListener('click', () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        undoStack = [];
     });
     toolbar.appendChild(resetButton);
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Save Drawing';
+    saveButton.style.cssText = `
+        background: #28A745;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    `;
+    saveButton.addEventListener('click', () => {
+        const drawingData = canvas.toDataURL("image/jpeg");
+        const link = document.createElement('a');
+        link.download = `drawing.jpeg`;
+        link.href = drawingData;
+        link.click();
+    });
+    toolbar.appendChild(saveButton);
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
@@ -154,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     let drawing = false;
+    let undoStack = [];
     canvas.addEventListener('mousedown', (e) => {
         drawing = true;
         ctx.beginPath();
@@ -171,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.addEventListener('mouseup', () => {
         drawing = false;
         ctx.closePath();
+        undoStack.push(canvas.toDataURL());
     });
     canvas.addEventListener('mouseleave', () => {
         drawing = false;
@@ -179,9 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
     app.appendChild(canvas);
 });
 function saveDrawing() {
+    const userName = document.getElementById('userName').value.trim();
     const drawingName = document.getElementById('drawingName').value.trim();
     const guessTime = parseInt(document.getElementById('guessTime').value);
-if (!drawingName || isNaN(guessTime) || guessTime < 1) {
+if (!userName || !drawingName || isNaN(guessTime) || guessTime < 10 || guessTime > 120) {
         showMessage('Please fill in all fields correctly', true);
         return;
     }
@@ -192,6 +208,7 @@ fetch('/api/save-drawing', {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+            user_name: userName,
             drawing_name: drawingName,
             guess_time: guessTime,
             drawing: drawingData
