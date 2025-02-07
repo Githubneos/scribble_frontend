@@ -11,6 +11,7 @@ Author: Keertha
 
 <table>
     <tr>
+        <td><a href="{{site.baseurl}}/index">Home</a></td>
         <td><a href="{{site.baseurl}}/competition">Competitive</a></td>
         <td><a href="{{site.baseurl}}/guess">Guess Game</a></td>
         <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
@@ -20,8 +21,7 @@ Author: Keertha
     </tr>
 </table>
 <br>
-
-Deployment blogs:
+<hr>
 
 ## Welcome to deployment blogs
 <table>
@@ -111,7 +111,7 @@ services:
 ### Create DNS record
 
 ```markdown
-- To create a DNS record, you first have to log into [AWS](https://aws.amazon.com/ec2/)
+- To create a DNS record, first log into [AWS](https://aws.amazon.com/ec2/)
 
 - Account Details:
     - Account ID: nighthawkcodingsociety
@@ -119,7 +119,7 @@ services:
     - Password:  Ubuntu14*&*41
 
 
-- Once signed in, you should click the button on the home page titled **Route 53**
+- Once signed in, click the button on the home page titled **Route 53**
 
 - The next step (when on the Route 53 page) is to press the **Hosted zones** section on the column to the left.
 
@@ -127,9 +127,9 @@ services:
 
 - We have made it to the page where we can create a DNS record. Click the button that says Create record
 
-- When creating a record you need to put in some information. Here is the following information that should be inputted:
+- When creating a record, its necessary to put in some information. Here is the following information that should be inputted:
     
-    - Record name: name of your project (ex: cantella)
+    - Record name: name of project (ex: cantella)
 - Record type: A - Routes traffic to an IPv4 address and some AWS resources
 - Value: 3.129.109.200
 - TTL (seconds): 300
@@ -137,7 +137,7 @@ services:
 
 - Once all categories have been filled, click the Create record button on the bottom right.
 
-- If successful, you should receive a notification that a new record was successfully created
+- If successful, a notification should pop up that a new record was successfully created
 ```
 After this has been completed, you will have successfully created a DNS record.
 
@@ -148,18 +148,18 @@ After this has been completed, you will have successfully created a DNS record.
 
 - Now run the following commands:
     1. Change into the correct directory: cd ~
-    2. Clone your backend repo: git clone https://github.com/Githubneos/scribble_backend.git
-    3. Navigate into your repo: cd scribble_backend
+    2. Clone backend repo: git clone https://github.com/Githubneos/scribble_backend.git
+    3. Navigate into repo: cd scribble_backend
     4. Build the site: docker-compose up -d --build
-    5. Test your site: curl localhost:8203
+    5. Test site: curl localhost:8203
 ```
 
 ### Nginx Setup
 1. Change into the correct directory: cd ~
 
-2. Navigate into your repo: cd scribble_backend
+2. Navigate into repo: cd scribble_backend
 
-3. Copy paste your nginx file into /etc/nginx/sites-available: sudo cp scribble_nginx_file /etc/nginx/sites-available/.
+3. Copy paste nginx file into /etc/nginx/sites-available: sudo cp scribble_nginx_file /etc/nginx/sites-available/.
 
 4. Change back into ~ directory: cd ~
 

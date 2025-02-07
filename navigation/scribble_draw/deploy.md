@@ -11,6 +11,7 @@ Author: Ian
 
 <table>
     <tr>
+        <td><a href="{{site.baseurl}}/index">Home</a></td>
         <td><a href="{{site.baseurl}}/competition">Competitive</a></td>
         <td><a href="{{site.baseurl}}/guess">Guess Game</a></td>
         <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
@@ -20,8 +21,7 @@ Author: Ian
     </tr>
 </table>
 <br>
-
-Deployment blogs:
+<hr>
 
 ## Welcome to deployment blogs
 
@@ -36,10 +36,10 @@ Deployment blogs:
 Log in to the AWS Management Console  
 Navigate to EC2 > Instances  
 Launch a new EC2 instance using Ubuntu as the base image  
-Connect to your instance using SSH:
+Connect to instance using SSH:
 
 ```sh
-ssh -i your-key.pem ubuntu@your-aws-instance-ip
+ssh -i something-key.pem ubuntu@something-aws-instance-ip
 ```
 
 ## Step 2: Setting Up Application
@@ -110,6 +110,8 @@ if (location.hostname === "localhost" || location.hostname === "127.0.0.1") { //
 }
 ```
 
+ - If localhost works on backend but not frontend, always check pythonURI before continuing.
+
 ## Step 3: Server Setup
 
 ### 1. Clone Backend Repository
@@ -133,14 +135,16 @@ curl localhost:8023
 
 ## Step 4: Configuring DNS with Route 53
 Go to AWS Route 53  
-Select hosted zone and add a new CNAME record:
+Select hosted zone and add a new CNAME record. 
+ - Our name is scribble
+ - Our value is scribble.stu.nighthawkcodingsociety.com
 
 | Name       | Type  | Value                                |
 |------------|------|--------------------------------------|
 | scribble  | CNAME | scribble.stu.nighthawkcodingsociety.com     |
 
 ## Step 5: Setting Up Nginx as a Reverse Proxy
-
+thie
 Create an Nginx configuration file:
 
 ```sh
@@ -185,7 +189,7 @@ sudo certbot --nginx
 Follow the prompts to select domain and enable HTTPS.
 
 ## Step 7: Deployment Updates
-Whenever you update code:
+Whenever updating code, do the following:
 
 ### Pull the latest changes:
 ```sh
@@ -205,6 +209,9 @@ curl localhost:8023
 ```
 
 ## Step 8: Troubleshooting and Monitoring
+troubleshoots for docker configurations. 
+ - Checks if deploy works. 
+ - Becareful of sudo commands unless mort allows it.
 
 ### Basic Checks
 Check running Docker containers:
@@ -223,10 +230,14 @@ sudo journalctl -u nginx --no-pager | tail -n 20
 ```
 
 ## Using Cockpit for Server Management
-Log into Cockpit using your subdomain.  
+Log into Cockpit using subdomain.  
 Navigate to:
-- **Overview** – System health and status
-- **Logs** – Server activity and errors
-- **Networking** – View active network settings
-- **Terminal** – Run administrative commands
+
+- **Overview** – System health and status.
+
+- **Logs** – Server activity and errors.
+
+- **Networking** – View active network settings.
+
+- **Terminal** – Run administrative commands.
 
