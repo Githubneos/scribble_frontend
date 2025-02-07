@@ -6,6 +6,18 @@ description: Competition
 permalink: /competition
 Author: Ian
 ---
+### Nav:
+<table>
+    <tr>
+        <td><a href="{{site.baseurl}}/index">Home</a></td>
+        <td><a href="{{site.baseurl}}/competition">Competitive</a></td>
+        <td><a href="{{site.baseurl}}/guess">Guess Game</a></td>
+        <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
+        <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
+        <td><a href="{{site.baseurl}}/about">About Us</a></td>
+        <td><a href="{{site.baseurl}}/deploy">Deploy Blog</a></td>
+    </tr>
+</table>
 <div>
     <style>
         * {
@@ -73,17 +85,6 @@ Author: Ian
         }
     </style>
     <h1>🎨 Welcome to Scribble Art 🎨</h1>
-    <table>
-        <tr>
-            <td><a href="{{site.baseurl}}/index">Home</a></td>
-            <td><a href="{{site.baseurl}}/competition">Competitive</a></td>
-            <td><a href="{{site.baseurl}}/guess">Guess Game</a></td>
-            <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
-            <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
-            <td><a href="{{site.baseurl}}/about">About Us</a></td>
-            <td><a href="{{site.baseurl}}/deploy">Deploy Blog</a></td>
-        </tr>
-    </table>
     <canvas id="drawing-board" width="800" height="500"></canvas>
     <div class="controls">
         <input type="color" id="color-picker" value="#ffffff" title="Choose a color">
