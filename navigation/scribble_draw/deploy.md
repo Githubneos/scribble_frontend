@@ -7,6 +7,31 @@ permalink: /deploy
 Author: Ian
 ---
 
+## Welcome to Scribble With Users
+
+<table>
+    <tr>
+        <td><a href="{{site.baseurl}}/competition">Competitive</a></td>
+        <td><a href="{{site.baseurl}}/guess">Guess Game</a></td>
+        <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
+        <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
+        <td><a href="{{site.baseurl}}/about">About Us</a></td>
+        <td><a href="{{site.baseurl}}/deploy">Deploy Blog</a></td>
+    </tr>
+</table>
+<br>
+
+Deployment blogs:
+
+## Welcome to deployment blogs
+
+<table>
+    <tr>
+        <td><a href="{{site.baseurl}}/deploy">Deploy 1</a></td>
+        <td><a href="{{site.baseurl}}/deploy_v2">Deploy 2</a></td>
+    </tr>
+</table>
+
 ## Step 1: Accessing AWS EC2
 Log in to the AWS Management Console  
 Navigate to EC2 > Instances  
