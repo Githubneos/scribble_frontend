@@ -3,10 +3,10 @@ layout: post
 title: Drawing Board
 search_exclude: true
 description: Drawing Board
-Author: Zach
+author: Zach
 ---
 
-## Welcome to Scribbl With Users
+## Welcome to Scribble With Users
 
 <table>
     <tr>
@@ -21,15 +21,24 @@ Author: Zach
 
 <div id="app"></div>
 <div class="form-container" style="margin-top: 20px;">
-    <div class="input-group" style="display: flex; flex-direction: column; gap: 10px;">
-        <input type="text" id="userName" placeholder="Your Name" class="form-input" style="height: 3rem;" required>
-        <input type="text" id="drawingName" placeholder="Drawing Name" class="form-input" style="height: 3rem;" required>
-        <input type="number" id="guessTime" placeholder="Guess Time (10-120 seconds)" class="form-input" style="height: 3rem;" min="10" max="120" required>
-        <button onclick="saveDrawing()" class="submit-button" style="align-self: flex-end; height: 3rem;">Send</button>
+    <div class="input-group" style="display: flex; gap: 10px;">
+        <input type="text" id="userName" placeholder="Your Name" class="form-input" style="height: 3rem; flex: 1;" required>
+        <input type="text" id="drawingName" placeholder="Drawing Name" class="form-input" style="height: 3rem; flex: 1;" required>
+        <button onclick="saveDrawing()" class="submit-button" style="height: 3rem;">Send</button>
     </div>
     <div id="message"></div>
 </div>
-<div style="margin-top: 20px;"></div>
+<div id="drawings-list" style="margin-top: 20px;"></div>
+<table id="drawingsTable" border="1" style="margin-top: 20px; width: 100%;">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Drawing Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.querySelector('#app');
@@ -192,17 +201,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     app.appendChild(toolbar);
     app.appendChild(canvas);
+// Load drawings when the page loads
+    loadDrawings();
 });
 function saveDrawing() {
     const userName = document.getElementById('userName').value.trim();
     const drawingName = document.getElementById('drawingName').value.trim();
-    const guessTime = parseInt(document.getElementById('guessTime').value);
-if (!userName || !drawingName || isNaN(guessTime) || guessTime < 10 || guessTime > 120) {
+    if (!userName || !drawingName) {
         showMessage('Please fill in all fields correctly', true);
         return;
     }
-const drawingData = canvas.toDataURL("image/jpeg");
-fetch('/api/save-drawing', {
+    const drawingData = canvas.toDataURL("image/jpeg");
+    fetch('http://127.0.0.1:8203/api/save-drawing', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -210,7 +220,6 @@ fetch('/api/save-drawing', {
         body: JSON.stringify({
             user_name: userName,
             drawing_name: drawingName,
-            guess_time: guessTime,
             drawing: drawingData
         })
     })
@@ -218,6 +227,7 @@ fetch('/api/save-drawing', {
     .then(data => {
         if (data.message) {
             showMessage('Drawing saved successfully');
+            loadDrawings();
         } else {
             showMessage(`Error: ${data.error}`, true);
         }
@@ -225,6 +235,107 @@ fetch('/api/save-drawing', {
     .catch(error => {
         console.error('Error:', error);
         showMessage('Error saving drawing', true);
+    });
+}
+function loadDrawings() {
+    fetch('http://127.0.0.1:8203/api/get-drawings')
+        .then(response => response.json())
+        .then(data => {
+            const drawingsTableBody = document.querySelector('#drawingsTable tbody');
+            drawingsTableBody.innerHTML = '';
+            data.drawings.forEach(drawing => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${drawing.user_name}</td>
+                    <td class="drawing-name">${drawing.drawing_name}</td>
+                    <td>
+                        <button onclick="editDrawing(this, ${drawing.id})">Edit</button>
+                        <button onclick="deleteDrawing(${drawing.id})">Delete</button>
+                    </td>
+                `;
+                drawingsTableBody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+function editDrawing(button, drawingId) {
+    const row = button.parentElement.parentElement;
+    const drawingNameCell = row.querySelector('.drawing-name');
+    const newDrawingName = prompt("Edit drawing name:", drawingNameCell.textContent);
+if (!newDrawingName) return;
+fetch(`http://127.0.0.1:8203/api/update-drawing/${drawingId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ drawing_name: newDrawingName })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            drawingNameCell.textContent = newDrawingName;
+            showMessage('Drawing name updated successfully');
+        } else {
+            showMessage(`Error: ${data.error}`, true);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error updating drawing name', true);
+    });
+}
+function deleteDrawing(drawingId) {
+    fetch(`http://127.0.0.1:8203/api/delete-drawing/${drawingId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            showMessage('Drawing deleted successfully');
+            loadDrawings();
+        } else {
+            showMessage(`Error: ${data.error}`, true);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error deleting drawing', true);
+    });
+}
+function deleteDrawingByName() {
+    const userName = document.getElementById('userName').value.trim();
+    const drawingName = document.getElementById('drawingName').value.trim();
+    if (!userName || !drawingName) {
+        showMessage('Please fill in both name fields to delete', true);
+        return;
+    }
+    fetch('http://127.0.0.1:8203/api/delete-drawing-by-name', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            user_name: userName,
+            drawing_name: drawingName
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            showMessage('Drawing deleted successfully');
+            loadDrawings();
+        } else {
+            showMessage(`Error: ${data.error}`, true);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error deleting drawing', true);
     });
 }
 function showMessage(message, isError = false) {
