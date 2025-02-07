@@ -83,6 +83,28 @@ Author: Ian
             font-size: 0.9em;
             color: #aaa;
         }
+        .entry-form {
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .entry-form input {
+            padding: 10px;
+            border: 2px solid #61dafb;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .entry-form button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .entry-form button:hover {
+            background-color: #45a049;
+        }
     </style>
     <h1>🎨 Welcome to Scribble Art 🎨</h1>
     <canvas id="drawing-board" width="800" height="500"></canvas>
@@ -104,6 +126,13 @@ Author: Ian
 </div>
 <button id="save-button">Save Drawing</button>
 
+<div class="entry-form">
+    <input type="text" id="user-name" placeholder="Enter your name">
+    <input type="number" id="time-spent" placeholder="Enter the time spent (in minutes)">
+    <input type="number" id="drawings-count" placeholder="Enter the number of drawings">
+    <button id="submit-entry">Submit Entry</button>
+</div>
+
 <script>
     const canvas = document.getElementById('drawing-board');
     const ctx = canvas.getContext('2d');
@@ -114,43 +143,14 @@ Author: Ian
     const timerInput = document.getElementById('timer-input');
     const timerDisplay = document.getElementById('timer-display');
     const startButton = document.getElementById('start-button');
+    const saveButton = document.getElementById('save-button');
+    const submitEntryButton = document.getElementById('submit-entry');
+    const userNameInput = document.getElementById('user-name');
+    const timeSpentInput = document.getElementById('time-spent');
+    const drawingsCountInput = document.getElementById('drawings-count');
 
     let drawingAllowed = false;
-    let currentColor = colorPicker.value;
-    let lineWidth = parseInt(lineWidthPicker.value);
-    let erasing = false;
-
-    let interval = null; // Reference for the interval (setInterval)
-    let timerStarted = false; // Track if the timer has already started
-
-    // Setup drawing
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mousemove', draw);
-
-    // Getting button from html
-    document.getElementById('save-button').addEventListener('click', saveDrawing);
-
-    function startDrawing() {
-        // If timer hasn't started yet, start it automatically
-        if (!timerStarted) {
-            let timeInSeconds = parseInt(timerInput.value);
-
-            if (isNaN(timeInSeconds) || timeInSeconds <= 0) {
-                // If no valid timer value entered, pick a random value between 20-100 seconds
-                timeInSeconds = Math.floor(Math.random() * (30 - 20 + 1)) + 20;
-            }
-
-            startTimer(timeInSeconds);
-        }
-        drawingAllowed = true;
-        ctx.beginPath();
-    }
-
-    function stopDrawing() {
-        drawingAllowed = false;
-        ctx.beginPath(); // Reset path
-    }
+    let currentColor
 
     function draw(event) {
         if (!drawingAllowed) return;
