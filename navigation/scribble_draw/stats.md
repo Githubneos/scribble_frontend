@@ -139,8 +139,7 @@ Author: Max
             </thead>
             <tbody id="stats-body"></tbody>
         </table>
-        
-        <div class="input-form">
+            <div class="input-form">
             <h2 style="color: #ffcc00;">Update Statistics</h2>
             <select id="user-select" onchange="handleUserSelect()">
                 <option value="">Create New User</option>
@@ -154,10 +153,8 @@ Author: Max
             <div id="notification"></div>
         </div>
     </div>
-
     <script type="module">
-        const pythonURI = 'http://localhost:8203';
-
+        const pythonURI = 'https://scribble.stu.nighthawkcodingsociety.com/stats';
         async function fetchStatistics() {
             try {
                 const response = await fetch(`${pythonURI}/api/statistics/all`);
@@ -170,13 +167,11 @@ Author: Max
                 showNotification('Error fetching statistics', 'error');
             }
         }
-
         async function updateStatistics(event) {
             event.preventDefault();
             const username = document.getElementById('username-input').value;
             const correct = parseInt(document.getElementById('correct-guesses-input').value) || 0;
             const wrong = parseInt(document.getElementById('wrong-guesses-input').value) || 0;
-
             try {
                 const response = await fetch(`${pythonURI}/api/statistics`, {
                     method: 'POST',
@@ -189,26 +184,19 @@ Author: Max
                         wrong: wrong
                     })
                 });
-
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
                 const data = await response.json();
                 showNotification('Stats updated successfully!', 'success');
-                
                 // Clear form
                 document.getElementById('username-input').value = '';
                 document.getElementById('correct-guesses-input').value = '';
                 document.getElementById('wrong-guesses-input').value = '';
-                
                 // Update table with new data
                 updateTable(data);
-                
             } catch (error) {
                 console.error('Error:', error);
                 showNotification('Error updating stats', 'error');
             }
-        }
-
         function updateTable(data) {
             const tbody = document.getElementById('stats-body');
             tbody.innerHTML = '';
@@ -231,13 +219,11 @@ Author: Max
                 tbody.innerHTML += row;
             });
         }
-
         // Add delete function
         async function deleteUser(username) {
             if (!confirm(`Are you sure you want to delete stats for ${username}?`)) {
                 return;
             }
-
             try {
                 const response = await fetch(`${pythonURI}/api/statistics/${username}`, {
                     method: 'DELETE',
@@ -245,9 +231,7 @@ Author: Max
                         'Content-Type': 'application/json'
                     }
                 });
-
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); 
                 showNotification(`Deleted stats for ${username}`, 'success');
                 fetchStatistics();
             } catch (error) {
@@ -255,10 +239,8 @@ Author: Max
                 showNotification('Error deleting stats', 'error');
             }
         }
-
         // Add to window scope
         window.deleteUser = deleteUser;
-
         function showNotification(message, type) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -269,7 +251,6 @@ Author: Max
                 notification.style.display = 'none';
             }, 3000);
         }
-
         function sortTable(n) {
             const table = document.querySelector('.stats-table');
             const rows = Array.from(table.querySelectorAll('tbody tr'));
@@ -281,7 +262,6 @@ Author: Max
             const tbody = table.querySelector('tbody');
             rows.forEach(row => tbody.appendChild(row));
         }
-
         function populateUserSelect(data) {
             const userSelect = document.getElementById('user-select');
             userSelect.innerHTML = '<option value="">Create New User</option>';
@@ -292,7 +272,6 @@ Author: Max
                 userSelect.appendChild(option);
             });
         }
-
         async function fetchUsers() {
             try {
                 const response = await fetch(`${pythonURI}/api/statistics/all`);
@@ -309,7 +288,6 @@ Author: Max
                 console.error('Error fetching users:', error);
             }
         }
-
         async function handleUserSelect() {
             const select = document.getElementById('user-select');
             const username = document.getElementById('username-input');
@@ -321,14 +299,12 @@ Author: Max
                 username.readOnly = false;
             }
         }
-
         // Add to window scope and onload
         window.handleUserSelect = handleUserSelect;
         window.onload = () => {
             fetchStatistics();
             fetchUsers();
         };
-
         window.sortTable = sortTable;
         window.updateStatistics = updateStatistics;
     </script>
