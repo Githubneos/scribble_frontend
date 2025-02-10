@@ -193,7 +193,7 @@ Author: Daksha
 </div>
 
 <script>
-const API_URL = 'http://127.0.0.1:8203/api/leaderboard';
+const API_URL = 'https://scribble.stu.nighthawkcodingsociety.com/';
 
 function showMessage(message, isError = false) {
     const messageEl = document.getElementById('message');
