@@ -108,7 +108,7 @@ author: Keerthan
   const isCorrect = guess.toLowerCase() === currentDrawing.label.toLowerCase();
 
   try {
-    const response = await fetch('http://127.0.0.1:8203/api/submit_guess', {
+    const response = await fetch('https://scribble.stu.nighthawkcodingsociety.com', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user, guess, is_correct: isCorrect }),
@@ -130,7 +130,7 @@ author: Keerthan
 
 async function fetchGuesses() {
   try {
-    const response = await fetch('http://127.0.0.1:8203/api/guesses', { method: 'GET' });
+    const response = await fetch('https://scribble.stu.nighthawkcodingsociety.com', { method: 'GET' });
     if (!response.ok) throw new Error('Failed to fetch guesses');
 
     const guesses = await response.json(); // Assuming the server responds with an array of guesses
@@ -178,7 +178,7 @@ async function editGuess(button) {
     try {
         console.log("Sending PUT request...");
 
-        const response = await fetch('http://127.0.0.1:8203/api/guesses', {
+        const response = await fetch('https://scribble.stu.nighthawkcodingsociety.com', {
             method: 'PUT',
             headers: { 
                 'Content-Type': 'application/json' 
@@ -213,7 +213,7 @@ async function deleteGuess(button) {
   const guess = row.cells[1].textContent;
 
   try {
-    const response = await fetch('http://127.0.0.1:8203/api/guesses', {
+    const response = await fetch('https://scribble.stu.nighthawkcodingsociety.com', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user, guess }),
