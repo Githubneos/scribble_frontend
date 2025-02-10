@@ -10,6 +10,7 @@ author: Zach
 
 <table>
     <tr>
+        <td><a href="{{site.baseurl}}/index">Home</a></td>
         <td><a href="{{site.baseurl}}/competition">Competitive</a></td>
         <td><a href="{{site.baseurl}}/guess">Guess Game</a></td>
         <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
@@ -201,7 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     app.appendChild(toolbar);
     app.appendChild(canvas);
-// Load drawings when the page loads
     loadDrawings();
 });
 function saveDrawing() {
@@ -292,37 +292,6 @@ function deleteDrawing(drawingId) {
         headers: {
             'Content-Type': 'application/json'
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            showMessage('Drawing deleted successfully');
-            loadDrawings();
-        } else {
-            showMessage(`Error: ${data.error}`, true);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showMessage('Error deleting drawing', true);
-    });
-}
-function deleteDrawingByName() {
-    const userName = document.getElementById('userName').value.trim();
-    const drawingName = document.getElementById('drawingName').value.trim();
-    if (!userName || !drawingName) {
-        showMessage('Please fill in both name fields to delete', true);
-        return;
-    }
-    fetch('http://127.0.0.1:8203/api/delete-drawing-by-name', {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            user_name: userName,
-            drawing_name: drawingName
-        })
     })
     .then(response => response.json())
     .then(data => {
