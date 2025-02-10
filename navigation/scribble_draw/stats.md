@@ -27,7 +27,7 @@ Author: Max
             font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 20px;
-            background: #121212;
+            background: linear-gradient(145deg, #F7CFD8, #F4F8D3, #A6F1E0, #73C7C7);
             color: #fff;
         }
         .statistics-container {

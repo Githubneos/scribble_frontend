@@ -40,6 +40,11 @@ author: Zach
     </thead>
     <tbody></tbody>
 </table>
+<style>
+    body {
+        background: linear-gradient(145deg, #3674B5, #578FCA, #A1E3F9, #D1F8EF);
+    }
+</style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.querySelector('#app');

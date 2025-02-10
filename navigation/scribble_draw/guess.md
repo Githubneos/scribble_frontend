@@ -47,6 +47,12 @@ author: Keerthan
   <tbody></tbody>
 </table>
 
+<style>
+    body {
+        background: linear-gradient(145deg, #FCC6FF, #FFE6C9, #FFC785, #FFA09B);
+    }
+</style>
+
 <script>
   const canvas = document.getElementById('drawingCanvas');
   const ctx = canvas.getContext('2d');

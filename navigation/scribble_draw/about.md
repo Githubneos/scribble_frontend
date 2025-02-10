@@ -31,7 +31,7 @@ hide: true
     }
 
     body {
-        background-color: #f9f9f9;
+        background: linear-gradient(145deg, #727D73, #AAB99A, #D0DDD0, #F0F0D7);
         color: #333;
         line-height: 1.6;
         text-align: center;

@@ -23,6 +23,12 @@ Author: Ian
 <br>
 <hr>
 
+<style>
+    body {
+        background: linear-gradient(145deg, #BAD8B6, #E1EACD, #F9F6E6, #8D77AB);
+    }
+</style>
+
 ## Welcome to deployment blogs
 
 <table>

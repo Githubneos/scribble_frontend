@@ -27,7 +27,7 @@ Author: Ian
         justify-content: center;
         min-height: 100vh;
         margin: 0;
-        background: #f4f4f4;
+        background: linear-gradient(145deg, #FBFBFB, #E8F9FF, #C4D9FF, #C5BAFF);
         font-family: Arial, sans-serif;
     }
 
