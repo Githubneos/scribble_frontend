@@ -88,6 +88,19 @@ Author: Ian
             font-size: 0.9em;
             color: #aaa;
         }
+        #user-table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        #user-table th, #user-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        #user-table th {
+            background-color: #4CAF50;
+            color: white;
+        }
     </style>
     <h1>🎨 Welcome to Scribble Art 🎨</h1>
     <canvas id="drawing-board" width="800" height="500"></canvas>
@@ -107,6 +120,16 @@ Author: Ian
     </div>
     <p id="timer-display">Timer: Not started</p>
     <div class="footer">Enjoy your time creating art and having fun!</div>
+    <table id="user-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Timer</th>
+                <th>Drawn</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 </div>
 <button id="save-button">Save Drawing</button>
 
@@ -121,6 +144,7 @@ Author: Ian
     const timerDisplay = document.getElementById('timer-display');
     const startButton = document.getElementById('start-button');
     const stopButton = document.getElementById('stop-button');
+    const userTableBody = document.querySelector('#user-table tbody');
 
     let drawingAllowed = false;
     let currentColor = colorPicker.value;
@@ -271,7 +295,21 @@ Author: Ian
         link.href = canvasData;
         link.download = 'drawing.png'; // Default filename
         link.click(); // Trigger the download
+
+        // Add the user data to the table
+        addUserToTable(userName, timeSpent, drawingsCount);
     }
+
+    function addUserToTable(user, timer, drawn) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${user}</td>
+            <td>${timer}</td>
+            <td>${drawn}</td>
+        `;
+        userTableBody.appendChild(row);
+    }
+
     // Function to fetch the timer status from the server
     function fetchTimerStatus() {
         fetch('/api/timer_status')
@@ -291,4 +329,3 @@ Author: Ian
     // Set an interval to fetch the timer status every second
     setInterval(fetchTimerStatus, 1000);
 </script>
-
