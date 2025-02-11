@@ -32,22 +32,19 @@ Author: Daksha
             --error: #e74c3c;
             --success: #2ecc71;
         }
-
-        body {
+body {
             background: var(--background);
             margin: 0;
             min-height: 100vh;
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
             color: var(--text-color);
         }
-
-        .leaderboard-container {
+.leaderboard-container {
             max-width: 1000px;
             margin: 3rem auto;
             padding: 2rem;
         }
-
-        .leaderboard-title {
+.leaderboard-title {
             color: var(--primary-color);
             font-size: 2.5rem;
             text-align: center;
@@ -56,23 +53,20 @@ Author: Daksha
             text-transform: uppercase;
             letter-spacing: 2px;
         }
-
-        .form-container {
+.form-container {
             background: var(--card-bg);
             border-radius: 16px;
             padding: 2rem;
             margin-bottom: 2rem;
             box-shadow: 0 8px 30px rgba(0,0,0,0.1);
         }
-
-        .input-group {
+.input-group {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-bottom: 1rem;
         }
-
-        .form-input {
+.form-input {
             padding: 12px 16px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -81,13 +75,11 @@ Author: Daksha
             width: 100%;
             box-sizing: border-box;
         }
-
-        .form-input:focus {
+.form-input:focus {
             border-color: var(--primary-color);
             outline: none;
         }
-
-        .submit-button {
+.submit-button {
             background: var(--primary-color);
             color: white;
             border: none;
@@ -97,13 +89,11 @@ Author: Daksha
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
-        .submit-button:hover {
+.submit-button:hover {
             background: var(--secondary-color);
             transform: translateY(-2px);
         }
-
-        .delete-btn {
+.delete-btn {
             background: var(--error);
             color: white;
             border: none;
@@ -112,62 +102,51 @@ Author: Daksha
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
-        .delete-btn:hover {
+.delete-btn:hover {
             opacity: 0.9;
         }
-
-        .leaderboard-table {
+.leaderboard-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0 8px;
             margin-top: 2rem;
         }
-
-        .leaderboard-table th {
+.leaderboard-table th {
             background: var(--primary-color);
             color: white;
             padding: 16px;
             text-align: left;
             font-weight: 600;
         }
-
-        .leaderboard-table td {
+.leaderboard-table td {
             background: var(--card-bg);
             padding: 16px;
             color: var(--text-color);
         }
-
-        .leaderboard-table tr:hover td {
+.leaderboard-table tr:hover td {
             background: #f8f9fa;
         }
-
-        #message {
+#message {
             text-align: center;
             margin-top: 1rem;
             padding: 12px;
             border-radius: 8px;
             font-weight: 500;
         }
-
-        @media (max-width: 768px) {
+@media (max-width: 768px) {
             .leaderboard-container {
                 margin: 1rem;
                 padding: 1rem;
             }
-
-            .input-group {
+.input-group {
                 grid-template-columns: 1fr;
             }
-
-            .leaderboard-title {
+.leaderboard-title {
                 font-size: 2rem;
             }
         }
     </style>
-
-    <h1 class="leaderboard-title">Scribble Masters</h1>
-    
+<h1 class="leaderboard-title">Scribble Masters</h1>
     <div class="form-container">
         <div class="input-group">
             <input type="text" id="profileName" placeholder="Profile Name" class="form-input" required>
@@ -177,8 +156,7 @@ Author: Daksha
         </div>
         <div id="message"></div>
     </div>
-
-    <table class="leaderboard-table">
+<table class="leaderboard-table">
         <thead>
             <tr>
                 <th>Rank</th>
