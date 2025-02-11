@@ -103,6 +103,7 @@ Author: Ian
         <button id="clear-button">Clear Board</button>
         <input type="number" id="timer-input" placeholder="Time (s)">
         <button id="start-button">Start Timer</button>
+        <button id="stop-button">Stop Timer</button>
     </div>
     <p id="timer-display">Timer: Not started</p>
     <div class="footer">Enjoy your time creating art and having fun!</div>
@@ -119,6 +120,7 @@ Author: Ian
     const timerInput = document.getElementById('timer-input');
     const timerDisplay = document.getElementById('timer-display');
     const startButton = document.getElementById('start-button');
+    const stopButton = document.getElementById('stop-button');
 
     let drawingAllowed = false;
     let currentColor = colorPicker.value;
@@ -208,6 +210,7 @@ Author: Ian
 
         timerStarted = true;
         startButton.disabled = true;  // Disable the start button after the timer starts
+        stopButton.disabled = false;  // Enable the stop button after the timer starts
         timerDisplay.textContent = `Timer: ${timeInSeconds} seconds left`;
 
         let timeRemaining = timeInSeconds;
@@ -226,6 +229,7 @@ Author: Ian
                 // Disable drawing and prevent re-enabling of the timer
                 canvas.style.pointerEvents = "none";  // Disable canvas interaction
                 startButton.disabled = true;  // Disable the timer button again after the timer ends
+                stopButton.disabled = true;  // Disable the stop button
                 eraseButton.disabled = true;  // Disable the erase button
                 clearButton.disabled = true;  // Disable the clear board button
 
@@ -234,6 +238,18 @@ Author: Ian
             }
         }, 1000);
     }
+
+    function stopTimer() {
+        if (interval) {
+            clearInterval(interval);
+            timerStarted = false;
+            startButton.disabled = false;  // Re-enable the start button
+            stopButton.disabled = true;  // Disable the stop button
+            timerDisplay.textContent = "Timer: Stopped";
+        }
+    }
+
+    stopButton.addEventListener('click', stopTimer);
 
     function saveDrawing() {
         const canvasData = canvas.toDataURL(); // Base64 string of the canvas
@@ -249,20 +265,6 @@ Author: Ian
         }
 
         // Step 1: Save the drawing on the server
-        fetch('/api/save_drawing', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ canvasData, userName, timeSpent, drawingsCount })
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Saved on server:", data);
-                alert('Drawing and entry submitted successfully!');
-            })
-            .catch(error => {
-                console.error("Error saving on server:", error);
-                alert('Error submitting entry. Please try again later.');
-            });
 
         // Step 2: Prompt the user to save the drawing locally
         const link = document.createElement('a');
@@ -270,4 +272,23 @@ Author: Ian
         link.download = 'drawing.png'; // Default filename
         link.click(); // Trigger the download
     }
+    // Function to fetch the timer status from the server
+    function fetchTimerStatus() {
+        fetch('/api/timer_status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_active) {
+                    timerDisplay.textContent = `Timer: ${data.time_remaining} seconds left`;
+                } else {
+                    timerDisplay.textContent = "Timer: Not started";
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching timer status:", error);
+            });
+    }
+
+    // Set an interval to fetch the timer status every second
+    setInterval(fetchTimerStatus, 1000);
 </script>
+
