@@ -42,7 +42,7 @@ author: Zach
 </table>
 <style>
     body {
-        background: linear-gradient(145deg, #3674B5, #578FCA, #A1E3F9, #D1F8EF);
+        background: linear-gradient(145deg, #fee2e2, #dcfce7, #dc2626, #16a34a);
     }
 </style>
 <script>
@@ -217,7 +217,7 @@ function saveDrawing() {
         return;
     }
     const drawingData = canvas.toDataURL("image/jpeg");
-    fetch('http://127.0.0.1:8203/api/save-drawing', {
+    fetch('http://127.0.0.1:8203/api/drawings', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -243,7 +243,7 @@ function saveDrawing() {
     });
 }
 function loadDrawings() {
-    fetch('http://127.0.0.1:8203/api/get-drawings')
+    fetch('http://127.0.0.1:8203/api/drawings')
         .then(response => response.json())
         .then(data => {
             const drawingsTableBody = document.querySelector('#drawingsTable tbody');
@@ -269,8 +269,8 @@ function editDrawing(button, drawingId) {
     const row = button.parentElement.parentElement;
     const drawingNameCell = row.querySelector('.drawing-name');
     const newDrawingName = prompt("Edit drawing name:", drawingNameCell.textContent);
-if (!newDrawingName) return;
-fetch(`http://127.0.0.1:8203/api/update-drawing/${drawingId}`, {
+    if (!newDrawingName) return;
+    fetch(`http://127.0.0.1:8203/api/drawings/${drawingId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
@@ -292,7 +292,7 @@ fetch(`http://127.0.0.1:8203/api/update-drawing/${drawingId}`, {
     });
 }
 function deleteDrawing(drawingId) {
-    fetch(`http://127.0.0.1:8203/api/delete-drawing/${drawingId}`, {
+    fetch(`http://127.0.0.1:8203/api/drawings/${drawingId}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json'
