@@ -1,12 +1,8 @@
 ---
 layout: post
 title: Scribble Guess
-search_exclude: true
-description: Scribble Guess
 permalink: /guess
-author: Keerthan
 ---
-## Welcome to Scribble Guess
 
 <table>
     <tr>
@@ -20,213 +16,233 @@ author: Keerthan
     </tr>
 </table>
 
-<canvas id="drawingCanvas" width="500" height="400" style="border: 1px solid black; background: white;"></canvas>
+<div class="game-container">
+    <style>
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        canvas {
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #guessForm {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .message {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #dff0d8; color: #3c763d; }
+        .error { background: #f2dede; color: #a94442; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th { background: #f5f5f5; }
+    </style>
 
-<div id="controls">
-  <button id="hintButton">Get Hint</button>
-  <button id="resetButton">Reset</button>
-  <form id="guessForm" style="margin-top: 20px;">
-    <input type="text" id="user" placeholder="Your Name" required />
-    <input type="text" id="guess" placeholder="Your Guess" required />
-    <button type="submit">Submit Guess</button>
-  </form>
+    <canvas id="drawingCanvas" width="500" height="400"></canvas>
+
+    <div class="controls">
+        <button id="hintButton">Get Hint</button>
+        <button id="resetButton">Reset Game</button>
+    </div>
+
+    <form id="guessForm">
+        <input type="text" id="username" placeholder="Your Username" required>
+        <input type="text" id="guess" placeholder="Your Guess" required>
+        <button type="submit">Submit Guess</button>
+    </form>
+
+    <div id="hint" class="message"></div>
+    <div id="message" class="message"></div>
+
+    <table id="guessTable">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Guess</th>
+                <th>Result</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 </div>
 
-<div id="hintArea">Hint: ???</div>
-<div id="messageArea"></div>
-
-<table id="guessTable" border="1">
-  <thead>
-    <tr>
-      <th>User</th>
-      <th>Guess</th>
-      <th>Result</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
-<style>
-    body {
-        background: linear-gradient(145deg, #FCC6FF, #FFE6C9, #FFC785, #FFA09B);
-    }
-</style>
-
 <script>
-  const canvas = document.getElementById('drawingCanvas');
-  const ctx = canvas.getContext('2d');
-  const hintArea = document.getElementById('hintArea');
-  const messageArea = document.getElementById('messageArea');
-  const guessTableBody = document.querySelector('#guessTable tbody');
+const API_URL = 'http://localhost:8203/api';
 
-  let currentDrawing = null;
-  let hintIndex = 0;
-
-  const drawings = [
-    { label: "car", hints: ["It has four wheels.", "Used for transportation."], draw: () => {
-      ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "blue"; ctx.fillRect(150, 250, 200, 50);
-      ctx.fillStyle = "gray"; ctx.fillRect(170, 200, 160, 50);
-    }},
-    { label: "sun", hints: ["It is bright.", "Seen in the sky."], draw: () => {
-      ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "yellow"; ctx.beginPath(); ctx.arc(250, 200, 50, 0, Math.PI * 2); ctx.fill();
-    }},
-    { label: "tree", hints: ["Has leaves.", "Grows tall."], draw: () => {
-      ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "brown"; ctx.fillRect(230, 250, 40, 100);
-      ctx.fillStyle = "green"; ctx.beginPath(); ctx.arc(250, 200, 60, 0, Math.PI * 2); ctx.fill();
-    }}
-  ];
-
-  function startGame() {
-    currentDrawing = drawings[Math.floor(Math.random() * drawings.length)];
-    hintIndex = 0;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    currentDrawing.draw();
-    hintArea.textContent = "Hint: ???";
-    messageArea.textContent = "";
-    fetchGuesses(); // Fetch guesses when the game starts
-  }
-
-  document.getElementById('hintButton').addEventListener('click', () => {
-    if (hintIndex < currentDrawing.hints.length) {
-      hintArea.textContent = `Hint: ${currentDrawing.hints[hintIndex]}`;
-      hintIndex++;
-    } else {
-      hintArea.textContent = "No more hints!";
+async function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showMessage('Please login first', 'error');
+        return false;
     }
-  });
+    return true;
+}
 
-  document.getElementById('resetButton').addEventListener('click', startGame);
+let currentDrawing = null;
+const drawings = [
+    { label: "car", hints: ["It has wheels", "Used for transportation"] },
+    { label: "house", hints: ["People live in it", "Has a roof"] },
+    { label: "tree", hints: ["It grows", "Has leaves"] }
+];
 
-  document.getElementById('guessForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const user = document.getElementById('user').value.trim();
-  const guess = document.getElementById('guess').value.trim();
-  const isCorrect = guess.toLowerCase() === currentDrawing.label.toLowerCase();
-
-  try {
-    const response = await fetch('https://scribble.stu.nighthawkcodingsociety.com', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user, guess, is_correct: isCorrect }),
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      messageArea.textContent = result.message;
-      fetchGuesses();  // Refresh the guess table after submission
-    } else {
-      const errorText = await response.text();
-      throw new Error(`Request failed: ${errorText}`);
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    messageArea.textContent = `Error: ${error.message}`;
-  }
-});
+function showMessage(text, type = 'info') {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = text;
+    messageDiv.className = `message ${type}`;
+}
 
 async function fetchGuesses() {
-  try {
-    const response = await fetch('https://scribble.stu.nighthawkcodingsociety.com', { method: 'GET' });
-    if (!response.ok) throw new Error('Failed to fetch guesses');
+    if (!await checkAuth()) return;
 
-    const guesses = await response.json(); // Assuming the server responds with an array of guesses
-    updateGuessTable(guesses);  // Update the table with the fetched guesses
-  } catch (error) {
-    console.error('Error fetching guesses:', error);
-    messageArea.textContent = `Error fetching guesses: ${error.message}`;
-  }
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/guess`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch guesses');
+        const guesses = await response.json();
+        updateGuessTable(guesses);
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage(error.message, 'error');
+    }
 }
 
 function updateGuessTable(guesses) {
-  guessTableBody.innerHTML = '';  // Clear the table before adding new rows
-
-  guesses.forEach((guess) => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${guess.user}</td>
-      <td>${guess.guess}</td>
-      <td class="result">${guess.is_correct ? 'Correct' : 'Incorrect'}</td>
-      <td>
-        <button onclick="editGuess(this)">Edit</button>
-        <button onclick="deleteGuess(this)">Delete</button>
-      </td>
-    `;
-    guessTableBody.appendChild(row);
-  });
+    const tbody = document.querySelector('#guessTable tbody');
+    tbody.innerHTML = '';
+    
+    guesses.forEach(guess => {
+        const row = `
+            <tr>
+                <td>${guess.guesser_name}</td>
+                <td>${guess.guess}</td>
+                <td>${guess.is_correct ? 'Correct! ✅' : 'Wrong ❌'}</td>
+                <td>
+                    <button onclick="deleteGuess(${guess.id})">Delete</button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
 }
 
-async function editGuess(button) {
-    const row = button.parentElement.parentElement;
-    const guessCell = row.cells[1];
-    const resultCell = row.querySelector('.result');
-    const newGuess = prompt("Edit your guess:", guessCell.textContent);
+async function submitGuess(event) {
+    event.preventDefault();
+    if (!await checkAuth()) return;
 
-    if (!newGuess) return;  // Cancel if no new guess is provided
-
-    const isCorrect = newGuess.toLowerCase() === currentDrawing.label.toLowerCase();
-
-    const requestBody = {
-        user: row.cells[0].textContent,  // User's name (from the row)
-        guess: newGuess,                 // The updated guess
-        is_correct: isCorrect            // Whether the guess is correct or not
-    };
+    const username = document.getElementById('username').value;
+    const guess = document.getElementById('guess').value;
+    const isCorrect = guess.toLowerCase() === currentDrawing.label.toLowerCase();
 
     try {
-        console.log("Sending PUT request...");
-
-        const response = await fetch('https://scribble.stu.nighthawkcodingsociety.com', {
-            method: 'PUT',
-            headers: { 
-                'Content-Type': 'application/json' 
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/guess`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify({
+                guesser_name: username,
+                guess: guess,
+                is_correct: isCorrect
+            })
         });
 
-        console.log('Response:', response);
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Error response from backend:', errorData);
-            throw new Error(`Error: ${errorData.error || 'Unknown error'}`);
-        }
-
-        const updatedGuess = await response.json();
-        console.log('Guess updated:', updatedGuess);
-
-        // Update the UI with the new guess and result
-        guessCell.textContent = updatedGuess.guess;  // Update the guess in the table
-        resultCell.textContent = updatedGuess.is_correct ? 'Correct' : 'Incorrect';  // Update the result in the table
-
+        if (!response.ok) throw new Error('Failed to submit guess');
+        
+        document.getElementById('guess').value = '';
+        showMessage(isCorrect ? 'Correct guess!' : 'Try again!', isCorrect ? 'success' : 'error');
+        await fetchGuesses();
     } catch (error) {
-        console.error('Error updating guess:', error);
-        alert(`Error updating guess: ${error.message}`);
+        console.error('Error:', error);
+        showMessage(error.message, 'error');
     }
 }
 
-async function deleteGuess(button) {
-  const row = button.parentElement.parentElement;
-  const user = row.cells[0].textContent;
-  const guess = row.cells[1].textContent;
+async function deleteGuess(id) {
+    if (!await checkAuth()) return;
+    if (!confirm('Are you sure you want to delete this guess?')) return;
 
-  try {
-    const response = await fetch('https://scribble.stu.nighthawkcodingsociety.com', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user, guess }),
-    });
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/guess`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ id: id })
+        });
 
-    if (!response.ok) throw new Error('Delete failed');
-    row.remove();
-  } catch (error) {
-    messageArea.textContent = `Error deleting: ${error.message}`;
-  }
+        if (!response.ok) throw new Error('Failed to delete guess');
+        showMessage('Guess deleted successfully');
+        await fetchGuesses();
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage(error.message, 'error');
+    }
 }
 
+function startGame() {
+    currentDrawing = drawings[Math.floor(Math.random() * drawings.length)];
+    document.getElementById('hint').textContent = '';
+    showMessage('New game started!');
+    fetchGuesses();
+}
 
+document.getElementById('guessForm').addEventListener('submit', submitGuess);
+document.getElementById('resetButton').addEventListener('click', startGame);
+document.getElementById('hintButton').addEventListener('click', () => {
+    const hint = currentDrawing.hints[Math.floor(Math.random() * currentDrawing.hints.length)];
+    document.getElementById('hint').textContent = `Hint: ${hint}`;
+});
 
-  startGame();
+// Initialize the game
+if (checkAuth()) {
+    startGame();
+}
 </script>
