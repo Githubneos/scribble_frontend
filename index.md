@@ -2,7 +2,7 @@
 layout: post
 title: Picture Gallery
 search_exclude: true
-description: Dark themed picture gallery
+description: Dark Themed Picture Gallery
 Author: Daksha
 ---
 
@@ -172,8 +172,7 @@ Author: Daksha
 </style>
 
 <div class="picture-gallery">
-    <h1>Picture Gallery</h1>
-
+    <div id="app"></div>
     <div class="upload-form">
         <h2>Upload New Picture</h2>
         <div class="form-group">
@@ -301,4 +300,265 @@ Author: Daksha
 
     // Refresh every 30 seconds
     setInterval(fetchPictures, 30000);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const app = document.querySelector('#app');
+        if (!app) {
+            console.error('Error: #app container not found. Ensure the div with id "app" is in the HTML.');
+            return;
+        }
+        const toolbar = document.createElement('div');
+        toolbar.style.cssText = `
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            gap: 10px;
+            flex-wrap: wrap;
+        `;
+        const colorPicker = document.createElement('input');
+        colorPicker.type = 'color';
+        colorPicker.value = '#000000';
+        colorPicker.style.cssText = `
+            width: 40px;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+        `;
+        toolbar.appendChild(colorPicker);
+        let currentColor = colorPicker.value;
+        let isEraser = false;
+        colorPicker.addEventListener('input', () => {
+            currentColor = colorPicker.value;
+            isEraser = false;
+            eraserButton.style.background = 'white';
+            eraserButton.style.color = 'black';
+        });
+        const brushSize = document.createElement('input');
+        brushSize.type = 'range';
+        brushSize.min = '1';
+        brushSize.max = '50';
+        brushSize.value = '5';
+        brushSize.style.cssText = 'margin: 0 10px;';
+        toolbar.appendChild(brushSize);
+        const markerButton = document.createElement('button');
+        markerButton.textContent = 'Marker';
+        markerButton.style.cssText = `
+            background: #FF5733;
+            color: white;
+            border: 2px solid #000;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        `;
+        markerButton.addEventListener('click', () => {
+            isEraser = false;
+            currentColor = '#000000';
+            colorPicker.value = currentColor;
+            eraserButton.style.background = 'white';
+            eraserButton.style.color = 'black';
+        });
+        toolbar.appendChild(markerButton);
+        const eraserButton = document.createElement('button');
+        eraserButton.textContent = 'Eraser';
+        eraserButton.style.cssText = `
+            background: white;
+            color: black;
+            border: 2px solid #000;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        `;
+        eraserButton.addEventListener('click', () => {
+            isEraser = true;
+            eraserButton.style.background = 'black';
+            eraserButton.style.color = 'white';
+        });
+        toolbar.appendChild(eraserButton);
+        const undoButton = document.createElement('button');
+        undoButton.textContent = 'Undo';
+        undoButton.style.cssText = `
+            background: #FFC107;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        `;
+        undoButton.addEventListener('click', () => {
+            if (undoStack.length > 0) {
+                undoStack.pop();
+                const lastImage = undoStack.length > 0 ? undoStack[undoStack.length - 1] : null;
+                const img = new Image();
+                img.src = lastImage || '';
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+            }
+        });
+        toolbar.appendChild(undoButton);
+        const resetButton = document.createElement('button');
+        resetButton.textContent = 'Reset';
+        resetButton.style.cssText = `
+            background: #DC3545;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        `;
+        resetButton.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            undoStack = [];
+        });
+        toolbar.appendChild(resetButton);
+        const saveButton = document.createElement('button');
+        saveButton.textContent = 'Save Drawing';
+        saveButton.style.cssText = `
+            background: #28A745;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        `;
+        saveButton.addEventListener('click', () => {
+            const drawingData = canvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            link.download = `drawing.png`;
+            link.href = drawingData;
+            link.click();
+        });
+        toolbar.appendChild(saveButton);
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 600;
+        canvas.style.cssText = `
+            border: 2px solid black;
+            background: white;
+            cursor: crosshair;
+        `;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        let drawing = false;
+        let undoStack = [];
+        canvas.addEventListener('mousedown', (e) => {
+            drawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            if (drawing) {
+                ctx.strokeStyle = isEraser ? 'white' : currentColor;
+                ctx.lineWidth = brushSize.value;
+                ctx.lineCap = 'round';
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+            }
+        });
+        canvas.addEventListener('mouseup', () => {
+            drawing = false;
+            ctx.closePath();
+            undoStack.push(canvas.toDataURL());
+        });
+        canvas.addEventListener('mouseleave', () => {
+            drawing = false;
+        });
+        app.appendChild(toolbar);
+        app.appendChild(canvas);
+        loadDrawings();
+    });
+
+    function saveDrawing() {
+        const userName = document.getElementById('userName').value.trim();
+        const drawingName = document.getElementById('drawingName').value.trim();
+        if (!userName || !drawingName) {
+            showMessage('Please fill in all fields correctly', true);
+            return;
+        }
+        const drawingData = canvas.toDataURL("image/jpeg");
+        fetch('http://127.0.0.1:8203/api/drawings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_name: userName,
+                drawing_name: drawingName,
+                drawing: drawingData
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                showMessage('Drawing saved successfully');
+                loadDrawings();
+            } else {
+                showMessage(`Error: ${data.error}`, true);
+            }
+        })
+        .catch(error => {
+            showMessage(`Error: ${error.message}`, true);
+        });
+    }
+
+    function loadDrawings() {
+        fetch('http://127.0.0.1:8203/api/drawings')
+        .then(response => response.json())
+        .then(data => {
+            const drawingsTableBody = document.querySelector('#drawingsTable tbody');
+            drawingsTableBody.innerHTML = '';
+            data.drawings.forEach(drawing => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${drawing.user_name}</td>
+                    <td>${drawing.drawing_name}</td>
+                    <td>
+                        <button onclick="viewDrawing('${drawing.drawing}')">View</button>
+                        <button onclick="deleteDrawing(${drawing.id})">Delete</button>
+                    </td>
+                `;
+                drawingsTableBody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            showMessage(`Error: ${error.message}`, true);
+        });
+    }
+
+    function viewDrawing(drawingData) {
+        const img = new Image();
+        img.src = drawingData;
+        const drawingsList = document.getElementById('drawings-list');
+        drawingsList.innerHTML = '';
+        drawingsList.appendChild(img);
+    }
+
+    function deleteDrawing(drawingId) {
+        fetch(`http://127.0.0.1:8203/api/drawings/${drawingId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                showMessage('Drawing deleted successfully');
+                loadDrawings();
+            } else {
+                showMessage(`Error: ${data.error}`, true);
+            }
+        })
+        .catch(error => {
+            showMessage(`Error: ${error.message}`, true);
+        });
+    }
 </script>
