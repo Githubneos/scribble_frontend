@@ -105,9 +105,11 @@ permalink: /stats
             display: none;
         }
     </style>
-     <div class="statistics-header">
+
+    <div class="statistics-header">
         <h1>🎮 Game Statistics 🎯</h1>
     </div>
+
     <table class="stats-table">
         <thead>
             <tr>
@@ -121,6 +123,7 @@ permalink: /stats
         </thead>
         <tbody id="stats-body"></tbody>
     </table>
+
     <div class="input-form">
         <h2 style="color: #ffcc00;">Update Statistics</h2>
         <select id="user-select" onchange="handleUserSelect()" class="form-input">
@@ -137,7 +140,7 @@ permalink: /stats
 </div>
 
 <script>
-    const API_URL = 'https://scribble.stu.nighthawkcodingsociety.com/api/stats';
+    const API_URL = 'http://localhost:8203/api';
 
     async function checkAuth() {
         const token = localStorage.getItem('token');

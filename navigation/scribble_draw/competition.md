@@ -80,9 +80,13 @@ permalink: /competition
             color: white;
         }
     </style>
+
     <h1>🎨 Competitive Drawing</h1>
+    
     <div id="message" class="message"></div>
+    
     <canvas id="drawingCanvas" width="800" height="500"></canvas>
+    
     <div class="controls">
         <input type="color" id="colorPicker" value="#000000">
         <input type="range" id="brushSize" min="1" max="20" value="5">
@@ -91,7 +95,9 @@ permalink: /competition
         <button class="button" id="startTimer">Start Timer</button>
         <button class="button" id="submitDrawing">Submit Drawing</button>
     </div>
+
     <div id="timer" class="timer">Time: Not Started</div>
+
     <table>
         <thead>
             <tr>
@@ -106,7 +112,7 @@ permalink: /competition
 </div>
 
 <script>
-const API_URL = 'https://scribble.stu.nighthawkcodingsociety.com/api/competition';
+const API_URL = 'http://localhost:8203/api';
 
 async function checkAuth() {
     const token = localStorage.getItem('token');
