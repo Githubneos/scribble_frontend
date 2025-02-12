@@ -1,12 +1,9 @@
 ---
 layout: post
 title: Competition
-search_exclude: true
-description: Competition
 permalink: /competition
-Author: Ian
 ---
-### Nav:
+
 <table>
     <tr>
         <td><a href="{{site.baseurl}}/index">Home</a></td>
@@ -18,314 +15,300 @@ Author: Ian
         <td><a href="{{site.baseurl}}/deploy">Deploy Blog</a></td>
     </tr>
 </table>
-<div>
+
+<div class="game-container">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+        .game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
         }
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background: linear-gradient(145deg, #FBFBFB, #E8F9FF, #C4D9FF, #C5BAFF);
-            color: white;
-            text-align: center;
-        }
-         h1 {
-            margin: 20px 0;
-            font-size: 2.5em;
-            color: #61dafb;
-        }
-         #drawing-board {
-            border: 3px solid #61dafb;
-            background-color: #444;
-            display: block;
-            margin: 20px auto;
-            border-radius: 10px;
+        canvas {
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .controls {
-            margin: 20px auto;
+            margin: 20px 0;
             display: flex;
-            justify-content: center;
-            gap: 15px;
+            gap: 10px;
             flex-wrap: wrap;
+            justify-content: center;
         }
-         .controls input, .controls button, .controls select {
-            padding: 10px;
+        .button {
+            padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
-        }
-        .controls input[type="color"] {
-            height: 40px;
-            width: 60px;
-            padding: 0;
-            cursor: pointer;
-            border: 2px solid #61dafb;
-            border-radius: 5px;
-        }
-        .controls button {
-            background-color: #4CAF50;
+            background: #4CAF50;
             color: white;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
         }
-        .controls button:hover {
-            background-color: #45a049;
+        .button:hover {
+            background: #45a049;
         }
-        #timer-display {
-            margin: 15px auto;
-            font-size: 1.2em;
+        .button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
         }
-        .footer {
-            margin-top: 20px;
-            font-size: 0.9em;
-            color: #aaa;
+        .timer {
+            font-size: 2em;
+            margin: 20px 0;
+            text-align: center;
         }
-        #user-table {
-            margin: 20px auto;
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+        }
+        .success { background: #dff0d8; }
+        .error { background: #f2dede; }
+        table {
+            width: 100%;
             border-collapse: collapse;
-            width: 80%;
+            margin: 20px 0;
         }
-        #user-table th, #user-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
-        #user-table th {
-            background-color: #4CAF50;
+        th {
+            background: #4CAF50;
             color: white;
         }
     </style>
-    <h1>🎨 Welcome to Scribble Art 🎨</h1>
-    <canvas id="drawing-board" width="800" height="500"></canvas>
+
+    <h1>🎨 Competitive Drawing</h1>
+    
+    <div id="message" class="message"></div>
+    
+    <canvas id="drawingCanvas" width="800" height="500"></canvas>
+    
     <div class="controls">
-        <input type="color" id="color-picker" value="#ffffff" title="Choose a color">
-        <select id="line-width" title="Brush size">
-            <option value="2">Thin</option>
-            <option value="5" selected>Medium</option>
-            <option value="10">Thick</option>
-            <option value="15">Extra Thick</option>
-        </select>
-        <button id="erase-button">Erase</button>
-        <button id="clear-button">Clear Board</button>
-        <input type="number" id="timer-input" placeholder="Time (s)">
-        <button id="start-button">Start Timer</button>
-        <button id="stop-button">Stop Timer</button>
+        <input type="color" id="colorPicker" value="#000000">
+        <input type="range" id="brushSize" min="1" max="20" value="5">
+        <button class="button" id="clearButton">Clear Canvas</button>
+        <input type="number" id="timerInput" placeholder="Time in seconds" min="1">
+        <button class="button" id="startTimer">Start Timer</button>
+        <button class="button" id="submitDrawing">Submit Drawing</button>
     </div>
-    <p id="timer-display">Timer: Not started</p>
-    <div class="footer">Enjoy your time creating art and having fun!</div>
-    <table id="user-table">
+
+    <div id="timer" class="timer">Time: Not Started</div>
+
+    <table>
         <thead>
             <tr>
-                <th>User</th>
-                <th>Timer</th>
-                <th>Drawn</th>
+                <th>Username</th>
+                <th>Time</th>
+                <th>Drawings</th>
+                <th>Actions</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody id="entriesTable"></tbody>
     </table>
 </div>
-<button id="save-button">Save Drawing</button>
 
 <script>
-    const canvas = document.getElementById('drawing-board');
-    const ctx = canvas.getContext('2d');
-    const colorPicker = document.getElementById('color-picker');
-    const lineWidthPicker = document.getElementById('line-width');
-    const eraseButton = document.getElementById('erase-button');
-    const clearButton = document.getElementById('clear-button');
-    const timerInput = document.getElementById('timer-input');
-    const timerDisplay = document.getElementById('timer-display');
-    const startButton = document.getElementById('start-button');
-    const stopButton = document.getElementById('stop-button');
-    const userTableBody = document.querySelector('#user-table tbody');
+const API_URL = 'http://localhost:8203/api';
 
-    let drawingAllowed = false;
-    let currentColor = colorPicker.value;
-    let lineWidth = parseInt(lineWidthPicker.value);
-    let erasing = false;
+async function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showMessage('Please login first', 'error');
+        return false;
+    }
+    return true;
+}
 
-    let interval = null; // Reference for the interval (setInterval)
-    let timerStarted = false; // Track if the timer has already started
+function showMessage(text, type) {
+    const msgEl = document.getElementById('message');
+    msgEl.textContent = text;
+    msgEl.className = `message ${type}`;
+    msgEl.style.display = 'block';
+    setTimeout(() => msgEl.style.display = 'none', 3000);
+}
 
-    // Setup drawing
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mousemove', draw);
+let isDrawing = false;
+const canvas = document.getElementById('drawingCanvas');
+const ctx = canvas.getContext('2d');
 
-    // Getting button from html
-    document.getElementById('save-button').addEventListener('click', saveDrawing);
+// Drawing functions
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('mouseout', stopDrawing);
 
-    function startDrawing() {
-        // If timer hasn't started yet, start it automatically
-        if (!timerStarted) {
-            let timeInSeconds = parseInt(timerInput.value);
+function startDrawing(e) {
+    isDrawing = true;
+    draw(e);
+}
 
-            if (isNaN(timeInSeconds) || timeInSeconds <= 0) {
-                // If no valid timer value entered, pick a random value between 20-100 seconds
-                timeInSeconds = Math.floor(Math.random() * (30 - 20 + 1)) + 20;
+function draw(e) {
+    if (!isDrawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    ctx.lineWidth = document.getElementById('brushSize').value;
+    ctx.strokeStyle = document.getElementById('colorPicker').value;
+    ctx.lineCap = 'round';
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+}
+
+function stopDrawing() {
+    isDrawing = false;
+    ctx.beginPath();
+}
+
+// Timer functionality
+document.getElementById('startTimer').addEventListener('click', async () => {
+    if (!await checkAuth()) return;
+
+    const duration = parseInt(document.getElementById('timerInput').value);
+    if (!duration || duration <= 0) {
+        showMessage('Please enter a valid duration', 'error');
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/competition/timer`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ duration })
+        });
+
+        if (!response.ok) throw new Error('Failed to start timer');
+        showMessage('Timer started!', 'success');
+    } catch (error) {
+        showMessage(error.message, 'error');
+    }
+});
+
+// Submit drawing
+document.getElementById('submitDrawing').addEventListener('click', async () => {
+    if (!await checkAuth()) return;
+
+    const username = prompt('Enter your username:');
+    if (!username) return;
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/competition`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                users_name: username,
+                timer: document.getElementById('timer').textContent,
+                amount_drawn: 1
+            })
+        });
+
+        if (!response.ok) throw new Error('Failed to submit drawing');
+        showMessage('Drawing submitted successfully!', 'success');
+        fetchEntries();
+    } catch (error) {
+        showMessage(error.message, 'error');
+    }
+});
+
+async function fetchEntries() {
+    if (!await checkAuth()) return;
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/competition/all`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
+        });
 
-            startTimer(timeInSeconds);
-        }
-        drawingAllowed = true;
-        ctx.beginPath();
+        if (!response.ok) throw new Error('Failed to fetch entries');
+        
+        const entries = await response.json();
+        updateTable(entries);
+    } catch (error) {
+        showMessage(error.message, 'error');
     }
+}
 
-    function stopDrawing() {
-        drawingAllowed = false;
-        ctx.beginPath(); // Reset path
-    }
+function updateTable(entries) {
+    const tbody = document.getElementById('entriesTable');
+    tbody.innerHTML = '';
 
-    function draw(event) {
-        if (!drawingAllowed) return;
-
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-
-        ctx.lineWidth = lineWidth;
-        ctx.lineCap = "round";
-
-        if (erasing) {
-            ctx.strokeStyle = "#444"; // Match background color
-        } else {
-            ctx.strokeStyle = currentColor;
-        }
-
-        ctx.lineTo(x, y);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-    }
-
-    // Color Picker
-    colorPicker.addEventListener('input', () => {
-        currentColor = colorPicker.value;
-        erasing = false; // Stop erasing if a new color is chosen
-    });
-
-    // Line Width Picker
-    lineWidthPicker.addEventListener('change', () => {
-        lineWidth = parseInt(lineWidthPicker.value);
-    });
-
-    // Erase Button
-    eraseButton.addEventListener('click', () => {
-        erasing = true;
-    });
-
-    // Clear Button
-    clearButton.addEventListener('click', () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        erasing = false;
-    });
-
-    // Timer functionality (handles both random and user-defined time)
-    function startTimer(timeInSeconds) {
-        // Start timer only if it's not already started
-        if (timerStarted) return;
-
-        timerStarted = true;
-        startButton.disabled = true;  // Disable the start button after the timer starts
-        stopButton.disabled = false;  // Enable the stop button after the timer starts
-        timerDisplay.textContent = `Timer: ${timeInSeconds} seconds left`;
-
-        let timeRemaining = timeInSeconds;
-
-        // Start a new interval for the countdown
-        interval = setInterval(() => {
-            timeRemaining--;
-            timerDisplay.textContent = `Timer: ${timeRemaining} seconds left`;
-
-            if (timeRemaining <= 0) {
-                clearInterval(interval);
-                drawingAllowed = false;  // Disable drawing after the timer ends
-                timerDisplay.textContent = "Timer: Time's up!";
-                alert('Time is up! Hope you enjoyed drawing!');
-
-                // Disable drawing and prevent re-enabling of the timer
-                canvas.style.pointerEvents = "none";  // Disable canvas interaction
-                startButton.disabled = true;  // Disable the timer button again after the timer ends
-                stopButton.disabled = true;  // Disable the stop button
-                eraseButton.disabled = true;  // Disable the erase button
-                clearButton.disabled = true;  // Disable the clear board button
-
-                // Save the drawing and submit the entry
-                saveDrawing();
-            }
-        }, 1000);
-    }
-
-    function stopTimer() {
-        if (interval) {
-            clearInterval(interval);
-            timerStarted = false;
-            startButton.disabled = false;  // Re-enable the start button
-            stopButton.disabled = true;  // Disable the stop button
-            timerDisplay.textContent = "Timer: Stopped";
-        }
-    }
-
-    stopButton.addEventListener('click', stopTimer);
-
-    function saveDrawing() {
-        const canvasData = canvas.toDataURL(); // Base64 string of the canvas
-
-        // Prompt the user for their name, time spent, and number of drawings
-        const userName = prompt("Enter your name:");
-        const timeSpent = parseInt(prompt("Enter the time spent (in minutes):"));
-        const drawingsCount = parseInt(prompt("Enter the number of drawings:"));
-
-        if (!userName || isNaN(timeSpent) || isNaN(drawingsCount)) {
-            alert("Invalid input. Please try again.");
-            return;
-        }
-
-        // Step 1: Save the drawing on the server
-
-        // Step 2: Prompt the user to save the drawing locally
-        const link = document.createElement('a');
-        link.href = canvasData;
-        link.download = 'drawing.png'; // Default filename
-        link.click(); // Trigger the download
-
-        // Add the user data to the table
-        addUserToTable(userName, timeSpent, drawingsCount);
-    }
-
-    function addUserToTable(user, timer, drawn) {
+    entries.forEach(entry => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${user}</td>
-            <td>${timer}</td>
-            <td>${drawn}</td>
+            <td>${entry.users_name}</td>
+            <td>${entry.timer}</td>
+            <td>${entry.amount_drawn}</td>
+            <td>
+                <button onclick="deleteEntry(${entry.id})" class="button">Delete</button>
+            </td>
         `;
-        userTableBody.appendChild(row);
-    }
+        tbody.appendChild(row);
+    });
+}
 
-    // Function to fetch the timer status from the server
-    function fetchTimerStatus() {
-        fetch('/api/timer_status')
-            .then(response => response.json())
-            .then(data => {
-                if (data.is_active) {
-                    timerDisplay.textContent = `Timer: ${data.time_remaining} seconds left`;
-                } else {
-                    timerDisplay.textContent = "Timer: Not started";
-                }
-            })
-            .catch(error => {
-                console.error("Error fetching timer status:", error);
-            });
-    }
+async function deleteEntry(id) {
+    if (!await checkAuth()) return;
+    if (!confirm('Are you sure you want to delete this entry?')) return;
 
-    // Set an interval to fetch the timer status every second
-    setInterval(fetchTimerStatus, 1000);
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/competition`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ id })
+        });
+
+        if (!response.ok) throw new Error('Failed to delete entry');
+        showMessage('Entry deleted successfully', 'success');
+        fetchEntries();
+    } catch (error) {
+        showMessage(error.message, 'error');
+    }
+}
+
+// Initialize
+if (checkAuth()) {
+    fetchEntries();
+}
+
+// Poll timer status
+setInterval(async () => {
+    if (!await checkAuth()) return;
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/competition/timer`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch timer status');
+        
+        const status = await response.json();
+        document.getElementById('timer').textContent = 
+            status.is_active ? `Time: ${status.time_remaining}s` : 'Time: Not Started';
+    } catch (error) {
+        console.error('Timer status error:', error);
+    }
+}, 1000);
 </script>
