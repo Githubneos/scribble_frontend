@@ -1,13 +1,8 @@
 ---
 layout: post
 title: Scribble Stats
-search_exclude: true
-description: Stats page
 permalink: /stats
-Author: Max
 ---
-
-## Welcome to Scribble Stats
 
 <table>
     <tr>
@@ -21,23 +16,31 @@ Author: Max
     </tr>
 </table>
 
-<div>
+<div class="statistics-container">
     <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #283593;
+            --background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            --text-color: #2c3e50;
+            --card-bg: #ffffff;
+            --error: #e74c3c;
+            --success: #2ecc71;
+        }
         body {
-            font-family: 'Poppins', sans-serif;
+            background: var(--background);
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(145deg, #F7CFD8, #F4F8D3, #A6F1E0, #73C7C7);
-            color: #fff;
+            min-height: 100vh;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-color);
         }
         .statistics-container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 2rem;
             background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
         }
         .statistics-header h1 {
             font-size: 2.8rem;
@@ -47,30 +50,21 @@ Author: Max
         }
         .stats-table {
             width: 100%;
-            border-collapse: collapse;
-            background: #1e1e1e;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-        .stats-table th, .stats-table td {
-            padding: 15px;
-            text-align: center;
-            border-bottom: 1px solid #333;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            margin-top: 2rem;
         }
         .stats-table th {
-            background: #2d2d2d;
-            color: #00ffcc;
+            background: var(--primary-color);
+            color: white;
+            padding: 16px;
+            text-align: left;
             cursor: pointer;
-            position: relative;
         }
-        .stats-table th:hover {
-            background: #363636;
-        }
-        .stats-table tr:hover {
-            background: #252525;
-        }
-        .stats-table tbody tr:last-child td {
-            border-bottom: none;
+        .stats-table td {
+            background: var(--card-bg);
+            padding: 16px;
+            color: var(--text-color);
         }
         .input-form {
             margin-top: 30px;
@@ -78,30 +72,23 @@ Author: Max
             background: #1e1e1e;
             border-radius: 15px;
         }
-        .input-form input {
-            padding: 10px;
+        .form-input {
+            padding: 12px 16px;
             margin: 10px;
             background: #2d2d2d;
             border: 1px solid #333;
             color: #fff;
             border-radius: 5px;
+            width: calc(33% - 20px);
         }
-        .input-form button {
-            padding: 10px 20px;
+        .submit-button {
+            padding: 12px 24px;
             background: #00ffcc;
             color: #121212;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-        }
-        .input-form button:hover {
-            background: #00ccaa;
-        }
-        #notification {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
+            transition: all 0.3s ease;
         }
         .delete-btn {
             background: #ff4444;
@@ -111,205 +98,214 @@ Author: Max
             padding: 5px 10px;
             cursor: pointer;
         }
-        .delete-btn:hover {
-            background: #cc3333;
-        }
-        #user-select {
-            width: 100%;
+        #message {
+            margin-top: 10px;
             padding: 10px;
-            margin: 10px 0;
-            background: #2d2d2d;
-            border: 1px solid #333;
-            color: #fff;
             border-radius: 5px;
+            display: none;
         }
     </style>
-    <div class="statistics-container">
-        <div class="statistics-header">
-            <h1>🎮 Game Statistics 🎯</h1>
-        </div>
-        <table class="stats-table">
-            <thead>
-                <tr>
-                    <th onclick="sortTable(0)">Username</th>
-                    <th onclick="sortTable(1)">Correct Guesses</th>
-                    <th onclick="sortTable(2)">Wrong Guesses</th>
-                    <th onclick="sortTable(3)">Win Rate</th>
-                </tr>
-            </thead>
-            <tbody id="stats-body"></tbody>
-        </table>
-            <div class="input-form">
-            <h2 style="color: #ffcc00;">Update Statistics</h2>
-            <select id="user-select" onchange="handleUserSelect()">
-                <option value="">Create New User</option>
-            </select>
-            <form onsubmit="return updateStatistics(event)">
-                <input type="text" id="username-input" placeholder="Username" required>
-                <input type="number" id="correct-guesses-input" placeholder="Correct Guesses" required>
-                <input type="number" id="wrong-guesses-input" placeholder="Wrong Guesses" required>
-                <button type="submit">Update Stats</button>
-            </form>
-            <div id="notification"></div>
-        </div>
+
+    <div class="statistics-header">
+        <h1>🎮 Game Statistics 🎯</h1>
     </div>
-    <script type="module">
-        const pythonURI = 'https://scribble.stu.nighthawkcodingsociety.com/stats';
-        async function fetchStatistics() {
-            try {
-                const response = await fetch(`${pythonURI}/api/statistics/all`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                updateTable(data);
-                populateUserSelect(data);
-            } catch (error) {
-                console.error('Error fetching statistics:', error);
-                showNotification('Error fetching statistics', 'error');
-            }
-        }
-        async function updateStatistics(event) {
-            event.preventDefault();
-            const username = document.getElementById('username-input').value;
-            const correct = parseInt(document.getElementById('correct-guesses-input').value) || 0;
-            const wrong = parseInt(document.getElementById('wrong-guesses-input').value) || 0;
-            try {
-                const response = await fetch(`${pythonURI}/api/statistics`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        username: username,
-                        correct: correct,
-                        wrong: wrong
-                    })
-                });
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                showNotification('Stats updated successfully!', 'success');
-                // Clear form
-                document.getElementById('username-input').value = '';
-                document.getElementById('correct-guesses-input').value = '';
-                document.getElementById('wrong-guesses-input').value = '';
-                // Update table with new data
-                updateTable(data);
-            } catch (error) {
-                console.error('Error:', error);
-                showNotification('Error updating stats', 'error');
-            }
-        function updateTable(data) {
-            const tbody = document.getElementById('stats-body');
-            tbody.innerHTML = '';
-            data.forEach(user => {
-                const totalGuesses = user.correct_guesses + user.wrong_guesses;
-                const winRate = ((user.correct_guesses / (totalGuesses || 1)) * 100).toFixed(1);
-                const row = `
-                    <tr>
-                        <td>${user.username}</td>
-                        <td>${user.correct_guesses}</td>
-                        <td>${user.wrong_guesses}</td>
-                        <td>${winRate}%</td>
-                        <td>
-                            <button onclick="deleteUser('${user.username}')" class="delete-btn">
-                                Delete
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
-            });
-        }
-        // Add delete function
-        async function deleteUser(username) {
-            if (!confirm(`Are you sure you want to delete stats for ${username}?`)) {
-                return;
-            }
-            try {
-                const response = await fetch(`${pythonURI}/api/statistics/${username}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`); 
-                showNotification(`Deleted stats for ${username}`, 'success');
-                fetchStatistics();
-            } catch (error) {
-                console.error('Error:', error);
-                showNotification('Error deleting stats', 'error');
-            }
-        }
-        // Add to window scope
-        window.deleteUser = deleteUser;
-        function showNotification(message, type) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.style.display = 'block';
-            notification.style.background = type === 'success' ? '#00ffcc' : '#ff4444';
-            notification.style.color = '#121212';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-        function sortTable(n) {
-            const table = document.querySelector('.stats-table');
-            const rows = Array.from(table.querySelectorAll('tbody tr'));
-            rows.sort((a, b) => {
-                const aVal = a.cells[n].textContent;
-                const bVal = b.cells[n].textContent;
-                return aVal.localeCompare(bVal, undefined, {numeric: true});
-            });
-            const tbody = table.querySelector('tbody');
-            rows.forEach(row => tbody.appendChild(row));
-        }
-        function populateUserSelect(data) {
-            const userSelect = document.getElementById('user-select');
-            userSelect.innerHTML = '<option value="">Create New User</option>';
-            data.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.username;
-                option.textContent = user.username;
-                userSelect.appendChild(option);
-            });
-        }
-        async function fetchUsers() {
-            try {
-                const response = await fetch(`${pythonURI}/api/statistics/all`);
-                const data = await response.json();
-                const select = document.getElementById('user-select');
-                select.innerHTML = '<option value="">Create New User</option>';
-                data.forEach(user => {
-                    const option = document.createElement('option');
-                    option.value = user.username;
-                    option.textContent = user.username;
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error fetching users:', error);
-            }
-        }
-        async function handleUserSelect() {
-            const select = document.getElementById('user-select');
-            const username = document.getElementById('username-input');
-            if (select.value) {
-                username.value = select.value;
-                username.readOnly = true;
-            } else {
-                username.value = '';
-                username.readOnly = false;
-            }
-        }
-        // Add to window scope and onload
-        window.handleUserSelect = handleUserSelect;
-        window.onload = () => {
-            fetchStatistics();
-            fetchUsers();
-        };
-        window.sortTable = sortTable;
-        window.updateStatistics = updateStatistics;
-    </script>
+
+    <table class="stats-table">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Username</th>
+                <th onclick="sortTable(1)">Correct Guesses</th>
+                <th onclick="sortTable(2)">Wrong Guesses</th>
+                <th onclick="sortTable(3)">Total Rounds</th>
+                <th onclick="sortTable(4)">Win Rate</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="stats-body"></tbody>
+    </table>
+
+    <div class="input-form">
+        <h2 style="color: #ffcc00;">Update Statistics</h2>
+        <select id="user-select" onchange="handleUserSelect()" class="form-input">
+            <option value="">Create New User</option>
+        </select>
+        <form onsubmit="return updateStatistics(event)">
+            <input type="text" id="username-input" class="form-input" placeholder="Username" required>
+            <input type="number" id="correct-guesses-input" class="form-input" placeholder="Correct Guesses" required min="0">
+            <input type="number" id="wrong-guesses-input" class="form-input" placeholder="Wrong Guesses" required min="0">
+            <button type="submit" class="submit-button">Update Stats</button>
+        </form>
+        <div id="message"></div>
+    </div>
 </div>
 
+<script>
+    const API_URL = 'http://localhost:8203/api';
 
+    async function checkAuth() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showMessage('Please login first', 'error');
+            return false;
+        }
+        return true;
+    }
 
+    async function fetchStatistics() {
+        if (!await checkAuth()) return;
 
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/statistics/all`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) throw new Error('Failed to fetch statistics');
+            const data = await response.json();
+            updateTable(data.data || []);
+            populateUserSelect(data.data || []);
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage('Error loading statistics', 'error');
+        }
+    }
+
+    function updateTable(data) {
+        const tbody = document.getElementById('stats-body');
+        tbody.innerHTML = '';
+        data.forEach(user => {
+            const row = `
+                <tr>
+                    <td>${user.username}</td>
+                    <td>${user.correct_guesses}</td>
+                    <td>${user.wrong_guesses}</td>
+                    <td>${user.total_rounds}</td>
+                    <td>${user.win_rate}%</td>
+                    <td>
+                        <button onclick="deleteStats('${user.username}')" class="delete-btn">Delete</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    async function updateStatistics(event) {
+        event.preventDefault();
+        if (!await checkAuth()) return;
+
+        const username = document.getElementById('username-input').value;
+        const correct = parseInt(document.getElementById('correct-guesses-input').value) || 0;
+        const wrong = parseInt(document.getElementById('wrong-guesses-input').value) || 0;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/statistics`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    username: username,
+                    correct: correct,
+                    wrong: wrong
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to update statistics');
+            showMessage('Stats updated successfully!', 'success');
+            clearForm();
+            await fetchStatistics();
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage(error.message, 'error');
+        }
+    }
+
+    async function deleteStats(username) {
+        if (!await checkAuth()) return;
+        if (!confirm(`Are you sure you want to delete stats for ${username}?`)) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/statistics`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ username: username })
+            });
+
+            if (!response.ok) throw new Error('Failed to delete statistics');
+            showMessage(`Deleted stats for ${username}`, 'success');
+            await fetchStatistics();
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage(error.message, 'error');
+        }
+    }
+
+    function showMessage(message, type) {
+        const messageEl = document.getElementById('message');
+        messageEl.textContent = message;
+        messageEl.style.display = 'block';
+        messageEl.style.background = type === 'success' ? '#2ecc71' : '#e74c3c';
+        messageEl.style.color = 'white';
+        setTimeout(() => messageEl.style.display = 'none', 3000);
+    }
+
+    function clearForm() {
+        document.getElementById('username-input').value = '';
+        document.getElementById('correct-guesses-input').value = '';
+        document.getElementById('wrong-guesses-input').value = '';
+        document.getElementById('user-select').value = '';
+    }
+
+    function handleUserSelect() {
+        const select = document.getElementById('user-select');
+        const username = document.getElementById('username-input');
+        if (select.value) {
+            username.value = select.value;
+            username.readOnly = true;
+        } else {
+            username.value = '';
+            username.readOnly = false;
+        }
+    }
+
+    function sortTable(n) {
+        const table = document.querySelector('.stats-table');
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        const isNumeric = n > 0 && n < 5;
+
+        rows.sort((a, b) => {
+            let aVal = a.cells[n].textContent;
+            let bVal = b.cells[n].textContent;
+
+            if (isNumeric) {
+                aVal = parseFloat(aVal);
+                bVal = parseFloat(bVal);
+            }
+
+            return aVal > bVal ? 1 : -1;
+        });
+
+        const tbody = table.querySelector('tbody');
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    // Initialize
+    if (checkAuth()) {
+        fetchStatistics();
+    }
+
+    // Add functions to window scope
+    window.updateStatistics = updateStatistics;
+    window.deleteStats = deleteStats;
+    window.handleUserSelect = handleUserSelect;
+    window.sortTable = sortTable;
+</script>
