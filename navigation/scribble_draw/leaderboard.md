@@ -111,9 +111,7 @@ permalink: /leaderboard
             display: none;
         }
     </style>
-
     <h1 class="leaderboard-title">Scribble Masters</h1>
-    
     <div class="form-container">
         <div class="input-group">
             <input type="text" id="profileName" class="form-input" placeholder="Profile Name" required>
@@ -123,7 +121,6 @@ permalink: /leaderboard
         </div>
         <div id="message"></div>
     </div>
-
     <table class="leaderboard-table">
         <thead>
             <tr>
@@ -139,7 +136,7 @@ permalink: /leaderboard
 </div>
 
 <script>
-    const API_URL = 'http://localhost:8203/api/leaderboard';
+    const API_URL = 'https://scribble.stu.nighthawkcodingsociety.com/api/leaderboard_api';
     
     async function checkAuth() {
         const token = localStorage.getItem('token');

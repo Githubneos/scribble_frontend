@@ -173,7 +173,6 @@ Author: Daksha
 
 <div class="picture-gallery">
     <h1>Picture Gallery</h1>
-
     <div class="upload-form">
         <h2>Upload New Picture</h2>
         <div class="form-group">
@@ -194,13 +193,12 @@ Author: Daksha
         </div>
         <button onclick="uploadPicture()" class="submit-btn">Upload Picture</button>
     </div>
-
     <div id="message"></div>
     <div id="galleryGrid" class="gallery-grid"></div>
 </div>
 
 <script>
-    const API_URL = 'http://127.0.0.1:8203/api/picture';
+    const API_URL = 'https://scribble.stu.nighthawkcodingsociety.com/api/picture';
 
     function showMessage(message, isError = false) {
         const messageEl = document.getElementById('message');

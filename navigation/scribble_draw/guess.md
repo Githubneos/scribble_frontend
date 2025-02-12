@@ -75,23 +75,18 @@ permalink: /guess
         }
         th { background: #f5f5f5; }
     </style>
-
     <canvas id="drawingCanvas" width="500" height="400"></canvas>
-
     <div class="controls">
         <button id="hintButton">Get Hint</button>
         <button id="resetButton">Reset Game</button>
     </div>
-
     <form id="guessForm">
         <input type="text" id="username" placeholder="Your Username" required>
         <input type="text" id="guess" placeholder="Your Guess" required>
         <button type="submit">Submit Guess</button>
     </form>
-
     <div id="hint" class="message"></div>
     <div id="message" class="message"></div>
-
     <table id="guessTable">
         <thead>
             <tr>
@@ -106,7 +101,7 @@ permalink: /guess
 </div>
 
 <script>
-const API_URL = 'http://localhost:8203/api';
+const API_URL = 'https://scribble.stu.nighthawkcodingsociety.com/api/guess';
 
 async function checkAuth() {
     const token = localStorage.getItem('token');
