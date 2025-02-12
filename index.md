@@ -172,11 +172,7 @@ Author: Daksha
 </style>
 
 <div class="picture-gallery">
-<<<<<<< HEAD
     <div id="app"></div>
-=======
-    <h1>Picture Gallery</h1>
->>>>>>> 3846aa0ed9b49ab2de950da8b1c6a824f2326bc8
     <div class="upload-form">
         <h2>Upload New Picture</h2>
         <div class="form-group">
