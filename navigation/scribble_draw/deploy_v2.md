@@ -25,9 +25,11 @@ Author: Keertha
 
 <style>
     body {
-        background: linear-gradient(145deg, #BAD8B6, #E1EACD, #F9F6E6, #8D77AB);
+        background: linear-gradient(145deg, rgb(50, 131, 40), rgb(164, 219, 43), rgb(15, 96, 107), #8D77AB);
+        color: white;
     }
 </style>
+
 
 ## Welcome to deployment blogs
 <table>
