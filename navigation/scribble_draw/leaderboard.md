@@ -171,7 +171,7 @@ body {
 </div>
 
 <script>
-const API_URL = 'https://scribble.stu.nighthawkcodingsociety.com/';
+const API_URL = 'http://127.0.0.1:8203/api/leaderboard';
 
 function showMessage(message, isError = false) {
     const messageEl = document.getElementById('message');
