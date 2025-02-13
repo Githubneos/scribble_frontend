@@ -26,6 +26,7 @@ Author: Ian
 
 <style>
     body {
+        background: linear-gradient(145deg, rgb(50, 131, 40), rgb(164, 219, 43), rgb(15, 96, 107), #8D77AB);
         color: white;
     }
 </style>
