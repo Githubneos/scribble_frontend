@@ -13,6 +13,7 @@ permalink: /guess
         <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
         <td><a href="{{site.baseurl}}/about">About Us</a></td>
         <td><a href="{{site.baseurl}}/deploy">Deploy Blog</a></td>
+        <td><a href="{{site.baseurl}}/posts">Posts</a></td>
     </tr>
 </table>
 
