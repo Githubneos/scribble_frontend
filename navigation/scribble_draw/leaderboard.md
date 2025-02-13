@@ -19,6 +19,9 @@ menu: nav/home.html
 </table>
 
 <style>
+  body {
+    background: linear-gradient(145deg, #727D73, #AAB99A, #D0DDD0, #F0F0D7);
+  }
   .container {
     padding: 20px;
     max-width: 800px;
@@ -246,6 +249,16 @@ menu: nav/home.html
       messageElement.className = 'message error';
     }
   };
+
+  function showMessage(text, type) {
+    const messageElement = document.getElementById('message');
+    messageElement.textContent = text;
+    messageElement.className = `message ${type}`;
+    messageElement.style.display = 'block';
+    messageEl.style.backgroundColor = isError ? '#727D73' : '#AAB99A';
+    messageEl.style.color = isError ? '#D0DDD0' : '#F0F0D7';
+    setTimeout(() => messageElement.style.display = 'none', 3000);
+  }
 
   document.addEventListener('DOMContentLoaded', fetchLeaderboard);
 </script>

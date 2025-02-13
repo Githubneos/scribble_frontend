@@ -19,70 +19,73 @@ search_exclude: true
 </table>
 
 <style>
-.game-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
+    body {
+        background: linear-gradient(145deg, #F7CFD8, #F4F8D3, #A6F1E0, #73C7C7);
+    }
+    .game-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
 
-.word-card {
-    background: #2C3E50;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    color: white;
-}
+    .word-card {
+        background: #2C3E50;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        color: white;
+    }
 
-.hint-section {
-    margin: 20px 0;
-    padding: 15px;
-    background: #34495E;
-    border-radius: 8px;
-}
+    .hint-section {
+        margin: 20px 0;
+        padding: 15px;
+        background: #34495E;
+        border-radius: 8px;
+    }
 
-.guess-form {
-    margin-top: 20px;
-}
+    .guess-form {
+        margin-top: 20px;
+    }
 
-.input-field {
-    padding: 8px;
-    margin-right: 10px;
-    border-radius: 4px;
-    border: 1px solid #34495E;
-    width: 200px;
-}
+    .input-field {
+        padding: 8px;
+        margin-right: 10px;
+        border-radius: 4px;
+        border: 1px solid #34495E;
+        width: 200px;
+    }
 
-.button {
-    padding: 8px 20px;
-    background: #3498DB;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin: 5px;
-}
+    .button {
+        padding: 8px 20px;
+        background: #3498DB;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+    }
 
-.button:hover {
-    background: #2980B9;
-}
+    .button:hover {
+        background: #2980B9;
+    }
 
-.stats-container {
-    margin-top: 20px;
-    padding: 20px;
-    background: #34495E;
-    border-radius: 10px;
-    color: white;
-}
+    .stats-container {
+        margin-top: 20px;
+        padding: 20px;
+        background: #34495E;
+        border-radius: 10px;
+        color: white;
+    }
 
-.error {
-    color: #E74C3C;
-    margin-top: 10px;
-}
+    .error {
+        color: #E74C3C;
+        margin-top: 10px;
+    }
 
-.success {
-    color: #2ECC71;
-    margin-top: 10px;
-}
+    .success {
+        color: #2ECC71;
+        margin-top: 10px;
+    }
 </style>
 
 <div class="game-container">
@@ -135,8 +138,8 @@ function showMessage(text, type) {
     messageDiv.textContent = text;
     messageDiv.className = `message ${type}`;
     messageDiv.style.display = 'block';
-    messageDiv.style.backgroundColor = type === 'error' ? '#FBFBFB' : '#C4D9FF';
-    messageDiv.style.color = type === 'error' ? '#E8F9FF' : '#C5BAFF';
+    messageDiv.style.backgroundColor = type === 'error' ? '#F7CFD8' : '#F4F8D3';
+    messageDiv.style.color = type === 'error' ? '#A6F1E0' : '#73C7C7';
     setTimeout(() => messageDiv.style.display = 'none', 3000);
 }
 
