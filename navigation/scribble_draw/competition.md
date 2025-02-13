@@ -129,8 +129,8 @@ function showMessage(text, type) {
     msgEl.textContent = text;
     msgEl.className = `message ${type}`;
     msgEl.style.display = 'block';
-      messageEl.style.backgroundColor = isError ? '#fee2e2' : '#dcfce7';
-    messageEl.style.color = isError ? '#dc2626' : '#16a34a';
+    messageEl.style.backgroundColor = isError ? '#3674B5' : '#578FCA';
+    messageEl.style.color = isError ? '#A1E3F9' : '#D1F8EF';
     setTimeout(() => msgEl.style.display = 'none', 3000);
 }
 
