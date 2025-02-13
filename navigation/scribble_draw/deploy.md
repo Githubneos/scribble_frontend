@@ -18,6 +18,7 @@ Author: Ian
         <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
         <td><a href="{{site.baseurl}}/about">About Us</a></td>
         <td><a href="{{site.baseurl}}/deploy">Deploy Blog</a></td>
+        <td><a href="{{site.baseurl}}/posts">Posts</a></td>
     </tr>
 </table>
 <br>
@@ -25,12 +26,6 @@ Author: Ian
 
 <style>
     body {
-        color: white;
-    }
-    .code-container {
-        background-color: rgb(110, 119, 68);
-        padding: 10px;
-        border-radius: 5px;
         color: white;
     }
 </style>
@@ -50,22 +45,18 @@ Navigate to EC2 > Instances
 Launch a new EC2 instance using Ubuntu as the base image  
 Connect to the instance using SSH:
 
-<div class="code-container">
 ```sh
 ssh -i something-key.pem ubuntu@something-aws-instance-ip
 ```
-</div>
 
 ## Step 2: Setting Up Application
 
 ### 1. Finding an Available Port
 Run the following command in the EC2 terminal to check for available ports:
 
-<div class="code-container">
 ```sh
 docker ps
 ```
-</div>
 
 Our class port is 802_, Scribble's port goes to 8023
 
@@ -75,14 +66,11 @@ Ensure Docker configuration files match the deployment environment:
 If `docker.io/python` doesn't work, make sure the versions match up
 
 #### Terminal
-<div class="code-container">
 ```python
 python --version
 ```
-</div>
 
 #### Dockerfile
-<div class="code-container">
 ```dockerfile
 FROM docker.io/python:3.11
 
@@ -100,10 +88,8 @@ EXPOSE 8023
 
 CMD [ "gunicorn", "main:app" ]
 ```
-</div>
 
 #### docker-compose.yml
-<div class="code-container">
 ```yaml
 version: '3'
 services:
@@ -118,12 +104,10 @@ services:
       - ./instance:/instance
     restart: unless-stopped
 ```
-</div>
 
 ### Frontend Configuration
 Update `config.js` to ensure the frontend communicates with the backend:
 
-<div class="code-container">
 ```javascript
 export var pythonURI;
 if (location.hostname === "localhost" || location.hostname === "127.0.0.1") { //Main domain
@@ -132,7 +116,6 @@ if (location.hostname === "localhost" || location.hostname === "127.0.0.1") { //
     pythonURI = "https://scribble_backend.stu.nighthawkcodingsociety.com";
 }
 ```
-</div>
 
 - If localhost works on the backend but not the frontend, always check `pythonURI` before continuing.
 
@@ -141,27 +124,21 @@ if (location.hostname === "localhost" || location.hostname === "127.0.0.1") { //
 ### 1. Clone Backend Repository
 
 Ensure repos don't have an uppercase for formatting purposes.
-<div class="code-container">
 ```sh
 cd ~
 git clone https://github.com/scribble_backend.git scribble_backend
 cd scribble_backend
 ```
-</div>
 
 ### 2. Build and Run the Docker Container
-<div class="code-container">
 ```sh
 docker-compose up -d --build
 ```
-</div>
 
 ### Verify deployment with:
-<div class="code-container">
 ```sh
 curl localhost:8023
 ```
-</div>
 
 ## Step 4: Configuring DNS with Route 53
 Go to AWS Route 53  
@@ -176,14 +153,11 @@ Select hosted zone and add a new CNAME record.
 ## Step 5: Setting Up Nginx as a Reverse Proxy
 Create an Nginx configuration file:
 
-<div class="code-container">
 ```sh
 sudo nano /etc/nginx/sites-available/scribble_backend
 ```
-</div>
 
 ### Add the following configuration:
-<div class="code-container">
 ```nginx
 server {
     listen 80;
@@ -203,53 +177,42 @@ server {
     }
 }
 ```
-</div>
 
 ### Enable the configuration and restart Nginx:
-<div class="code-container">
 ```sh
 sudo ln -s /etc/nginx/sites-available/scribble_backend /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
 ```
-</div>
 
 ## Step 6: Enabling SSL with Certbot
 Install Certbot and configure HTTPS:
 
-<div class="code-container">
 ```sh
 sudo apt update && sudo apt install certbot python3-certbot-nginx -y
 sudo certbot --nginx
 ```
-</div>
 Follow the prompts to select the domain and enable HTTPS.
 
 ## Step 7: Deployment Updates
 Whenever updating code, do the following:
 
 ### Pull the latest changes:
-<div class="code-container">
 ```sh
 cd ~/scribble_backend
 git pull
 ```
-</div>
 
 ### Restart the container:
-<div class="code-container">
 ```sh
 docker-compose down
 docker-compose up -d --build
 ```
-</div>
 
 ### Verify the deployment:
-<div class="code-container">
 ```sh
 curl localhost:8023
 ```
-</div>
 
 ## Step 8: Troubleshooting and Monitoring
 Troubleshoot Docker configurations. 
@@ -258,25 +221,19 @@ Troubleshoot Docker configurations.
 
 ### Basic Checks
 Check running Docker containers:
-<div class="code-container">
 ```sh
 docker ps
 ```
-</div>
 
 ### Check application logs:
-<div class="code-container">
 ```sh
 docker-compose logs
 ```
-</div>
 
 ### Check Nginx errors:
-<div class="code-container">
 ```sh
 sudo journalctl -u nginx --no-pager | tail -n 20
 ```
-</div>
 
 ## Using Cockpit for Server Management
 Log into Cockpit using subdomain.  

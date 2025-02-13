@@ -1,7 +1,9 @@
 ---
-layout: post
+layout: needsAuth
 title: Leaderboard
 permalink: /leaderboard
+search_exclude: true
+menu: nav/home.html 
 ---
 <table>
     <tr>
@@ -12,279 +14,238 @@ permalink: /leaderboard
         <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
         <td><a href="{{site.baseurl}}/about">About Us</a></td>
         <td><a href="{{site.baseurl}}/deploy">Deploy Blog</a></td>
+        <td><a href="{{site.baseurl}}/posts">Posts</a></td>
     </tr>
 </table>
 
-<div class="leaderboard-container">
-    <style>
-        :root {
-            --primary-color: #1a237e;
-            --secondary-color: #283593;
-            --background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            --text-color: #2c3e50;
-            --card-bg: #ffffff;
-            --error: #e74c3c;
-            --success: #2ecc71;
-        }
-        body {
-            background: var(--background);
-            margin: 0;
-            min-height: 100vh;
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: var(--text-color);
-        }
-        .leaderboard-container {
-            max-width: 1000px;
-            margin: 3rem auto;
-            padding: 2rem;
-        }
-        .leaderboard-title {
-            color: var(--primary-color);
-            font-size: 2.5rem;
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        .form-container {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-        }
-        .input-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        .form-input {
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            color: var(--text-color);
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .submit-button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .delete-btn {
-            background: var(--error);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 8px;
-            margin-top: 2rem;
-        }
-        .leaderboard-table th {
-            background: var(--primary-color);
-            color: white;
-            padding: 16px;
-            text-align: left;
-        }
-        .leaderboard-table td {
-            background: var(--card-bg);
-            padding: 16px;
-        }
-        #message {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            display: none;
-        }
-    </style>
+<style>
+  .container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .title {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .submit-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background-color: #b91c1c;
+  }
+  
+  .leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .leaderboard-table th,
+  .leaderboard-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+  }
+  
+  .leaderboard-table th {
+    background-color: #f3f4f6;
+  }
+  
+  .delete-btn {
+    color: #dc2626;
+    text-decoration: underline;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+  
+  .message {
+    text-align: center;
+    margin-top: 15px;
+  }
+  
+  .success {
+    color: #059669;
+  }
+  
+  .error {
+    color: #dc2626;
+  }
+</style>
 
-    <h1 class="leaderboard-title">Scribble Masters</h1>
-    
-    <div class="form-container">
-        <div class="input-group">
-            <input type="text" id="profileName" class="form-input" placeholder="Profile Name" required>
-            <input type="text" id="drawingName" class="form-input" placeholder="Drawing Name" required>
-            <input type="number" id="score" class="form-input" placeholder="Score (0-100)" min="0" max="100" required>
-            <button onclick="submitScore()" class="submit-button">Submit Score</button>
-        </div>
-        <div id="message"></div>
+<div class="container">
+  <h2 class="title">Drawing Leaderboard</h2>
+
+  <form id="score-form">
+    <div class="form-group">
+      <label for="drawingName">Drawing Name</label>
+      <input type="text" id="drawingName" required>
     </div>
+    <div class="form-group">
+      <label for="score">Score (0-100)</label>
+      <input type="number" id="score" min="0" max="100" required>
+    </div>
+    <button type="submit" class="submit-button">Submit Score</button>
+  </form>
 
-    <table class="leaderboard-table">
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Drawing</th>
-                <th>Score</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="leaderboard"></tbody>
-    </table>
+  <table class="leaderboard-table">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Player</th>
+        <th>Drawing</th>
+        <th>Score</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboard-entries">
+    </tbody>
+  </table>
+  
+  <div id="message" class="message"></div>
 </div>
 
-<script>
-    const API_URL = 'http://localhost:8203/api/leaderboard';
+<script type="module">
+  import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+
+  const fetchConfig = {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+
+  async function fetchLeaderboard() {
+    const messageElement = document.getElementById('message');
+    const leaderboardBody = document.getElementById('leaderboard-entries');
+
+    leaderboardBody.innerHTML = '';
+
+    try {
+      const response = await fetch(`${pythonURI}/api/leaderboard`, {
+        method: "GET"  // GET doesn't need authentication
+      });
+
+      if (!response.ok) throw new Error('Failed to load leaderboard');
+      const data = await response.json();
+
+      data
+        .sort((a, b) => b.score - a.score)
+        .forEach((entry, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><span style="color: ${index < 3 ? '#dc2626' : '#666'}">#${index + 1}</span></td>
+            <td>${entry.profile_name}</td>
+            <td>${entry.drawing_name}</td>
+            <td>${entry.score}</td>
+            <td>${entry.created_by ? 
+              `<button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>` 
+              : ''}</td>
+          `;
+          leaderboardBody.appendChild(row);
+        });
+      messageElement.textContent = '';
+    } catch (error) {
+      console.error('Error:', error);
+      messageElement.textContent = 'Error loading leaderboard';
+      messageElement.className = 'message error';
+    }
+  }
+
+  document.getElementById('score-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const messageElement = document.getElementById('message');
     
-    async function checkAuth() {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            showMessage('Please login to view the leaderboard', 'error');
-            return false;
-        }
-        return true;
+    const drawingName = document.getElementById('drawingName').value.trim();
+    const score = parseInt(document.getElementById('score').value);
+
+    if (score < 0 || score > 100) {
+      messageElement.textContent = 'Score must be between 0 and 100';
+      messageElement.className = 'message error';
+      return;
     }
 
-    async function fetchLeaderboard() {
-        if (!await checkAuth()) return;
-        
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(API_URL, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            if (!response.ok) throw new Error('Failed to fetch leaderboard');
-            const data = await response.json();
-            displayLeaderboard(data);
-        } catch (error) {
-            console.error('Error:', error);
-            showMessage('Error loading leaderboard', 'error');
-        }
+    try {
+      const response = await fetch(`${pythonURI}/api/leaderboard`, {
+        ...fetchConfig,
+        method: "POST",
+        body: JSON.stringify({
+          drawing_name: drawingName,
+          score: score
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit score');
+      }
+
+      messageElement.textContent = 'Score submitted successfully!';
+      messageElement.className = 'message success';
+      this.reset();
+      
+      await fetchLeaderboard();
+    } catch (error) {
+      console.error('Error:', error);
+      messageElement.textContent = error.message;
+      messageElement.className = 'message error';
     }
+  });
 
-    function displayLeaderboard(entries) {
-        const tbody = document.getElementById('leaderboard');
-        tbody.innerHTML = '';
+  window.deleteEntry = async function(entryId) {
+    if (!confirm('Are you sure you want to delete this entry?')) return;
+    const messageElement = document.getElementById('message');
 
-        entries.sort((a, b) => b.score - a.score)
-            .forEach((entry, index) => {
-                const row = `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${entry.profile_name}</td>
-                        <td>${entry.drawing_name}</td>
-                        <td>${entry.score}</td>
-                        <td>
-                            <button onclick="deleteEntry('${entry.profile_name}', '${entry.drawing_name}')" 
-                                    class="delete-btn">Delete</button>
-                        </td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
-            });
+    try {
+      const response = await fetch(`${pythonURI}/api/leaderboard`, {
+        ...fetchConfig,
+        method: "DELETE",
+        body: JSON.stringify({ id: entryId })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to delete entry');
+      }
+
+      messageElement.textContent = data.message || 'Entry deleted successfully';
+      messageElement.className = 'message success';
+      
+      await fetchLeaderboard();
+    } catch (error) {
+      console.error('Error:', error);
+      messageElement.textContent = error.message;
+      messageElement.className = 'message error';
     }
+  };
 
-    async function submitScore() {
-        if (!await checkAuth()) return;
-
-        const profileName = document.getElementById('profileName').value.trim();
-        const drawingName = document.getElementById('drawingName').value.trim();
-        const score = parseInt(document.getElementById('score').value);
-
-        if (!profileName || !drawingName || isNaN(score) || score < 0 || score > 100) {
-            showMessage('Please fill in all fields correctly', 'error');
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    profile_name: profileName,
-                    drawing_name: drawingName,
-                    score: score
-                })
-            });
-
-            const data = await response.json();
-            
-            if (response.ok) {
-                showMessage('Score submitted successfully', 'success');
-                clearForm();
-                await fetchLeaderboard();
-            } else {
-                throw new Error(data.error || 'Failed to submit score');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showMessage(error.message, 'error');
-        }
-    }
-
-    async function deleteEntry(profileName, drawingName) {
-        if (!await checkAuth()) return;
-        
-        if (!confirm(`Are you sure you want to delete this entry?`)) return;
-
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(API_URL, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    profile_name: profileName,
-                    drawing_name: drawingName
-                })
-            });
-
-            const data = await response.json();
-            
-            if (response.ok) {
-                showMessage('Entry deleted successfully', 'success');
-                await fetchLeaderboard();
-            } else {
-                throw new Error(data.error || 'Failed to delete entry');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showMessage(error.message, 'error');
-        }
-    }
-
-    function showMessage(message, type) {
-    const messageEl = document.getElementById('message');
-    messageEl.textContent = message;
-    messageEl.style.display = 'block';
-    messageEl.style.background = type === 'success' ? '#2ecc71' : '#e74c3c';  // Direct color values
-    messageEl.style.color = 'white';
-    setTimeout(() => messageEl.style.display = 'none', 3000);
-}
-
-    function clearForm() {
-        document.getElementById('profileName').value = '';
-        document.getElementById('drawingName').value = '';
-        document.getElementById('score').value = '';
-    }
-
-    // Initialize the page
-    if (checkAuth()) {
-        fetchLeaderboard();
-        setInterval(fetchLeaderboard, 30000); // Refresh every 30 seconds
-    }
+  document.addEventListener('DOMContentLoaded', fetchLeaderboard);
 </script>
