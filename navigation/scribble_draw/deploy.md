@@ -250,8 +250,8 @@ function showMessage(message, type) {
     const messageEl = document.getElementById('message');
     messageEl.textContent = message;
     messageEl.style.display = 'block';
-    messageEl.style.backgroundColor = type === 'error' ? '#FCC6FF' : '#FFC785';
-    messageEl.style.color = type === 'error' ? '#FFE6C9' : '#FFA09B';
+    messageEl.style.backgroundColor = type === 'error' ? '#F8FAFC' : '#D9EAFD';
+    messageEl.style.color = type === 'error' ? '#BCCCDC' : '#9AA6B2';
     setTimeout(() => messageEl.style.display = 'none', 3000);
 }
 </script>

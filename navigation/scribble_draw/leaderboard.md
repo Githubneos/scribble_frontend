@@ -255,8 +255,8 @@ menu: nav/home.html
     messageElement.textContent = text;
     messageElement.className = `message ${type}`;
     messageElement.style.display = 'block';
-    messageEl.style.backgroundColor = isError ? '#727D73' : '#AAB99A';
-    messageEl.style.color = isError ? '#D0DDD0' : '#F0F0D7';
+    messageEl.style.backgroundColor = isError ? '#F5EFFF' : '#E5D9F2';
+    messageEl.style.color = isError ? '#CDC1FF' : '#A294F9';
     setTimeout(() => messageElement.style.display = 'none', 3000);
   }
 
