@@ -38,7 +38,7 @@ permalink: /stats
             max-width: 1000px;
             margin: 3rem auto;
             padding: 2rem;
-            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+            background: var(--card-bg);
             border-radius: 20px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
         }
@@ -253,8 +253,8 @@ permalink: /stats
         const messageEl = document.getElementById('message');
         messageEl.textContent = message;
         messageEl.style.display = 'block';
-        messageEl.style.background = type === 'success' ? '#2ecc71' : '#e74c3c';
-        messageEl.style.color = 'white';
+        messageEl.style.backgroundColor = type === 'error' ? '#727D73' : '#D0DDD0';
+        messageEl.style.color = type === 'error' ? '#AAB99A' : '#F0F0D7';
         setTimeout(() => messageEl.style.display = 'none', 3000);
     }
 

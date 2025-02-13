@@ -124,10 +124,14 @@ const drawings = [
     { label: "tree", hints: ["It grows", "Has leaves"] }
 ];
 
-function showMessage(text, type = 'info') {
+function showMessage(text, type) {
     const messageDiv = document.getElementById('message');
     messageDiv.textContent = text;
     messageDiv.className = `message ${type}`;
+    messageDiv.style.display = 'block';
+    messageDiv.style.backgroundColor = type === 'error' ? '#FBFBFB' : '#C4D9FF';
+    messageDiv.style.color = type === 'error' ? '#E8F9FF' : '#C5BAFF';
+    setTimeout(() => messageDiv.style.display = 'none', 3000);
 }
 
 async function fetchGuesses() {

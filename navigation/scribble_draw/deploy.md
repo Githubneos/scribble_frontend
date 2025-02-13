@@ -25,7 +25,6 @@ Author: Ian
 
 <style>
     body {
-        background: linear-gradient(145deg, rgb(50, 131, 40), rgb(164, 219, 43), rgb(15, 96, 107), #8D77AB);
         color: white;
     }
     .code-container {
@@ -287,3 +286,14 @@ Navigate to:
 - **Logs** – Server activity and errors.
 - **Networking** – View active network settings.
 - **Terminal** – Run administrative commands.
+
+<script>
+function showMessage(message, type) {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = message;
+    messageEl.style.display = 'block';
+    messageEl.style.backgroundColor = type === 'error' ? '#FCC6FF' : '#FFC785';
+    messageEl.style.color = type === 'error' ? '#FFE6C9' : '#FFA09B';
+    setTimeout(() => messageEl.style.display = 'none', 3000);
+}
+</script>

@@ -128,6 +128,8 @@ function showMessage(text, type) {
     msgEl.textContent = text;
     msgEl.className = `message ${type}`;
     msgEl.style.display = 'block';
+      messageEl.style.backgroundColor = isError ? '#fee2e2' : '#dcfce7';
+    messageEl.style.color = isError ? '#dc2626' : '#16a34a';
     setTimeout(() => msgEl.style.display = 'none', 3000);
 }
 
