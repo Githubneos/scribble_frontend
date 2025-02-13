@@ -114,7 +114,6 @@ search_exclude: true
 <script type="module">
 import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
-<<<<<<< HEAD
 async function checkAuth() {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -143,11 +142,6 @@ function showMessage(text, type) {
 
 async function fetchGuesses() {
     if (!await checkAuth()) return;
-=======
-let currentWord = '';
-let currentHintIndex = 0;
-let hintsUsed = 0;
->>>>>>> 213d098706552fe06b1e73ffeabe037bb2ce5cdd
 
 async function loadNewWord() {
     try {
