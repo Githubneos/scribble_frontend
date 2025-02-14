@@ -167,6 +167,10 @@ async function submitGuess(event) {
     const guess = document.getElementById('guess-input').value;
     const image = images[currentImageIndex];
 
+    // You need to pass the guesser's name and correctness status as well
+    const guesserName = "Anonymous";  // Replace with actual user name if applicable
+    const isCorrect = checkIfCorrect(guess, image.label);  // Implement this function to check correctness
+
     try {
         const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
             method: 'POST',
@@ -174,7 +178,9 @@ async function submitGuess(event) {
             body: JSON.stringify({
                 image_label: image.label,
                 guess: guess,
-                hints_used: hintsUsed
+                guesser_name: guesserName,  // Pass guesser's name
+                is_correct: isCorrect,  // Pass correctness status
+                hints_used: hintsUsed  // Number of hints used
             })
         });
 
@@ -197,11 +203,15 @@ async function submitGuess(event) {
 
 // Load guess statistics from backend
 async function loadStats() {
+    const image = images[currentImageIndex];  // Get current image label
+
     try {
-        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats", {
+        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image_label: image.label })  // Send image label to filter guesses
         });
+
         if (!response.ok) throw new Error('Failed to fetch stats');
 
         const stats = await response.json();
@@ -230,11 +240,11 @@ async function loadStats() {
 }
 
 // Update a Guess using image label
-async function updateGuess(imageLabel) {
-    const newGuess = document.getElementById(`guess-${imageLabel}`).value;
+async function updateGuess(guessId) {
+    const newGuess = document.getElementById(`guess-${guessId}`).value;
 
     try {
-        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/${imageLabel}", {
+        const response = await fetch(`https://scribble.stu.nighthawkcodingsociety.com/api/guess/${guessId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ guess: newGuess })
@@ -249,10 +259,10 @@ async function updateGuess(imageLabel) {
     }
 }
 
-// Delete a Guess using image label
-async function deleteGuess(imageLabel) {
+// Delete a Guess using guess ID
+async function deleteGuess(guessId) {
     try {
-        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/${imageLabel}", {
+        const response = await fetch(`https://scribble.stu.nighthawkcodingsociety.com/api/guess/${guessId}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' }
         });
