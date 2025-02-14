@@ -106,22 +106,21 @@ search_exclude: true
         </form>
         <p id="result-message"></p>
     </div>
+
     <!-- Stats Table (with Update and Delete) -->
     <div class="stats-container">
         <h3>Your Guess Statistics</h3>
         <table id="stats-table" border="1">
             <thead>
                 <tr>
-                    <th>Guess ID</th>
-                    <th>Image</th>
+                    <th>User</th>
                     <th>Your Guess</th>
                     <th>Correct?</th>
-                    <th>Hints Used</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="stats-body">
-                <tr><td colspan="6">Loading stats...</td></tr>
+                <tr><td colspan="4">Loading stats...</td></tr>
             </tbody>
         </table>
     </div>
@@ -136,8 +135,8 @@ let currentHintIndex = 0;
 
 // Built-in images and hints
 const images = [
-    { label: "car", src: "images/scribble_pictures/car.png", hints: ["It has wheels", "Used for transportation", "has engine"] },
-    { label: "house", src: "images/scribble_pictures/house.png", hints: ["People live in it", "Has a roof", "home"] },
+    { label: "car", src: "images/scribble_pictures/car.png", hints: ["It has wheels", "Used for transportation", "Has engine"] },
+    { label: "house", src: "images/scribble_pictures/house.png", hints: ["People live in it", "Has a roof", "Home"] },
     { label: "sun", src: "images/scribble_pictures/sun.png", hints: ["It's bright", "Appears during the day", "Star of our solar system"] },
     { label: "mountain", src: "images/scribble_pictures/mountain.png", hints: ["It's tall", "Covered with snow", "People hike on this"] },
     { label: "ocean", src: "images/scribble_pictures/ocean.png", hints: ["It's large", "Salty water", "People use boats on it"] }
@@ -203,13 +202,10 @@ async function submitGuess(event) {
 
 // Load guess statistics from backend
 async function loadStats() {
-    const image = images[currentImageIndex];  // Get current image label
-
     try {
         const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image_label: image.label })  // Send image label to filter guesses
+            headers: { 'Content-Type': 'application/json' }
         });
 
         if (!response.ok) throw new Error('Failed to fetch stats');
@@ -221,11 +217,9 @@ async function loadStats() {
         stats.forEach(stat => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${stat.guess_id}</td>
-                <td><img src="${images.find(img => img.label === stat.image_label)?.src}" alt="${stat.image_label}" width="50"></td>
+                <td>${stat.guesser_name}</td>
                 <td><input type="text" value="${stat.user_guess}" id="guess-${stat.guess_id}"></td>
                 <td>${stat.correct ? '✅' : '❌'}</td>
-                <td>${stat.hints_used}</td>
                 <td>
                     <button onclick="updateGuess(${stat.guess_id})">Update</button>
                     <button onclick="deleteGuess(${stat.guess_id})">Delete</button>
@@ -235,11 +229,11 @@ async function loadStats() {
         });
     } catch (error) {
         console.error('Error:', error);
-        document.getElementById('stats-body').innerHTML = '<tr><td colspan="6">Failed to load stats</td></tr>';
+        document.getElementById('stats-body').innerHTML = '<tr><td colspan="4">Failed to load stats</td></tr>';
     }
 }
 
-// Update a Guess using image label
+// Update a Guess using guess ID
 async function updateGuess(guessId) {
     const newGuess = document.getElementById(`guess-${guessId}`).value;
 
@@ -275,7 +269,6 @@ async function deleteGuess(guessId) {
         showMessage('Failed to delete guess', 'error');
     }
 }
-
 
 // Get next hint from built-in hints
 function getNextHint() {
