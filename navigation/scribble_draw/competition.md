@@ -19,6 +19,9 @@ permalink: /competition
 
 <div class="game-container">
     <style>
+        body {
+            background: linear-gradient(145deg, #BAD8B6, #E1EACD, #F9F6E6, #8D77AB);
+        }
         .game-container {
             max-width: 1000px;
             margin: 0 auto;
@@ -129,8 +132,8 @@ function showMessage(text, type) {
     msgEl.textContent = text;
     msgEl.className = `message ${type}`;
     msgEl.style.display = 'block';
-    messageEl.style.backgroundColor = isError ? '#3674B5' : '#578FCA';
-    messageEl.style.color = isError ? '#A1E3F9' : '#D1F8EF';
+    msgEl.style.backgroundColor = isError ? '#fee2e2' : '#dcfce7';
+    msgEl.style.color = isError ? '#BAD8B6' : '#E1EACD';
     setTimeout(() => msgEl.style.display = 'none', 3000);
 }
 

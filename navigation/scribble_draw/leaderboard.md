@@ -189,36 +189,41 @@ menu: nav/home.html
     const score = parseInt(document.getElementById('score').value);
 
     if (score < 0 || score > 100) {
-      messageElement.textContent = 'Score must be between 0 and 100';
-      messageElement.className = 'message error';
-      return;
+        messageElement.textContent = 'Score must be between 0 and 100';
+        messageElement.className = 'message error';
+        return;
     }
 
     try {
-      const response = await fetch(`${pythonURI}/api/leaderboard`, {
-        ...fetchConfig,
-        method: "POST",
-        body: JSON.stringify({
-          drawing_name: drawingName,
-          score: score
-        })
-      });
+        const response = await fetch(`${pythonURI}/api/leaderboard`, {
+            ...fetchConfig,
+            method: "POST",
+            body: JSON.stringify({
+                drawing_name: drawingName,
+                score: score
+            })
+        });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to submit score');
-      }
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to submit score');
+        }
 
-      messageElement.textContent = 'Score submitted successfully!';
-      messageElement.className = 'message success';
-      this.reset();
-      
-      await fetchLeaderboard();
+        // Check if score was updated or created
+        if (response.status === 200) {
+            messageElement.textContent = `Score updated! Current best: ${data.score}`;
+        } else {
+            messageElement.textContent = 'New score submitted successfully!';
+        }
+        messageElement.className = 'message success';
+        this.reset();
+        
+        await fetchLeaderboard();
     } catch (error) {
-      console.error('Error:', error);
-      messageElement.textContent = error.message;
-      messageElement.className = 'message error';
+        console.error('Error:', error);
+        messageElement.textContent = error.message;
+        messageElement.className = 'message error';
     }
   });
 
@@ -255,8 +260,8 @@ menu: nav/home.html
     messageElement.textContent = text;
     messageElement.className = `message ${type}`;
     messageElement.style.display = 'block';
-    messageEl.style.backgroundColor = isError ? '#727D73' : '#AAB99A';
-    messageEl.style.color = isError ? '#D0DDD0' : '#F0F0D7';
+    messageEl.style.backgroundColor = isError ? '#F5EFFF' : '#E5D9F2';
+    messageEl.style.color = isError ? '#CDC1FF' : '#A294F9';
     setTimeout(() => messageElement.style.display = 'none', 3000);
   }
 
