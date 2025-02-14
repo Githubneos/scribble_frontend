@@ -106,7 +106,6 @@ search_exclude: true
         </form>
         <p id="result-message"></p>
     </div>
-
     <!-- Stats Table (with Update and Delete) -->
     <div class="stats-container">
         <h3>Your Guess Statistics</h3>
@@ -137,11 +136,11 @@ let currentHintIndex = 0;
 
 // Built-in images and hints
 const images = [
-    { label: "car", src: "assets/images/car.png", hints: ["It has wheels", "Used for transportation"] },
-    { label: "house", src: "assets/images/house.png", hints: ["People live in it", "Has a roof"] },
-    { label: "sun", src: "assets/images/sun.png", hints: ["It's bright", "Appears during the day"] },
-    { label: "mountain", src: "assets/images/mountain.png", hints: ["It's tall", "Covered with snow"] },
-    { label: "ocean", src: "assets/images/ocean.png", hints: ["It's large", "Salty water"] }
+    { label: "car", src: "images/scribble_pictures/car.png", hints: ["It has wheels", "Used for transportation", "has engine"] },
+    { label: "house", src: "images/scribble_pictures/house.png", hints: ["People live in it", "Has a roof", "home"] },
+    { label: "sun", src: "images/scribble_pictures/sun.png", hints: ["It's bright", "Appears during the day", "Star of our solar system"] },
+    { label: "mountain", src: "images/scribble_pictures/mountain.png", hints: ["It's tall", "Covered with snow", "People hike on this"] },
+    { label: "ocean", src: "images/scribble_pictures/ocean.png", hints: ["It's large", "Salty water", "People use boats on it"] }
 ];
 
 // Show a message
@@ -169,7 +168,7 @@ async function submitGuess(event) {
     const image = images[currentImageIndex];
 
     try {
-        const response = await fetch(`${pythonURI}/api/guess`, {
+        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -199,7 +198,7 @@ async function submitGuess(event) {
 // Load guess statistics from backend
 async function loadStats() {
     try {
-        const response = await fetch(`${pythonURI}/api/guess/stats`, {
+        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats", {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -230,12 +229,12 @@ async function loadStats() {
     }
 }
 
-// Update a guess
-async function updateGuess(guessId) {
-    const newGuess = document.getElementById(`guess-${guessId}`).value;
+// Update a Guess using image label
+async function updateGuess(imageLabel) {
+    const newGuess = document.getElementById(`guess-${imageLabel}`).value;
 
     try {
-        const response = await fetch(`${pythonURI}/api/guess/${guessId}`, {
+        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/${imageLabel}", {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ guess: newGuess })
@@ -250,10 +249,10 @@ async function updateGuess(guessId) {
     }
 }
 
-// Delete a guess
-async function deleteGuess(guessId) {
+// Delete a Guess using image label
+async function deleteGuess(imageLabel) {
     try {
-        const response = await fetch(`${pythonURI}/api/guess/${guessId}`, {
+        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/${imageLabel}", {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -266,6 +265,7 @@ async function deleteGuess(guessId) {
         showMessage('Failed to delete guess', 'error');
     }
 }
+
 
 // Get next hint from built-in hints
 function getNextHint() {
