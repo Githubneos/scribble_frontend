@@ -106,7 +106,6 @@ search_exclude: true
         </form>
         <p id="result-message"></p>
     </div>
-
     <!-- Stats Table (with Update and Delete) -->
     <div class="stats-container">
         <h3>Your Guess Statistics</h3>
@@ -127,7 +126,7 @@ search_exclude: true
 </div>
 
 <script type="module">
-import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+import "https://scribble.stu.nighthawkcodingsociety.com" from '{{site.baseurl}}/assets/js/api/config.js';
 
 let currentImageIndex = 0;
 let hintsUsed = 0;
