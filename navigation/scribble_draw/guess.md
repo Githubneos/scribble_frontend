@@ -97,8 +97,8 @@ search_exclude: true
         </div>
         <div class="hint-section">
             <h3>Hints:</h3>
-            <div id="hint-list"></div>
-            <button class="button" id="hint-button">Get Next Hint</button>
+        <div id="hint-list"></div>
+        <button class="button" id="hint-button">Get Next Hint</button>
         </div>
         <form class="guess-form" onsubmit="submitGuess(event)">
             <input type="text" id="guess-input" class="input-field" placeholder="Enter your guess" required>
@@ -106,6 +106,7 @@ search_exclude: true
         </form>
         <p id="result-message"></p>
     </div>
+
     <!-- Stats Table (with Update and Delete) -->
     <div class="stats-container">
         <h3>Your Guess Statistics</h3>
@@ -122,12 +123,6 @@ search_exclude: true
                 <tr><td colspan="4">Loading stats...</td></tr>
             </tbody>
         </table>
-    </div>
-    <!-- Custom Drawing Canvas for the Game -->
-    <div class="drawing-container">
-        <h3>Draw Your Guess:</h3>
-        <canvas id="drawing-canvas" width="300" height="300" style="border: 1px solid #000;"></canvas>
-        <button class="button" onclick="clearCanvas()">Clear Canvas</button>
     </div>
 </div>
 
@@ -146,11 +141,6 @@ const images = [
     { label: "mountain", src: "images/scribble_pictures/mountain.png", hints: ["It's tall", "Covered with snow", "People hike on this"] },
     { label: "ocean", src: "images/scribble_pictures/ocean.png", hints: ["It's large", "Salty water", "People use boats on it"] }
 ];
-
-// Drawing canvas context
-const canvas = document.getElementById('drawing-canvas');
-const ctx = canvas.getContext('2d');
-let isDrawing = false;
 
 // Show a message
 function showMessage(text, type) {
@@ -295,30 +285,9 @@ function getNextHint() {
     }
 }
 
-// Initialize the drawing functionality on canvas
-canvas.addEventListener('mousedown', (e) => {
-    isDrawing = true;
-    ctx.moveTo(e.offsetX, e.offsetY);
-});
-
-canvas.addEventListener('mousemove', (e) => {
-    if (isDrawing) {
-        ctx.lineTo(e.offsetX, e.offsetY);
-        ctx.stroke();
-    }
-});
-
-canvas.addEventListener('mouseup', () => {
-    isDrawing = false;
-});
-
-canvas.addEventListener('mouseout', () => {
-    isDrawing = false;
-});
-
-// Clear canvas function
-function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+// Check if the guess is correct (simple comparison for demo purposes)
+function checkIfCorrect(guess, correctLabel) {
+    return guess.trim().toLowerCase() === correctLabel.toLowerCase();
 }
 
 // Initial load
