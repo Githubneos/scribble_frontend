@@ -126,180 +126,235 @@ search_exclude: true
     </div>
 </div>
 <script type="module">
-let currentImageIndex = 0;
-let hintsUsed = 0;
-let currentHintIndex = 0;
-// Custom images data (labels, hints, and basic drawings for simplicity)
-const images = [
-    {
-        label: "car",
-        drawing: function(ctx) {
-            // Drawing a basic representation of a car on canvas
-            ctx.fillStyle = "#3498db";
-            ctx.fillRect(100, 150, 200, 50); // Body of the car
-            ctx.fillStyle = "#2ecc71";
-            ctx.beginPath();
-            ctx.arc(130, 200, 20, 0, Math.PI * 2); // Left wheel
-            ctx.arc(270, 200, 20, 0, Math.PI * 2); // Right wheel
-            ctx.fill();
+    let currentImageIndex = 0;
+    let hintsUsed = 0;
+    let currentHintIndex = 0;
+    // Custom images data (labels, hints, and basic drawings for simplicity)
+    const images = [
+        {
+            label: "car",
+            drawing: function(ctx) {
+                // Drawing a basic representation of a car on canvas
+                ctx.fillStyle = "#3498db";
+                ctx.fillRect(100, 150, 200, 50); // Body of the car
+                ctx.fillStyle = "#2ecc71";
+                ctx.beginPath();
+                ctx.arc(130, 200, 20, 0, Math.PI * 2); // Left wheel
+                ctx.arc(270, 200, 20, 0, Math.PI * 2); // Right wheel
+                ctx.fill();
+            },
+            hints: ["It has wheels", "Used for transportation", "Has engine"]
         },
-        hints: ["It has wheels", "Used for transportation", "Has engine"]
-    },
-    {
-        label: "house",
-        drawing: function(ctx) {
-            // Drawing a basic house
-            ctx.fillStyle = "#e74c3c";
-            ctx.fillRect(100, 100, 200, 150); // House body
-            ctx.fillStyle = "#f39c12";
-            ctx.beginPath();
-            ctx.moveTo(100, 100);
-            ctx.lineTo(200, 50); // Roof
-            ctx.lineTo(300, 100);
-            ctx.fill();
+        {
+            label: "house",
+            drawing: function(ctx) {
+                // Drawing a basic house
+                ctx.fillStyle = "#e74c3c";
+                ctx.fillRect(100, 100, 200, 150); // House body
+                ctx.fillStyle = "#f39c12";
+                ctx.beginPath();
+                ctx.moveTo(100, 100);
+                ctx.lineTo(200, 50); // Roof
+                ctx.lineTo(300, 100);
+                ctx.fill();
+            },
+            hints: ["People live in it", "Has a roof", "Home"]
         },
-        hints: ["People live in it", "Has a roof", "Home"]
-    },
-    {
-        label: "sun",
-        drawing: function(ctx) {
-            // Drawing a simple sun
-            ctx.fillStyle = "#f1c40f";
-            ctx.beginPath();
-            ctx.arc(200, 200, 50, 0, Math.PI * 2); // Sun
-            ctx.fill();
+        {
+            label: "sun",
+            drawing: function(ctx) {
+                // Drawing a simple sun
+                ctx.fillStyle = "#f1c40f";
+                ctx.beginPath();
+                ctx.arc(200, 200, 50, 0, Math.PI * 2); // Sun
+                ctx.fill();
+            },
+            hints: ["It's bright", "Appears during the day", "Star of our solar system"]
         },
-        hints: ["It's bright", "Appears during the day", "Star of our solar system"]
-    },
-    {
-        label: "mountain",
-        drawing: function(ctx) {
-            // Drawing a simple mountain
-            ctx.fillStyle = "#2c3e50";
-            ctx.beginPath();
-            ctx.moveTo(100, 300);
-            ctx.lineTo(200, 100); // Peak of the mountain
-            ctx.lineTo(300, 300);
-            ctx.closePath();
-            ctx.fill();
+        {
+            label: "mountain",
+            drawing: function(ctx) {
+                // Drawing a simple mountain
+                ctx.fillStyle = "#2c3e50";
+                ctx.beginPath();
+                ctx.moveTo(100, 300);
+                ctx.lineTo(200, 100); // Peak of the mountain
+                ctx.lineTo(300, 300);
+                ctx.closePath();
+                ctx.fill();
+            },
+            hints: ["It's tall", "Covered with snow", "People hike on this"]
         },
-        hints: ["It's tall", "Covered with snow", "People hike on this"]
-    },
-    {
-        label: "ocean",
-        drawing: function(ctx) {
-            // Drawing a simple ocean (blue rectangle)
-            ctx.fillStyle = "#3498db";
-            ctx.fillRect(50, 250, 300, 100);
-        },
-        hints: ["It's large", "Salty water", "People use boats on it"]
-    }
-];
-// Show a message
-function showMessage(text, type) {
-    const messageDiv = document.getElementById('result-message');
-    messageDiv.textContent = text;
-    messageDiv.className = `message ${type}`;
-    setTimeout(() => messageDiv.textContent = '', 3000);
-}
-// Load a new image (canvas drawing) from custom images
-function loadNewImage() {
-    const image = images[currentImageIndex];
-    const canvas = document.getElementById('guess-canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 300;
-    canvas.height = 300;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    image.drawing(ctx);
-    document.getElementById('guess-input').value = '';
-    hintsUsed = 0;
-    currentHintIndex = 0;
-}
-// Submit a guess to the stats table
-async function submitGuess(event) {
-    event.preventDefault();
-    const guess = document.getElementById('guess-input').value;
-    const image = images[currentImageIndex];
-    const guesserName = "Anonymous";  // Replace with actual user name if applicable
-    const isCorrect = checkIfCorrect(guess, image.label);  // Implement this function to check correctness
-    try {
-        // Logic for submitting the guess (to be adapted for frontend)
-        showMessage(isCorrect ? 'Correct! Loading next image...' : 'Incorrect, try again!', isCorrect ? 'success' : 'error');
-        await loadStats();
-        currentImageIndex = (currentImageIndex + 1) % images.length;
-        setTimeout(loadNewImage, 1500);
-    } catch (error) {
-        console.error('Error:', error);
-        showMessage('Error submitting guess', 'error');
-    }
-}
-// Load guess statistics (strictly frontend)
-function loadStats() {
-    const statsBody = document.getElementById('stats-body');
-    statsBody.innerHTML = '';
-    const stats = [
-        { guesser_name: 'User1', user_guess: 'car', correct: true },
-        { guesser_name: 'User2', user_guess: 'house', correct: false },
-        { guesser_name: 'User3', user_guess: 'mountain', correct: true }
+        {
+            label: "ocean",
+            drawing: function(ctx) {
+                // Drawing a simple ocean (blue rectangle)
+                ctx.fillStyle = "#3498db";
+                ctx.fillRect(50, 250, 300, 100);
+            },
+            hints: ["It's large", "Salty water", "People use boats on it"]
+        }
     ];
-    stats.forEach(stat => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${stat.guesser_name}</td>
-            <td><input type="text" value="${stat.user_guess}" id="guess-${stat.guess_id}"></td>
-            <td>${stat.correct ? '✅' : '❌'}</td>
-            <td>
-                <button onclick="updateGuess(${stat.guess_id})">Update</button>
-                <button onclick="deleteGuess(${stat.guess_id})">Delete</button>
-            </td>
-        `;
-        statsBody.appendChild(row);
+    // Show a message
+    function showMessage(text, type) {
+        const messageDiv = document.getElementById('result-message');
+        messageDiv.textContent = text;
+        messageDiv.className = `message ${type}`;
+        setTimeout(() => messageDiv.textContent = '', 3000);
+    }
+    // Load a new image (canvas drawing) from custom images
+    function loadNewImage() {
+        const image = images[currentImageIndex];
+        const canvas = document.getElementById('guess-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 400;
+        canvas.height = 400;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        image.drawing(ctx);
+        document.getElementById('guess-input').value = '';
+        hintsUsed = 0;
+        currentHintIndex = 0;
+    }
+    // Submit a guess to the stats table
+    async function submitGuess(event) {
+        event.preventDefault();
+        const guess = document.getElementById('guess-input').value;
+        const image = images[currentImageIndex];
+        const guesserName = "Anonymous";  // Replace with actual user name if applicable
+        const isCorrect = checkIfCorrect(guess, image.label);  // Implement this function to check correctness
+        try {
+            const response = await fetch('/api/stats', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    user_guess: guess,
+                    is_correct: isCorrect,
+                    hint_used: hintsUsed,
+                    guesser_name: guesserName
+                })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                showMessage('Guess submitted successfully!', 'success');
+                await loadStats();
+                currentImageIndex = (currentImageIndex + 1) % images.length;
+                setTimeout(loadNewImage, 1500);
+            } else {
+                showMessage(result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error submitting guess:', error);
+            showMessage('Error submitting guess', 'error');
+        }
+    }
+    // Load guess statistics (strictly frontend)
+    async function loadStats() {
+        const statsBody = document.getElementById('stats-body');
+        statsBody.innerHTML = '';  // Clear the existing rows
+        try {
+            const response = await fetch('/api/stats', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                if (data.recent_guesses.length === 0) {
+                    statsBody.innerHTML = '<tr><td colspan="4">No guesses found</td></tr>';
+                    return;
+                }
+                data.recent_guesses.forEach(stat => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${stat.guesser_name}</td>
+                        <td><input type="text" value="${stat.user_guess}" id="guess-${stat.guess_id}"></td>
+                        <td>${stat.is_correct ? '✅' : '❌'}</td>
+                        <td>
+                            <button onclick="updateGuess(${stat.guess_id})">Update</button>
+                            <button onclick="deleteGuess(${stat.guess_id})">Delete</button>
+                        </td>
+                    `;
+                    statsBody.appendChild(row);
+                });
+            } else {
+                showMessage(data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
+            showMessage('Error loading stats', 'error');
+        }
+    }
+    // Update a Guess using guess ID
+    async function updateGuess(guessId) {
+        const newGuess = document.getElementById(`guess-${guessId}`).value;
+        try {
+            const response = await fetch(`/api/stats/guess/${guessId}/update`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ user_guess: newGuess })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                showMessage(result.message, 'success');
+                loadStats();  // Reload stats after update
+            } else {
+                showMessage(result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error updating guess:', error);
+            showMessage('Failed to update guess', 'error');
+        }
+    }
+    // Delete a Guess using guess ID
+    async function deleteGuess(guessId) {
+        try {
+            const response = await fetch(`/api/stats/guess/${guessId}/delete`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const result = await response.json();
+            if (response.ok) {
+                showMessage(result.message, 'success');
+                loadStats();  // Reload stats after deletion
+            } else {
+                showMessage(result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting guess:', error);
+            showMessage('Failed to delete guess', 'error');
+        }
+    }
+    // Check if the guess is correct (simple comparison for demo purposes)
+    function checkIfCorrect(guess, correctLabel) {
+        return guess.trim().toLowerCase() === correctLabel.toLowerCase();
+    }
+    // Get next hint from built-in hints
+    function getNextHint() {
+        const image = images[currentImageIndex];
+        if (currentHintIndex < image.hints.length) {
+            const hint = document.createElement('p');
+            hint.textContent = image.hints[currentHintIndex];
+            document.getElementById('hint-list').appendChild(hint);
+            hintsUsed++;
+            currentHintIndex++;
+        } else {
+            showMessage('No more hints available!', 'error');
+            document.getElementById('hint-button').disabled = true;
+        }
+    }
+    // Initial load
+    document.addEventListener('DOMContentLoaded', () => {
+        loadNewImage();
+        loadStats();
+        document.getElementById('hint-button').addEventListener('click', getNextHint);
     });
-}
-// Update a Guess using guess ID
-async function updateGuess(guessId) {
-    const newGuess = document.getElementById(`guess-${guessId}`).value;
-    try {
-        // Update logic here (not connected to backend in this version)
-        showMessage('Guess updated!', 'success');
-        await loadStats();
-    } catch (error) {
-        console.error('Error:', error);
-        showMessage('Failed to update guess', 'error');
-    }
-}
-// Delete a Guess using guess ID
-async function deleteGuess(guessId) {
-    try {
-        // Delete logic here (not connected to backend in this version)
-        showMessage('Guess deleted!', 'success');
-        await loadStats();
-    } catch (error) {
-        console.error('Error:', error);
-        showMessage('Failed to delete guess', 'error');
-    }
-}
-// Get next hint from built-in hints
-function getNextHint() {
-    const image = images[currentImageIndex];
-    if (currentHintIndex < image.hints.length) {
-        const hint = document.createElement('p');
-        hint.textContent = image.hints[currentHintIndex];
-        document.getElementById('hint-list').appendChild(hint);
-        hintsUsed++;
-        currentHintIndex++;
-    } else {
-        showMessage('No more hints available!', 'error');
-        document.getElementById('hint-button').disabled = true;
-    }
-}
-// Check if the guess is correct (simple comparison for demo purposes)
-function checkIfCorrect(guess, correctLabel) {
-    return guess.trim().toLowerCase() === correctLabel.toLowerCase();
-}
-// Initial load
-document.addEventListener('DOMContentLoaded', () => {
-    loadNewImage();
-    loadStats();
-    document.getElementById('hint-button').addEventListener('click', getNextHint);
-});
+</script>
