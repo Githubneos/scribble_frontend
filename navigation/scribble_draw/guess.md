@@ -295,4 +295,96 @@ document.addEventListener('DOMContentLoaded', () => {
     loadStats();
     document.getElementById('hint-button').addEventListener('click', getNextHint);
 });
+
+// Fetch and load user statistics from the backend
+async function loadStats() {
+    try {
+        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
+            }
+        });
+
+        if (!response.ok) throw new Error(`Failed to fetch stats: ${response.statusText}`);
+
+        const stats = await response.json();
+        const tbody = document.getElementById('stats-body');
+        tbody.innerHTML = ''; // Clear existing rows
+
+        if (!stats.recent_guesses || stats.recent_guesses.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4">No guesses yet.</td></tr>';
+            return;
+        }
+
+        stats.recent_guesses.forEach(stat => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${stat.guesser_name}</td>
+                <td><input type="text" value="${stat.word}" id="guess-${stat.id}"></td>
+                <td>${stat.is_correct ? '✅' : '❌'}</td>
+                <td>
+                    <button onclick="updateGuess(${stat.id})">Update</button>
+                    <button onclick="deleteGuess(${stat.id})">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('stats-body').innerHTML = `<tr><td colspan="4">Error loading stats</td></tr>`;
+    }
+}
+
+// Update a Guess using guess ID
+async function updateGuess(guessId) {
+    const newGuess = document.getElementById(`guess-${guessId}`).value;
+
+    try {
+        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats", {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
+            },
+            body: JSON.stringify({ id: guessId, guess: newGuess }) 
+        });
+
+        if (!response.ok) throw new Error('Update failed');
+        showMessage('Guess updated!', 'success');
+        await loadStats();
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage('Failed to update guess', 'error');
+    }
+}
+
+// Delete a Guess using guess ID
+async function deleteGuess(guessId) {
+    try {
+        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats", {
+            method: 'DELETE',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
+            },
+            body: JSON.stringify({ id: guessId })
+        });
+
+        if (!response.ok) throw new Error('Delete failed');
+        showMessage('Guess deleted!', 'success');
+        await loadStats();
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage('Failed to delete guess', 'error');
+    }
+}
+
+// Load stats when the page is ready
+document.addEventListener('DOMContentLoaded', () => {
+    loadStats();
+});
+
 </script>
+
