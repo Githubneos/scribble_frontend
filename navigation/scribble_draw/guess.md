@@ -1,6 +1,6 @@
 ---
 layout: needsAuth
-title: Word Guessing Game
+title: Picture Guessing Game
 permalink: /guess
 menu: nav/home.html
 search_exclude: true
@@ -86,6 +86,15 @@ search_exclude: true
         color: #2ECC71;
         margin-top: 10px;
     }
+
+    .image-container {
+        margin: 20px 0;
+    }
+
+    #guess-canvas {
+        border: 2px solid #34495E;
+        border-radius: 8px;
+    }
 </style>
 
 <div class="game-container">
@@ -107,7 +116,7 @@ search_exclude: true
         </form>
         <p id="result-message"></p>
     </div>
-     <!-- Stats Table (with Update and Delete) -->
+    <!-- Stats Table (with Update and Delete) -->
     <div class="stats-container">
         <h3>Your Guess Statistics</h3>
         <table id="stats-table" border="1">
@@ -125,6 +134,7 @@ search_exclude: true
         </table>
     </div>
 </div>
+
 <script type="module">
     let currentImageIndex = 0;
     let hintsUsed = 0;
@@ -134,7 +144,6 @@ search_exclude: true
         {
             label: "car",
             drawing: function(ctx) {
-                // Drawing a basic representation of a car on canvas
                 ctx.fillStyle = "#3498db";
                 ctx.fillRect(100, 150, 200, 50); // Body of the car
                 ctx.fillStyle = "#2ecc71";
@@ -148,7 +157,6 @@ search_exclude: true
         {
             label: "house",
             drawing: function(ctx) {
-                // Drawing a basic house
                 ctx.fillStyle = "#e74c3c";
                 ctx.fillRect(100, 100, 200, 150); // House body
                 ctx.fillStyle = "#f39c12";
@@ -163,7 +171,6 @@ search_exclude: true
         {
             label: "sun",
             drawing: function(ctx) {
-                // Drawing a simple sun
                 ctx.fillStyle = "#f1c40f";
                 ctx.beginPath();
                 ctx.arc(200, 200, 50, 0, Math.PI * 2); // Sun
@@ -174,7 +181,6 @@ search_exclude: true
         {
             label: "mountain",
             drawing: function(ctx) {
-                // Drawing a simple mountain
                 ctx.fillStyle = "#2c3e50";
                 ctx.beginPath();
                 ctx.moveTo(100, 300);
@@ -188,21 +194,20 @@ search_exclude: true
         {
             label: "ocean",
             drawing: function(ctx) {
-                // Drawing a simple ocean (blue rectangle)
                 ctx.fillStyle = "#3498db";
-                ctx.fillRect(50, 250, 300, 100);
+                ctx.fillRect(50, 250, 300, 100); // Ocean
             },
             hints: ["It's large", "Salty water", "People use boats on it"]
         }
     ];
-    // Show a message
+
     function showMessage(text, type) {
         const messageDiv = document.getElementById('result-message');
         messageDiv.textContent = text;
         messageDiv.className = `message ${type}`;
         setTimeout(() => messageDiv.textContent = '', 3000);
     }
-    // Load a new image (canvas drawing) from custom images
+
     function loadNewImage() {
         const image = images[currentImageIndex];
         const canvas = document.getElementById('guess-canvas');
@@ -215,15 +220,15 @@ search_exclude: true
         hintsUsed = 0;
         currentHintIndex = 0;
     }
-    // Submit a guess to the stats table
+
     async function submitGuess(event) {
         event.preventDefault();
         const guess = document.getElementById('guess-input').value;
         const image = images[currentImageIndex];
-        const guesserName = "Anonymous";  // Replace with actual user name if applicable
-        const isCorrect = checkIfCorrect(guess, image.label);  // Implement this function to check correctness
+        const guesserName = "Anonymous";  
+        const isCorrect = checkIfCorrect(guess, image.label); 
         try {
-            const response = await fetch('/api/stats', {
+            const response = await fetch('/api/guess', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -250,12 +255,12 @@ search_exclude: true
             showMessage('Error submitting guess', 'error');
         }
     }
-    // Load guess statistics (strictly frontend)
+
     async function loadStats() {
         const statsBody = document.getElementById('stats-body');
-        statsBody.innerHTML = '';  // Clear the existing rows
+        statsBody.innerHTML = '';  
         try {
-            const response = await fetch('/api/stats', {
+            const response = await fetch('/api/guess', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -288,11 +293,11 @@ search_exclude: true
             showMessage('Error loading stats', 'error');
         }
     }
-    // Update a Guess using guess ID
+
     async function updateGuess(guessId) {
         const newGuess = document.getElementById(`guess-${guessId}`).value;
         try {
-            const response = await fetch(`/api/stats/guess/${guessId}/update`, {
+            const response = await fetch(`/api/guess/stats/${guessId}/update`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -303,7 +308,7 @@ search_exclude: true
             const result = await response.json();
             if (response.ok) {
                 showMessage(result.message, 'success');
-                loadStats();  // Reload stats after update
+                loadStats();  
             } else {
                 showMessage(result.message, 'error');
             }
@@ -312,10 +317,10 @@ search_exclude: true
             showMessage('Failed to update guess', 'error');
         }
     }
-    // Delete a Guess using guess ID
+
     async function deleteGuess(guessId) {
         try {
-            const response = await fetch(`/api/stats/guess/${guessId}/delete`, {
+            const response = await fetch(`/api/guess/stats/${guessId}/delete`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -324,7 +329,7 @@ search_exclude: true
             const result = await response.json();
             if (response.ok) {
                 showMessage(result.message, 'success');
-                loadStats();  // Reload stats after deletion
+                loadStats();  
             } else {
                 showMessage(result.message, 'error');
             }
@@ -333,11 +338,11 @@ search_exclude: true
             showMessage('Failed to delete guess', 'error');
         }
     }
-    // Check if the guess is correct (simple comparison for demo purposes)
+
     function checkIfCorrect(guess, correctLabel) {
         return guess.trim().toLowerCase() === correctLabel.toLowerCase();
     }
-    // Get next hint from built-in hints
+
     function getNextHint() {
         const image = images[currentImageIndex];
         if (currentHintIndex < image.hints.length) {
@@ -351,120 +356,10 @@ search_exclude: true
             document.getElementById('hint-button').disabled = true;
         }
     }
-    document.addEventListener('DOMContentLoaded', fetchStats);
-// Fetch user stats from the backend API
-async function fetchStats() {
-    try {
-        const response = await fetch('/api/stats', {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('authToken'),  // Adjust as per your JWT handling
-                'Content-Type': 'application/json',
-            }
-        });
-        const data = await response.json();
-        if (response.ok) {
-            populateStatsTable(data);
-            updateStatsSummary(data);
-        } else {
-            showMessage('Error loading stats: ' + data.message, 'error');
-        }
-    } catch (error) {
-        console.error('Error fetching stats:', error);
-        showMessage('Error loading stats', 'error');
-    }
-}
-// Populate the stats table with recent guesses
-function populateStatsTable(stats) {
-    const statsBody = document.getElementById('stats-body');
-    statsBody.innerHTML = ''; // Clear any existing data
-    if (stats.recent_guesses && stats.recent_guesses.length > 0) {
-        stats.recent_guesses.forEach(stat => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${stat.guesser_name || 'Anonymous'}</td>
-                <td><input type="text" value="${stat.user_guess}" id="guess-${stat.guess_id}"></td>
-                <td>${stat.is_correct ? '✅' : '❌'}</td>
-                <td>${stat.hint_used}</td>
-                <td>
-                    <button onclick="updateGuess(${stat.guess_id})">Update</button>
-                    <button onclick="deleteGuess(${stat.guess_id})">Delete</button>
-                </td>
-            `;
-            statsBody.appendChild(row);
-        });
-    } else {
-        statsBody.innerHTML = '<tr><td colspan="5">No guesses available.</td></tr>';
-    }
-}
-// Update the summary statistics (total guesses, accuracy, etc.)
-function updateStatsSummary(stats) {
-    document.getElementById('total-guesses').innerText = stats.total_guesses;
-    document.getElementById('correct-guesses').innerText = stats.correct_guesses;
-    document.getElementById('accuracy').innerText = (stats.accuracy * 100).toFixed(2) + '%';
-    document.getElementById('avg-hints').innerText = stats.avg_hints.toFixed(2);
-}
-// Function to handle update action
-async function updateGuess(guessId) {
-    const newGuess = document.getElementById(`guess-${guessId}`).value;
-    try {
-        const response = await fetch(`/api/guess/${guessId}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                user_guess: newGuess
-            })
-        });
-        const data = await response.json();
-        if (response.ok) {
-            alert('Guess updated successfully!');
-            fetchStats();  // Refresh the stats after update
-        } else {
-            showMessage('Error updating guess: ' + data.message, 'error');
-        }
-    } catch (error) {
-        console.error('Error updating guess:', error);
-        showMessage('Error updating guess', 'error');
-    }
-}
-// Function to handle delete action
-async function deleteGuess(guessId) {
-    try {
-        const response = await fetch(`/api/guess/${guessId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
-                'Content-Type': 'application/json',
-            }
-        });
-        const data = await response.json();
-        if (response.ok) {
-            alert('Guess deleted successfully!');
-            fetchStats();  // Refresh the stats after delete
-        } else {
-            showMessage('Error deleting guess: ' + data.message, 'error');
-        }
-    } catch (error) {
-        console.error('Error deleting guess:', error);
-        showMessage('Error deleting guess', 'error');
-    }
-}
-// Function to display error or success messages
-function showMessage(message, type) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
-    messageDiv.innerText = message;
-    document.body.appendChild(messageDiv);
-    setTimeout(() => messageDiv.remove(), 3000);
-}
-    // Initial load
-    document.addEventListener('DOMContentLoaded', () => {
-        loadNewImage();
-        loadStats();
-        document.getElementById('hint-button').addEventListener('click', getNextHint);
-    });
+
+    document.getElementById('hint-button').addEventListener('click', getNextHint);
+
+    loadNewImage();  
+    loadStats();
 </script>
- 
+
