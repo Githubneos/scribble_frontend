@@ -126,7 +126,6 @@ search_exclude: true
 </div>
 
 <script type="module">
-import "https://scribble.stu.nighthawkcodingsociety.com" from '{{site.baseurl}}/assets/js/api/config.js';
 
 let currentImageIndex = 0;
 let hintsUsed = 0;
