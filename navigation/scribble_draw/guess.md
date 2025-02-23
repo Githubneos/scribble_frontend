@@ -351,6 +351,115 @@ search_exclude: true
             document.getElementById('hint-button').disabled = true;
         }
     }
+    document.addEventListener('DOMContentLoaded', fetchStats);
+// Fetch user stats from the backend API
+async function fetchStats() {
+    try {
+        const response = await fetch('/api/stats', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('authToken'),  // Adjust as per your JWT handling
+                'Content-Type': 'application/json',
+            }
+        });
+        const data = await response.json();
+        if (response.ok) {
+            populateStatsTable(data);
+            updateStatsSummary(data);
+        } else {
+            showMessage('Error loading stats: ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+        showMessage('Error loading stats', 'error');
+    }
+}
+// Populate the stats table with recent guesses
+function populateStatsTable(stats) {
+    const statsBody = document.getElementById('stats-body');
+    statsBody.innerHTML = ''; // Clear any existing data
+    if (stats.recent_guesses && stats.recent_guesses.length > 0) {
+        stats.recent_guesses.forEach(stat => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${stat.guesser_name || 'Anonymous'}</td>
+                <td><input type="text" value="${stat.user_guess}" id="guess-${stat.guess_id}"></td>
+                <td>${stat.is_correct ? '✅' : '❌'}</td>
+                <td>${stat.hint_used}</td>
+                <td>
+                    <button onclick="updateGuess(${stat.guess_id})">Update</button>
+                    <button onclick="deleteGuess(${stat.guess_id})">Delete</button>
+                </td>
+            `;
+            statsBody.appendChild(row);
+        });
+    } else {
+        statsBody.innerHTML = '<tr><td colspan="5">No guesses available.</td></tr>';
+    }
+}
+// Update the summary statistics (total guesses, accuracy, etc.)
+function updateStatsSummary(stats) {
+    document.getElementById('total-guesses').innerText = stats.total_guesses;
+    document.getElementById('correct-guesses').innerText = stats.correct_guesses;
+    document.getElementById('accuracy').innerText = (stats.accuracy * 100).toFixed(2) + '%';
+    document.getElementById('avg-hints').innerText = stats.avg_hints.toFixed(2);
+}
+// Function to handle update action
+async function updateGuess(guessId) {
+    const newGuess = document.getElementById(`guess-${guessId}`).value;
+    try {
+        const response = await fetch(`/api/guess/${guessId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_guess: newGuess
+            })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            alert('Guess updated successfully!');
+            fetchStats();  // Refresh the stats after update
+        } else {
+            showMessage('Error updating guess: ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error updating guess:', error);
+        showMessage('Error updating guess', 'error');
+    }
+}
+// Function to handle delete action
+async function deleteGuess(guessId) {
+    try {
+        const response = await fetch(`/api/guess/${guessId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                'Content-Type': 'application/json',
+            }
+        });
+        const data = await response.json();
+        if (response.ok) {
+            alert('Guess deleted successfully!');
+            fetchStats();  // Refresh the stats after delete
+        } else {
+            showMessage('Error deleting guess: ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting guess:', error);
+        showMessage('Error deleting guess', 'error');
+    }
+}
+// Function to display error or success messages
+function showMessage(message, type) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+    messageDiv.innerText = message;
+    document.body.appendChild(messageDiv);
+    setTimeout(() => messageDiv.remove(), 3000);
+}
     // Initial load
     document.addEventListener('DOMContentLoaded', () => {
         loadNewImage();
@@ -358,3 +467,4 @@ search_exclude: true
         document.getElementById('hint-button').addEventListener('click', getNextHint);
     });
 </script>
+ 
