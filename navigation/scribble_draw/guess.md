@@ -132,13 +132,71 @@ let currentImageIndex = 0;
 let hintsUsed = 0;
 let currentHintIndex = 0;
 
-// Built-in images and hints
+// Custom images data (labels, hints, and basic drawings for simplicity)
 const images = [
-    { label: "car", src: "images/scribble_pictures/car.png", hints: ["It has wheels", "Used for transportation", "Has engine"] },
-    { label: "house", src: "images/scribble_pictures/house.png", hints: ["People live in it", "Has a roof", "Home"] },
-    { label: "sun", src: "images/scribble_pictures/sun.png", hints: ["It's bright", "Appears during the day", "Star of our solar system"] },
-    { label: "mountain", src: "images/scribble_pictures/mountain.png", hints: ["It's tall", "Covered with snow", "People hike on this"] },
-    { label: "ocean", src: "images/scribble_pictures/ocean.png", hints: ["It's large", "Salty water", "People use boats on it"] }
+    {
+        label: "car",
+        drawing: function(ctx) {
+            // Drawing a basic representation of a car on canvas
+            ctx.fillStyle = "#3498db";
+            ctx.fillRect(100, 150, 200, 50); // Body of the car
+            ctx.fillStyle = "#2ecc71";
+            ctx.beginPath();
+            ctx.arc(130, 200, 20, 0, Math.PI * 2); // Left wheel
+            ctx.arc(270, 200, 20, 0, Math.PI * 2); // Right wheel
+            ctx.fill();
+        },
+        hints: ["It has wheels", "Used for transportation", "Has engine"]
+    },
+    {
+        label: "house",
+        drawing: function(ctx) {
+            // Drawing a basic house
+            ctx.fillStyle = "#e74c3c";
+            ctx.fillRect(100, 100, 200, 150); // House body
+            ctx.fillStyle = "#f39c12";
+            ctx.beginPath();
+            ctx.moveTo(100, 100);
+            ctx.lineTo(200, 50); // Roof
+            ctx.lineTo(300, 100);
+            ctx.fill();
+        },
+        hints: ["People live in it", "Has a roof", "Home"]
+    },
+    {
+        label: "sun",
+        drawing: function(ctx) {
+            // Drawing a simple sun
+            ctx.fillStyle = "#f1c40f";
+            ctx.beginPath();
+            ctx.arc(200, 200, 50, 0, Math.PI * 2); // Sun
+            ctx.fill();
+        },
+        hints: ["It's bright", "Appears during the day", "Star of our solar system"]
+    },
+    {
+        label: "mountain",
+        drawing: function(ctx) {
+            // Drawing a simple mountain
+            ctx.fillStyle = "#2c3e50";
+            ctx.beginPath();
+            ctx.moveTo(100, 300);
+            ctx.lineTo(200, 100); // Peak of the mountain
+            ctx.lineTo(300, 300);
+            ctx.closePath();
+            ctx.fill();
+        },
+        hints: ["It's tall", "Covered with snow", "People hike on this"]
+    },
+    {
+        label: "ocean",
+        drawing: function(ctx) {
+            // Drawing a simple ocean (blue rectangle)
+            ctx.fillStyle = "#3498db";
+            ctx.fillRect(50, 250, 300, 100);
+        },
+        hints: ["It's large", "Salty water", "People use boats on it"]
+    }
 ];
 
 // Show a message
@@ -149,11 +207,15 @@ function showMessage(text, type) {
     setTimeout(() => messageDiv.textContent = '', 3000);
 }
 
-// Load a new image from built-in images
+// Load a new image (canvas drawing) from custom images
 function loadNewImage() {
     const image = images[currentImageIndex];
-    document.getElementById('guess-image').src = image.src;
-    document.getElementById('hint-list').innerHTML = '';
+    const canvas = document.getElementById('guess-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 400;
+    canvas.height = 400;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    image.drawing(ctx);
     document.getElementById('guess-input').value = '';
     hintsUsed = 0;
     currentHintIndex = 0;
@@ -165,71 +227,45 @@ async function submitGuess(event) {
     const guess = document.getElementById('guess-input').value;
     const image = images[currentImageIndex];
 
-    // You need to pass the guesser's name and correctness status as well
     const guesserName = "Anonymous";  // Replace with actual user name if applicable
     const isCorrect = checkIfCorrect(guess, image.label);  // Implement this function to check correctness
 
     try {
-        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                image_label: image.label,
-                guess: guess,
-                guesser_name: guesserName,  // Pass guesser's name
-                is_correct: isCorrect,  // Pass correctness status
-                hints_used: hintsUsed  // Number of hints used
-            })
-        });
-
-        if (!response.ok) throw new Error('Failed to store guess');
-        const result = await response.json();
-
-        if (result.correct) {
-            showMessage('Correct! Loading next image...', 'success');
-            await loadStats();
-            currentImageIndex = (currentImageIndex + 1) % images.length;
-            setTimeout(loadNewImage, 1500);
-        } else {
-            showMessage('Incorrect, try again!', 'error');
-        }
+        // Logic for submitting the guess (to be adapted for frontend)
+        showMessage(isCorrect ? 'Correct! Loading next image...' : 'Incorrect, try again!', isCorrect ? 'success' : 'error');
+        await loadStats();
+        currentImageIndex = (currentImageIndex + 1) % images.length;
+        setTimeout(loadNewImage, 1500);
     } catch (error) {
         console.error('Error:', error);
         showMessage('Error submitting guess', 'error');
     }
 }
 
-// Load guess statistics from backend
-async function loadStats() {
-    try {
-        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        });
+// Load guess statistics (strictly frontend)
+function loadStats() {
+    const statsBody = document.getElementById('stats-body');
+    statsBody.innerHTML = '';
 
-        if (!response.ok) throw new Error('Failed to fetch stats');
+    const stats = [
+        { guesser_name: 'User1', user_guess: 'car', correct: true },
+        { guesser_name: 'User2', user_guess: 'house', correct: false },
+        { guesser_name: 'User3', user_guess: 'mountain', correct: true }
+    ];
 
-        const stats = await response.json();
-        const tbody = document.getElementById('stats-body');
-        tbody.innerHTML = '';
-
-        stats.forEach(stat => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${stat.guesser_name}</td>
-                <td><input type="text" value="${stat.user_guess}" id="guess-${stat.guess_id}"></td>
-                <td>${stat.correct ? '✅' : '❌'}</td>
-                <td>
-                    <button onclick="updateGuess(${stat.guess_id})">Update</button>
-                    <button onclick="deleteGuess(${stat.guess_id})">Delete</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('stats-body').innerHTML = '<tr><td colspan="4">Failed to load stats</td></tr>';
-    }
+    stats.forEach(stat => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${stat.guesser_name}</td>
+            <td><input type="text" value="${stat.user_guess}" id="guess-${stat.guess_id}"></td>
+            <td>${stat.correct ? '✅' : '❌'}</td>
+            <td>
+                <button onclick="updateGuess(${stat.guess_id})">Update</button>
+                <button onclick="deleteGuess(${stat.guess_id})">Delete</button>
+            </td>
+        `;
+        statsBody.appendChild(row);
+    });
 }
 
 // Update a Guess using guess ID
@@ -237,13 +273,7 @@ async function updateGuess(guessId) {
     const newGuess = document.getElementById(`guess-${guessId}`).value;
 
     try {
-        const response = await fetch(`https://scribble.stu.nighthawkcodingsociety.com/api/guess/${guessId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ guess: newGuess })
-        });
-
-        if (!response.ok) throw new Error('Update failed');
+        // Update logic here (not connected to backend in this version)
         showMessage('Guess updated!', 'success');
         await loadStats();
     } catch (error) {
@@ -255,12 +285,7 @@ async function updateGuess(guessId) {
 // Delete a Guess using guess ID
 async function deleteGuess(guessId) {
     try {
-        const response = await fetch(`https://scribble.stu.nighthawkcodingsociety.com/api/guess/${guessId}`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (!response.ok) throw new Error('Delete failed');
+        // Delete logic here (not connected to backend in this version)
         showMessage('Guess deleted!', 'success');
         await loadStats();
     } catch (error) {
@@ -295,96 +320,4 @@ document.addEventListener('DOMContentLoaded', () => {
     loadStats();
     document.getElementById('hint-button').addEventListener('click', getNextHint);
 });
-
-// Fetch and load user statistics from the backend
-async function loadStats() {
-    try {
-        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats", {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
-            }
-        });
-
-        if (!response.ok) throw new Error(`Failed to fetch stats: ${response.statusText}`);
-
-        const stats = await response.json();
-        const tbody = document.getElementById('stats-body');
-        tbody.innerHTML = ''; // Clear existing rows
-
-        if (!stats.recent_guesses || stats.recent_guesses.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4">No guesses yet.</td></tr>';
-            return;
-        }
-
-        stats.recent_guesses.forEach(stat => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${stat.guesser_name}</td>
-                <td><input type="text" value="${stat.word}" id="guess-${stat.id}"></td>
-                <td>${stat.is_correct ? '✅' : '❌'}</td>
-                <td>
-                    <button onclick="updateGuess(${stat.id})">Update</button>
-                    <button onclick="deleteGuess(${stat.id})">Delete</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('stats-body').innerHTML = `<tr><td colspan="4">Error loading stats</td></tr>`;
-    }
-}
-
-// Update a Guess using guess ID
-async function updateGuess(guessId) {
-    const newGuess = document.getElementById(`guess-${guessId}`).value;
-
-    try {
-        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats", {
-            method: 'PUT',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
-            },
-            body: JSON.stringify({ id: guessId, guess: newGuess }) 
-        });
-
-        if (!response.ok) throw new Error('Update failed');
-        showMessage('Guess updated!', 'success');
-        await loadStats();
-    } catch (error) {
-        console.error('Error:', error);
-        showMessage('Failed to update guess', 'error');
-    }
-}
-
-// Delete a Guess using guess ID
-async function deleteGuess(guessId) {
-    try {
-        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats", {
-            method: 'DELETE',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
-            },
-            body: JSON.stringify({ id: guessId })
-        });
-
-        if (!response.ok) throw new Error('Delete failed');
-        showMessage('Guess deleted!', 'success');
-        await loadStats();
-    } catch (error) {
-        console.error('Error:', error);
-        showMessage('Failed to delete guess', 'error');
-    }
-}
-
-// Load stats when the page is ready
-document.addEventListener('DOMContentLoaded', () => {
-    loadStats();
-});
-
 </script>
-
