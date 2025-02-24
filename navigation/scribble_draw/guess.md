@@ -217,6 +217,21 @@ search_exclude: true
         msgBox.textContent = msg;
         msgBox.className = type;
     }
+    function getNextHint() {
+    const hintList = document.getElementById('hint-list');
+    const image = images[currentImageIndex];
+
+    if (currentHintIndex < image.hints.length) {
+        const hint = document.createElement('p');
+        hint.textContent = image.hints[currentHintIndex];
+        hintList.appendChild(hint);
+        hintsUsed++;
+        currentHintIndex++;
+    } else {
+        showMessage('No more hints available!', 'error');
+        document.getElementById('hint-button').disabled = true; // Disable button when no more hints
+    }
+}
 
     document.getElementById('guess-form').addEventListener('submit', submitGuess);
     document.getElementById('hint-button').addEventListener('click', () => getNextHint());
