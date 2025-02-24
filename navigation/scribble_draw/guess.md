@@ -226,14 +226,9 @@ search_exclude: true
 });
 
 // Submit a new guess
-async function submitGuess(event) {
-    event.preventDefault();
-    const guess = document.getElementById('guess-input').value;
-    const image = images[currentImageIndex];
-    const guesserName = "Anonymous";  
-    const isCorrect = checkIfCorrect(guess, image.label); 
+async function submitGuess(guess, isCorrect, hintsUsed, guesserName = "Anonymous") {
     try {
-        const response = await fetch('/guess', {
+        const response = await fetch('https://scribble.stu.nighthawkcodingsociety.com/api/guess', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -246,27 +241,29 @@ async function submitGuess(event) {
                 guesser_name: guesserName
             })
         });
+
         const result = await response.json();
         if (response.ok) {
             showMessage('Guess submitted successfully!', 'success');
-            await loadStats(); // Reload stats after submitting the guess
-            currentImageIndex = (currentImageIndex + 1) % images.length;
-            setTimeout(loadNewImage, 1500);
+            return result; 
         } else {
             showMessage(result.message, 'error');
+            return null;
         }
     } catch (error) {
         console.error('Error submitting guess:', error);
         showMessage('Error submitting guess', 'error');
+        return null;
     }
 }
+
 
 // Load and display stats
 async function loadStats() {
     const statsBody = document.getElementById('stats-body');
     statsBody.innerHTML = '';  // Clear any existing rows
     try {
-        const response = await fetch('/guess/stats', {
+        const response = await fetch('https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -279,7 +276,6 @@ async function loadStats() {
                 statsBody.innerHTML = '<tr><td colspan="4">No guesses found</td></tr>';
                 return;
             }
-            
             data.recent_guesses.forEach(stat => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -306,7 +302,7 @@ async function loadStats() {
 async function updateGuess(guessId) {
     const newGuess = document.getElementById(`guess-${guessId}`).value;
     try {
-        const response = await fetch(`/guess/stats/${guessId}/update`, {
+        const response = await fetch(`https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats/${guessId}/update`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -330,7 +326,7 @@ async function updateGuess(guessId) {
 // Delete a guess
 async function deleteGuess(guessId) {
     try {
-        const response = await fetch(`/guess/stats/${guessId}/delete`, {
+        const response = await fetch(`https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats/${guessId}/delete`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
