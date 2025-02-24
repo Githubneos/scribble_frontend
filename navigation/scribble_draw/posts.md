@@ -254,5 +254,14 @@ menu: nav/home.html
         }
     };
 
+    function showMessage(message, isError = false) {
+        const messageEl = document.getElementById('message');
+        messageEl.textContent = message;
+        messageEl.style.display = 'block';
+        messageEl.style.backgroundColor = isError ? '#C6E7FF' : '#D4F6FF';
+        messageEl.style.color = isError ? '#FBFBFB' : '#FFDDAE';
+        setTimeout(() => messageEl.style.display = 'none', 3000);
+    }
+
     document.addEventListener('DOMContentLoaded', fetchPictures);
 </script>
