@@ -91,7 +91,7 @@ search_exclude: true
     </form>
     <p id="message-container"></p>
     <div class="stats-container">
-        <h3>Your Guess Statistics</h3>
+        <h3>Past Guesses</h3>
         <table id="stats-table" border="1">
             <thead>
                 <tr>
