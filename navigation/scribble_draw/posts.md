@@ -23,11 +23,17 @@ menu: nav/home.html
     :root {
         --primary-color: #1a237e;
         --secondary-color: #283593;
-        --background: linear-gradient(135deg, #1a1a2e, #16213e);
+        --background: linear-gradient(145deg, #C6E7FF, #D4F6FF, #FBFBFB, #FFDDAE);
         --text-color: #e1e1e1;
         --card-bg: rgba(30, 41, 59, 0.8);
         --error: #e74c3c;
         --success: #2ecc71;
+    }
+
+    body {
+        background: var(--background);
+        color: var(--text-color);
+        min-height: 100vh;
     }
 
     .picture-gallery {
@@ -253,6 +259,15 @@ menu: nav/home.html
             showMessage('Delete failed: ' + error.message, true);
         }
     };
+
+    function showMessage(message, isError = false) {
+        const messageEl = document.getElementById('message');
+        messageEl.textContent = message;
+        messageEl.style.display = 'block';
+        messageEl.style.backgroundColor = isError ? '#C6E7FF' : '#D4F6FF';
+        messageEl.style.color = isError ? '#FBFBFB' : '#FFDDAE';
+        setTimeout(() => messageEl.style.display = 'none', 3000);
+    }
 
     document.addEventListener('DOMContentLoaded', fetchPictures);
 </script>
