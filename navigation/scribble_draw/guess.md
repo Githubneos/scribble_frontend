@@ -85,7 +85,180 @@ search_exclude: true
         <div id="hint-list"></div>
         <button class="button" id="hint-button">Get Next Hint</button>
     </div>
-    <form id="guess-form">
+    <button id="reset-button" class="button">Reset</button>
+    
+    <button id="reset-button" class="button">Reset</button>
+
+<div>
+    <canvas id="guess-canvas" width="400" height="400"></canvas>
+</div>
+<div id="hint-list"></div>
+
+<script>
+    const images = [
+         {
+            label: "car",
+            drawing: function(ctx) {
+                ctx.fillStyle = "#3498db";
+                ctx.fillRect(100, 150, 200, 50);
+                ctx.fillStyle = "#2ecc71";
+                ctx.beginPath();
+                ctx.arc(130, 200, 20, 0, Math.PI * 2);
+                ctx.arc(270, 200, 20, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            hints: ["It has wheels", "Used for transportation", "Has engine"]
+        },
+        {
+            label: "house",
+            drawing: function(ctx) {
+                ctx.fillStyle = "#e74c3c";
+                ctx.fillRect(100, 100, 200, 150);
+                ctx.fillStyle = "#f39c12";
+                ctx.beginPath();
+                ctx.moveTo(100, 100);
+                ctx.lineTo(200, 50);
+                ctx.lineTo(300, 100);
+                ctx.fill();
+            },
+            hints: ["People live in it", "Has a roof", "Home"]
+        }
+        {
+        label: "sun",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#f1c40f";
+            ctx.beginPath();
+            ctx.arc(200, 200, 50, 0, Math.PI * 2); // Sun
+            ctx.fill();
+        },
+        hints: ["It's bright", "Appears during the day", "Star of our solar system"]
+        },
+        {
+        label: "tree",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#8B4513";
+            ctx.fillRect(175, 180, 50, 100); // Trunk
+            ctx.fillStyle = "#228B22";
+            ctx.beginPath();
+            ctx.arc(200, 150, 50, 0, Math.PI * 2); // Leaves
+            ctx.fill();
+        },
+        hints: ["It has leaves", "Found in forests", "Grows tall"]
+        },
+        {
+        label: "ball",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#FF4500";
+            ctx.beginPath();
+            ctx.arc(200, 200, 40, 0, Math.PI * 2); // Ball
+            ctx.fill();
+        },
+        hints: ["It's round", "Used in sports", "Can bounce"]
+        },
+        {
+        label: "boat",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#8B4513";
+            ctx.fillRect(120, 180, 160, 50); // Boat base
+            ctx.fillStyle = "#3498db";
+            ctx.beginPath();
+            ctx.moveTo(120, 180);
+            ctx.lineTo(200, 120); // Sail
+            ctx.lineTo(280, 180);
+            ctx.fill();
+        },
+        hints: ["Floats on water", "Has sails or motor", "Used for traveling on water"]
+        },
+        {
+        label: "cloud",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#D3D3D3";
+            ctx.beginPath();
+            ctx.arc(160, 180, 40, 0, Math.PI * 2);
+            ctx.arc(200, 160, 50, 0, Math.PI * 2);
+            ctx.arc(240, 180, 40, 0, Math.PI * 2);
+            ctx.fill();
+        },
+        hints: ["Found in the sky", "Made of water droplets", "Can bring rain"]
+        },
+        {
+        label: "fish",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#1E90FF";
+            ctx.beginPath();
+            ctx.arc(200, 200, 40, 0, Math.PI * 2); // Fish body
+            ctx.fill();
+            ctx.fillStyle = "#000";
+            ctx.beginPath();
+            ctx.arc(220, 190, 5, 0, Math.PI * 2); // Eye
+            ctx.fill();
+            ctx.fillStyle = "#1E90FF";
+            ctx.beginPath();
+            ctx.moveTo(160, 200);
+            ctx.lineTo(130, 180); // Tail
+            ctx.lineTo(130, 220);
+            ctx.fill();
+        },
+        hints: ["Lives in water", "Has fins", "Can swim"]
+        },
+        {
+        label: "star",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#FFD700";
+            ctx.beginPath();
+            let cx = 200, cy = 200, spikes = 5, outerRadius = 50, innerRadius = 20;
+            let rot = Math.PI / 2 * 3;
+            let step = Math.PI / spikes;
+            ctx.moveTo(cx, cy - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                let x = cx + Math.cos(rot) * outerRadius;
+                let y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(cx, cy - outerRadius);
+            ctx.fill();
+        },
+        hints: ["Found in the night sky", "Shiny", "Many form constellations"]
+        }
+    ];
+
+    let currentImageIndex = 0;
+
+    function loadNewImage() {
+        const image = images[currentImageIndex];
+        const canvas = document.getElementById('guess-canvas');
+        const ctx = canvas.getContext('2d');
+        const hintList = document.getElementById('hint-list');
+        
+        canvas.style.opacity = "0"; // Fade out effect
+        
+        setTimeout(() => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            image.drawing(ctx);
+            hintList.innerHTML = ''; // Clear any existing hints
+            image.hints.forEach(hint => {
+                const hintElement = document.createElement('p');
+                hintElement.textContent = hint;
+                hintList.appendChild(hintElement);
+            });
+            canvas.style.opacity = "1"; // Fade in effect
+        }, 300);
+    }
+
+    document.getElementById('reset-button').addEventListener('click', () => {
+        currentImageIndex = Math.floor(Math.random() * images.length); // Randomize image
+        loadNewImage();
+    });
+
+    loadNewImage(); // Load the first image on page load
+</script>
+<form id="guess-form">
         <input type="text" id="guess-input" class="input-field" placeholder="Enter your guess" required>
         <button type="submit" class="button">Submit Guess</button>
     </form>
@@ -142,6 +315,109 @@ search_exclude: true
                 ctx.fill();
             },
             hints: ["People live in it", "Has a roof", "Home"]
+        }
+        {
+        label: "sun",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#f1c40f";
+            ctx.beginPath();
+            ctx.arc(200, 200, 50, 0, Math.PI * 2); // Sun
+            ctx.fill();
+        },
+        hints: ["It's bright", "Appears during the day", "Star of our solar system"]
+        },
+        {
+        label: "tree",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#8B4513";
+            ctx.fillRect(175, 180, 50, 100); // Trunk
+            ctx.fillStyle = "#228B22";
+            ctx.beginPath();
+            ctx.arc(200, 150, 50, 0, Math.PI * 2); // Leaves
+            ctx.fill();
+        },
+        hints: ["It has leaves", "Found in forests", "Grows tall"]
+        },
+        {
+        label: "ball",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#FF4500";
+            ctx.beginPath();
+            ctx.arc(200, 200, 40, 0, Math.PI * 2); // Ball
+            ctx.fill();
+        },
+        hints: ["It's round", "Used in sports", "Can bounce"]
+        },
+        {
+        label: "boat",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#8B4513";
+            ctx.fillRect(120, 180, 160, 50); // Boat base
+            ctx.fillStyle = "#3498db";
+            ctx.beginPath();
+            ctx.moveTo(120, 180);
+            ctx.lineTo(200, 120); // Sail
+            ctx.lineTo(280, 180);
+            ctx.fill();
+        },
+        hints: ["Floats on water", "Has sails or motor", "Used for traveling on water"]
+        },
+        {
+        label: "cloud",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#D3D3D3";
+            ctx.beginPath();
+            ctx.arc(160, 180, 40, 0, Math.PI * 2);
+            ctx.arc(200, 160, 50, 0, Math.PI * 2);
+            ctx.arc(240, 180, 40, 0, Math.PI * 2);
+            ctx.fill();
+        },
+        hints: ["Found in the sky", "Made of water droplets", "Can bring rain"]
+        },
+        {
+        label: "fish",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#1E90FF";
+            ctx.beginPath();
+            ctx.arc(200, 200, 40, 0, Math.PI * 2); // Fish body
+            ctx.fill();
+            ctx.fillStyle = "#000";
+            ctx.beginPath();
+            ctx.arc(220, 190, 5, 0, Math.PI * 2); // Eye
+            ctx.fill();
+            ctx.fillStyle = "#1E90FF";
+            ctx.beginPath();
+            ctx.moveTo(160, 200);
+            ctx.lineTo(130, 180); // Tail
+            ctx.lineTo(130, 220);
+            ctx.fill();
+        },
+        hints: ["Lives in water", "Has fins", "Can swim"]
+        },
+        {
+        label: "star",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#FFD700";
+            ctx.beginPath();
+            let cx = 200, cy = 200, spikes = 5, outerRadius = 50, innerRadius = 20;
+            let rot = Math.PI / 2 * 3;
+            let step = Math.PI / spikes;
+            ctx.moveTo(cx, cy - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                let x = cx + Math.cos(rot) * outerRadius;
+                let y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(cx, cy - outerRadius);
+            ctx.fill();
+        },
+        hints: ["Found in the night sky", "Shiny", "Many form constellations"]
         }
     ];
 
@@ -232,6 +508,7 @@ search_exclude: true
         document.getElementById('hint-button').disabled = true; // Disable button when no more hints
     }
 }
+
 
     document.getElementById('guess-form').addEventListener('submit', submitGuess);
     document.getElementById('hint-button').addEventListener('click', () => getNextHint());
