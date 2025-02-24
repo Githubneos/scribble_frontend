@@ -219,10 +219,10 @@ document.getElementById('submitDrawing').addEventListener('click', async () => {
             return;
         }
 
-        // Save the drawing as JPEG
-        const imageData = canvas.toDataURL('image/jpeg');
+        // Save the drawing as PNG
+        const imageData = canvas.toDataURL('image/png');
         const link = document.createElement('a');
-        link.download = `drawing_${Date.now()}.jpg`;
+        link.download = `drawing_${Date.now()}.png`;
         link.href = imageData;
         link.click();
 
