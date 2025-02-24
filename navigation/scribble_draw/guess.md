@@ -201,7 +201,7 @@ search_exclude: true
         const isCorrect = guess.toLowerCase() === images[currentImageIndex].label.toLowerCase();
 
         try {
-            const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
+            const response = await fetch("`${pythonURI}/api/guess", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ search_exclude: true
         statsBody.innerHTML = ''; // Clear previous stats
 
         try {
-            const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
+            const response = await fetch("`${pythonURI}/api/guess", {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
@@ -258,7 +258,7 @@ search_exclude: true
         if (!confirm('Are you sure you want to delete this guess?')) return;
 
         try {
-            const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
+            const response = await fetch("`${pythonURI}/api/guess", {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -283,7 +283,7 @@ search_exclude: true
         if (updatedGuess === null || updatedGuess === "") return;
 
         try {
-            const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
+            const response = await fetch("`${pythonURI}/api/guess", {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -311,7 +311,7 @@ search_exclude: true
     document.getElementById('guess-form').addEventListener('submit', submitGuess);
     loadNewImage(); // Load the first image on page load
     loadStats(); // Load past guesses initially
-    
+
     function showMessage(msg, type) {
         const msgBox = document.getElementById('message-container');
         msgBox.textContent = msg;
