@@ -77,7 +77,6 @@ search_exclude: true
         <button class="button" id="hint-button">Get Next Hint</button>
     </div>
     <button id="reset-button" class="button">Reset</button>
-
     <form id="guess-form">
         <input type="text" id="guess-input" class="input-field" placeholder="Enter your guess" required>
         <button type="submit" class="button">Submit Guess</button>
@@ -196,7 +195,6 @@ search_exclude: true
             document.getElementById('hint-button').disabled = true; // Disable button when no more hints
         }
     });
-
     async function submitGuess(event) {
         event.preventDefault();
         const guess = document.getElementById('guess-input').value;
@@ -215,7 +213,7 @@ search_exclude: true
             const result = await response.json();
             if (response.ok) {
                 showMessage('Guess submitted successfully!', 'success');
-                loadStats();
+                loadStats(); // Load stats to refresh the table
             } else {
                 showMessage(result.message, 'error');
             }
@@ -226,10 +224,10 @@ search_exclude: true
 
     async function loadStats() {
         const statsBody = document.getElementById('stats-body');
-        statsBody.innerHTML = '';
+        statsBody.innerHTML = ''; // Clear previous stats
 
         try {
-            const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess/stats", {
+            const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
@@ -242,7 +240,10 @@ search_exclude: true
                             <td>${stat.guesser_name}</td>
                             <td>${stat.user_guess}</td>
                             <td>${stat.is_correct ? '✅' : '❌'}</td>
-                            <td><button onclick="deleteGuess(${stat.guess_id})">Delete</button></td>
+                            <td>
+                                <button onclick="deleteGuess(${stat.guess_id})">Delete</button>
+                                <button onclick="updateGuess(${stat.guess_id}, '${stat.user_guess}')">Update</button>
+                            </td>
                         </tr>`;
                 });
             } else {
@@ -253,6 +254,64 @@ search_exclude: true
         }
     }
 
+    async function deleteGuess(guessId) {
+        if (!confirm('Are you sure you want to delete this guess?')) return;
+
+        try {
+            const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ id: guessId })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                showMessage('Guess deleted successfully!', 'success');
+                loadStats(); // Refresh the stats after deletion
+            } else {
+                showMessage(result.message, 'error');
+            }
+        } catch (error) {
+            showMessage('Error deleting guess', 'error');
+        }
+    }
+    async function updateGuess(guessId, currentGuess) {
+        const updatedGuess = prompt("Update your guess:", currentGuess);
+        if (updatedGuess === null || updatedGuess === "") return;
+
+        try {
+            const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ id: guessId, user_guess: updatedGuess })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                showMessage('Guess updated successfully!', 'success');
+                loadStats(); // Refresh the stats after update
+            } else {
+                showMessage(result.message, 'error');
+            }
+        } catch (error) {
+            showMessage('Error updating guess', 'error');
+        }
+    }
+    function showMessage(msg, type) {
+        const msgBox = document.getElementById('message-container');
+        msgBox.textContent = msg;
+        msgBox.className = type;
+    }
+    document.getElementById('guess-form').addEventListener('submit', submitGuess);
+    loadNewImage(); // Load the first image on page load
+    loadStats(); // Load past guesses initially
+    
     function showMessage(msg, type) {
         const msgBox = document.getElementById('message-container');
         msgBox.textContent = msg;
