@@ -101,7 +101,11 @@ search_exclude: true
 </div>
 
 <script>
-import { pythonURI } from {{site.baseurl}}/assets/js/api/config.js
+<script type="module" src="{{site.baseurl}}/assets/js/api/config.js"></script>
+<script type="module">
+    import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+    console.log(pythonURI);  // It should log the Python URI
+</script>
 const token = localStorage.getItem("token");
 const canvas = document.getElementById("guess-canvas");
 const ctx = canvas.getContext("2d");
