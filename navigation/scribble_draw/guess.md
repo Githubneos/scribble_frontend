@@ -195,7 +195,6 @@ search_exclude: true
             document.getElementById('hint-button').disabled = true; // Disable button when no more hints
         }
     });
-    const pythonURI = "https://scribble.stu.nighthawkcodingsociety.com/api/guess"; // Ensure the correct backend API URL
 
 async function submitGuess(event) {
     event.preventDefault();
@@ -209,7 +208,7 @@ async function submitGuess(event) {
     }
 
     try {
-        const response = await fetch(pythonURI, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -236,7 +235,7 @@ async function loadStats() {
     statsBody.innerHTML = ''; // Clear previous stats
 
     try {
-        const response = await fetch(pythonURI, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: 'GET',
             // Remove Authorization header to not use the token
             headers: {
@@ -272,7 +271,7 @@ async function updateGuess(guessId, currentGuess) {
     if (updatedGuess === null || updatedGuess === "") return;
 
     try {
-        const response = await fetch(pythonURI, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -297,7 +296,7 @@ async function deleteGuess(guessId) {
     if (!confirm('Are you sure you want to delete this guess?')) return;
 
     try {
-        const response = await fetch(pythonURI, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
