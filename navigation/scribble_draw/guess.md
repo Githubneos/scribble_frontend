@@ -196,31 +196,30 @@ search_exclude: true
         }
     });
     async function submitGuess(event) {
-        event.preventDefault();
-        const guess = document.getElementById('guess-input').value;
-        const isCorrect = guess.toLowerCase() === images[currentImageIndex].label.toLowerCase();
+    event.preventDefault();
+    const guess = document.getElementById('guess-input').value;
 
-        try {
-            const response = await fetch("`${pythonURI}/api/guess", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ user_guess: guess, is_correct: isCorrect, hint_used: hintsUsed })
-            });
+    try {
+        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ user_guess: guess })
+        });
 
-            const result = await response.json();
-            if (response.ok) {
-                showMessage('Guess submitted successfully!', 'success');
-                loadStats(); // Load stats to refresh the table
-            } else {
-                showMessage(result.message, 'error');
-            }
-        } catch (error) {
-            showMessage('Error submitting guess', 'error');
+        const result = await response.json();
+        if (response.ok) {
+            showMessage('Guess submitted successfully!', 'success');
+            loadStats(); // Refresh stats after submission
+        } else {
+            showMessage(result.message, 'error');
         }
+    } catch (error) {
+        showMessage('Error submitting guess', 'error');
     }
+}
 
     async function loadStats() {
         const statsBody = document.getElementById('stats-body');
