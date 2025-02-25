@@ -196,64 +196,81 @@ search_exclude: true
         }
     });
 
-const submitGuess = async (userGuess, correctWord) => {
-    console.log("Submitting guess:", userGuess, correctWord); // Log the data to ensure it's correct
+const submitButton = document.getElementById('submitButton');
+const guessInput = document.getElementById('userGuessInput');
+const correctWordInput = document.getElementById('correctWordInput');
+const statsContainer = document.getElementById('statsContainer');
+const apiURL = `${pythonURI}/api/guess`; // Make sure pythonURI is set correctly
+
+submitButton.addEventListener('click', async () => {
+    const userGuess = guessInput.value.trim();
+    const correctWord = correctWordInput.value.trim();
+
+    // Validate user input
+    if (!userGuess || !correctWord) {
+        alert("Both the guess and the correct word are required.");
+        return;
+    }
+
+    const payload = {
+        user_guess: userGuess,
+        correct_word: correctWord
+    };
+
     try {
-        const response = await fetch(`${pythonURI}/api/guess`, {
-            method: "POST",
+        // Send POST request to submit the guess
+        const response = await fetch(apiURL, {
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,  // Add token to the header
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}` // Ensure JWT token is being passed
             },
-            body: JSON.stringify({
-                user_guess: userGuess,
-                correct_word: correctWord
-            }),
+            body: JSON.stringify(payload)
         });
 
-        const data = await response.json();
-        console.log("Response data:", data); // Log the response to inspect it
-
+        const result = await response.json();
         if (response.ok) {
-            console.log("Guess submitted:", data.guess);
-            alert(`Your guess was ${data.correct ? "correct" : "incorrect"}`);
+            alert("Guess submitted successfully!");
         } else {
-            console.error("Error:", data.error);
-            alert("Failed to submit guess");
+            alert(`Error: ${result.error}`);
         }
     } catch (error) {
-        console.error("Network error:", error);
-        alert("Something went wrong while submitting your guess.");
+        alert("Something went wrong while submitting the guess.");
+        console.error("Error during guess submission:", error);
     }
-};
+});
 
-
-// Fetch all guesses (GET request)
-const getGuesses = async () => {
+async function loadStats() {
     try {
-        const response = await fetch(`${pythonURI}/api/guess`, {
-            method: "GET",
+        const response = await fetch(apiURL, {
+            method: 'GET',
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,  // Add token to the header
-            },
+                'Authorization': `Bearer ${localStorage.getItem('token')}` // Include token for authorization
+            }
         });
 
-        const data = await response.json();
-
+        const result = await response.json();
         if (response.ok) {
-            console.log("Guesses fetched:", data.recent_guesses);
-            // Render guesses on the UI
-            renderGuesses(data.recent_guesses);
+            // Clear any existing stats
+            statsContainer.innerHTML = '';
+
+            // Display the fetched guesses
+            result.recent_guesses.forEach(guess => {
+                const guessElement = document.createElement('div');
+                guessElement.textContent = `Guesser: ${guess.guesser_name}, Guess: ${guess.guess}, Correct: ${guess.is_correct}`;
+                statsContainer.appendChild(guessElement);
+            });
         } else {
-            console.error("Error:", data.error);
-            alert("Failed to fetch guesses");
+            alert("Error loading stats: " + result.error);
         }
     } catch (error) {
-        console.error("Network error:", error);
-        alert("Something went wrong while fetching guesses.");
+        alert("Error loading stats.");
+        console.error("Error during stats loading:", error);
     }
-};
+}
+
+// Load stats initially when the page is loaded
+loadStats();
 
 // Update a guess (PUT request)
 const updateGuess = async (id, updatedGuess, correctWord) => {
