@@ -196,161 +196,143 @@ search_exclude: true
         }
     });
 
-async function submitGuess(event) {
-    event.preventDefault();
-    const guess = document.getElementById('guess-input').value;
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-        showMessage('You are not logged in. Please log in again.', 'error');
-        return;
-    }
-
+// Submit a guess (POST request)
+const submitGuess = async (userGuess, correctWord) => {
     try {
         const response = await fetch(`${pythonURI}/api/guess`, {
-            method: 'POST',
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,  // Add token to the header
             },
             body: JSON.stringify({
-                user_guess: guess,
-                correct_word: "apple" // Change this dynamically based on the image
-            })
-        });
-
-        const result = await response.json();
-        console.log('Submit Guess Response:', result);
-
-        if (response.ok) {
-            showMessage('Guess submitted successfully!', 'success');
-            loadStats();
-        } else {
-            showMessage(result.message || 'Error submitting guess', 'error');
-        }
-    } catch (error) {
-        console.error('Error submitting guess:', error);
-        showMessage('Error submitting guess', 'error');
-    }
-}
-
-async function loadStats() {
-    const statsBody = document.getElementById('stats-body');
-    statsBody.innerHTML = ''; // Clear previous stats
-
-    const token = localStorage.getItem('token'); // Get token
-
-    try {
-        console.log("Fetching stats from:", `${pythonURI}/api/guess`);
-
-        const headers = {
-            'Content-Type': 'application/json'
-        };
-
-        // If token exists, add Authorization header
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-
-        const response = await fetch(`${pythonURI}/api/guess`, {
-            method: 'GET',
-            headers: headers
+                user_guess: userGuess,  // user guess
+                correct_word: correctWord  // correct word
+            }),
         });
 
         const data = await response.json();
-        console.log('Load Stats Response:', data); // Debug response
-
-        if (response.ok && data.recent_guesses && data.recent_guesses.length > 0) {
-            statsBody.innerHTML = "";
-            data.recent_guesses.forEach(stat => {
-                statsBody.innerHTML += `
-                    <tr>
-                        <td>${stat.guesser_name}</td>
-                        <td>${stat.user_guess}</td>
-                        <td>${stat.is_correct ? '✅' : '❌'}</td>
-                        <td>
-                            <button onclick="deleteGuess(${stat.guess_id})">Delete</button>
-                            <button onclick="updateGuess(${stat.guess_id}, '${stat.user_guess}')">Update</button>
-                        </td>
-                    </tr>`;
-            });
-        } else {
-            statsBody.innerHTML = '<tr><td colspan="4">No guesses found</td></tr>';
-        }
-    } catch (error) {
-        console.error("Error loading stats:", error);
-        showMessage('Error loading stats', 'error');
-    }
-}
-
-async function updateGuess(guessId, currentGuess) {
-    const updatedGuess = prompt("Update your guess:", currentGuess);
-    if (updatedGuess === null || updatedGuess === "") return;
-
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showMessage('You are not logged in. Please log in again.', 'error');
-        return;
-    }
-
-    try {
-        const response = await fetch(`${pythonURI}/api/guess`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ id: guessId, user_guess: updatedGuess })
-        });
-
-        const result = await response.json();
-        console.log('Update Guess Response:', result); // Debug response
 
         if (response.ok) {
-            showMessage('Guess updated successfully!', 'success');
-            loadStats(); // Refresh stats after update
+            console.log("Guess submitted:", data.guess);
+            alert(`Your guess was ${data.correct ? "correct" : "incorrect"}`);
         } else {
-            showMessage(result.message || 'Error updating guess', 'error');
+            console.error("Error:", data.error);
+            alert("Failed to submit guess");
         }
     } catch (error) {
-        console.error("Error updating guess:", error);
-        showMessage('Error updating guess', 'error');
+        console.error("Network error:", error);
+        alert("Something went wrong while submitting your guess.");
     }
-}
+};
 
-async function deleteGuess(guessId) {
-    if (!confirm('Are you sure you want to delete this guess?')) return;
-
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showMessage('You are not logged in. Please log in again.', 'error');
-        return;
-    }
-
+// Fetch all guesses (GET request)
+const getGuesses = async () => {
     try {
         const response = await fetch(`${pythonURI}/api/guess`, {
-            method: 'DELETE',
+            method: "GET",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,  // Add token to the header
             },
-            body: JSON.stringify({ id: guessId })
         });
 
-        const result = await response.json();
-        console.log('Delete Guess Response:', result); // Debug response
+        const data = await response.json();
 
         if (response.ok) {
-            showMessage('Guess deleted successfully!', 'success');
-            loadStats(); // Refresh stats after deletion
+            console.log("Guesses fetched:", data.recent_guesses);
+            // Render guesses on the UI
+            renderGuesses(data.recent_guesses);
         } else {
-            showMessage(result.message || 'Error deleting guess', 'error');
+            console.error("Error:", data.error);
+            alert("Failed to fetch guesses");
         }
     } catch (error) {
-        console.error("Error deleting guess:", error);
-        showMessage('Error deleting guess', 'error');
+        console.error("Network error:", error);
+        alert("Something went wrong while fetching guesses.");
     }
-}
+};
+
+// Update a guess (PUT request)
+const updateGuess = async (id, updatedGuess, correctWord) => {
+    try {
+        const response = await fetch(`${pythonURI}/api/guess`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,  // Add token to the header
+            },
+            body: JSON.stringify({
+                id: id,  // Guess ID
+                user_guess: updatedGuess,  // Updated guess
+                correct_word: correctWord  // Correct word
+            }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log("Guess updated:", data.guess);
+            alert(`Guess updated! It was ${data.correct ? "correct" : "incorrect"}`);
+        } else {
+            console.error("Error:", data.error);
+            alert("Failed to update guess");
+        }
+    } catch (error) {
+        console.error("Network error:", error);
+        alert("Something went wrong while updating your guess.");
+    }
+};
+
+// Delete a guess (DELETE request)
+const deleteGuess = async (id) => {
+    try {
+        const response = await fetch(`${pythonURI}/api/guess`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,  // Add token to the header
+            },
+            body: JSON.stringify({
+                id: id  // Guess ID
+            }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log("Guess deleted:", data.message);
+            alert("Guess deleted successfully");
+        } else {
+            console.error("Error:", data.error);
+            alert("Failed to delete guess");
+        }
+    } catch (error) {
+        console.error("Network error:", error);
+        alert("Something went wrong while deleting the guess.");
+    }
+};
+
+// Render fetched guesses
+const renderGuesses = (guesses) => {
+    const guessesContainer = document.getElementById('guesses-container');
+    guessesContainer.innerHTML = '';  // Clear current content
+
+    guesses.forEach(guess => {
+        const guessElement = document.createElement('div');
+        guessElement.classList.add('guess');
+
+        guessElement.innerHTML = `
+            <p>Guesser: ${guess.guesser_name}</p>
+            <p>Guess: ${guess.guess}</p>
+            <p>Correct: ${guess.is_correct}</p>
+            <p>Date: ${guess.date_created}</p>
+        `;
+
+        guessesContainer.appendChild(guessElement);
+    });
+};
+
 
 
 function showMessage(message, type) {
