@@ -195,12 +195,14 @@ search_exclude: true
             document.getElementById('hint-button').disabled = true; // Disable button when no more hints
         }
     });
-    async function submitGuess(event) {
+    const pythonURI = "https://scribble.stu.nighthawkcodingsociety.com/api/guess"; // Ensure the correct backend API URL
+
+async function submitGuess(event) {
     event.preventDefault();
     const guess = document.getElementById('guess-input').value;
 
     try {
-        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
+        const response = await fetch(pythonURI, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -221,43 +223,44 @@ search_exclude: true
     }
 }
 
-    async function loadStats() {
-        const statsBody = document.getElementById('stats-body');
-        statsBody.innerHTML = ''; // Clear previous stats
+async function loadStats() {
+    const statsBody = document.getElementById('stats-body');
+    statsBody.innerHTML = ''; // Clear previous stats
 
-        try {
-            const response = await fetch("`${pythonURI}/api/guess", {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    try {
+        const response = await fetch(pythonURI, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+
+        const data = await response.json();
+        if (response.ok && data.recent_guesses && data.recent_guesses.length > 0) {
+            data.recent_guesses.forEach(stat => {
+                statsBody.innerHTML += `
+                    <tr>
+                        <td>${stat.guesser_name}</td>
+                        <td>${stat.user_guess}</td>
+                        <td>${stat.is_correct ? '✅' : '❌'}</td>
+                        <td>
+                            <button onclick="deleteGuess(${stat.guess_id})">Delete</button>
+                            <button onclick="updateGuess(${stat.guess_id}, '${stat.user_guess}')">Update</button>
+                        </td>
+                    </tr>`;
             });
-
-            const data = await response.json();
-            if (response.ok && data.recent_guesses.length > 0) {
-                data.recent_guesses.forEach(stat => {
-                    statsBody.innerHTML += `
-                        <tr>
-                            <td>${stat.guesser_name}</td>
-                            <td>${stat.user_guess}</td>
-                            <td>${stat.is_correct ? '✅' : '❌'}</td>
-                            <td>
-                                <button onclick="deleteGuess(${stat.guess_id})">Delete</button>
-                                <button onclick="updateGuess(${stat.guess_id}, '${stat.user_guess}')">Update</button>
-                            </td>
-                        </tr>`;
-                });
-            } else {
-                statsBody.innerHTML = '<tr><td colspan="4">No guesses found</td></tr>';
-            }
-        } catch (error) {
-            showMessage('Error loading stats', 'error');
+        } else {
+            statsBody.innerHTML = '<tr><td colspan="4">No guesses found</td></tr>';
         }
+    } catch (error) {
+        showMessage('Error loading stats', 'error');
     }
-    async function updateGuess(guessId, currentGuess) {
+}
+
+async function updateGuess(guessId, currentGuess) {
     const updatedGuess = prompt("Update your guess:", currentGuess);
     if (updatedGuess === null || updatedGuess === "") return;
 
     try {
-        const response = await fetch("`${pythonURI}/api/guess", {
+        const response = await fetch(pythonURI, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -276,13 +279,13 @@ search_exclude: true
     } catch (error) {
         showMessage('Error updating guess', 'error');
     }
-    }
+}
 
-    async function deleteGuess(guessId) {
+async function deleteGuess(guessId) {
     if (!confirm('Are you sure you want to delete this guess?')) return;
 
     try {
-        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
+        const response = await fetch(pythonURI, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -301,7 +304,18 @@ search_exclude: true
     } catch (error) {
         showMessage('Error deleting guess', 'error');
     }
-    }
+}
+
+function showMessage(message, type) {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add(type === 'success' ? 'alert-success' : 'alert-error');
+    messageElement.textContent = message;
+    document.body.appendChild(messageElement);
+    setTimeout(() => {
+        messageElement.remove();
+    }, 3000);
+}
+
     function showMessage(msg, type) {
         const msgBox = document.getElementById('message-container');
         msgBox.textContent = msg;
