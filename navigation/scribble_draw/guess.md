@@ -156,37 +156,30 @@ search_exclude: true
     let currentImageIndex = 0;
     let hintsUsed = 0;
     let currentHintIndex = 0;
+    const apiURL = `${pythonURI}/api/guess`; 
 
-    const image = images[currentImageIndex];
+    function loadNewImage() {
+        console.log("Loading new image...");
+        const canvas = document.getElementById('guess-canvas');
+        const ctx = canvas.getContext('2d');
+        const image = images[currentImageIndex];
 
-        // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "white";  
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw the new image
+        document.getElementById('hint-list').innerHTML = '';
         if (typeof image.drawing === "function") {
             requestAnimationFrame(() => image.drawing(ctx));
-        } else {
-            console.error("Drawing function missing for image:", image.label);
         }
+
+        hintsUsed = 0;
+        currentHintIndex = 0;
+        document.getElementById('hint-button').disabled = false;
     }
 
     document.getElementById('reset-button').addEventListener('click', () => {
         currentImageIndex = Math.floor(Math.random() * images.length);
-        loadNewImage();
-    });
-
-    // Reset hint tracker
-    hintsUsed = 0;
-    currentHintIndex = 0;
-    document.getElementById('hint-button').disabled = false;
-}
-
-
-
-    document.getElementById('reset-button').addEventListener('click', () => {
-        currentImageIndex = Math.floor(Math.random() * images.length); // Randomize image
         loadNewImage();
     });
 
@@ -202,203 +195,150 @@ search_exclude: true
             currentHintIndex++;
         } else {
             showMessage('No more hints available!', 'error');
-            document.getElementById('hint-button').disabled = true; // Disable button when no more hints
+            document.getElementById('hint-button').disabled = true;
         }
     });
 
-const submitButton = document.getElementById('submitButton');
-const guessInput = document.getElementById('userGuessInput');
-const correctWordInput = document.getElementById('correctWordInput');
-const statsContainer = document.getElementById('statsContainer');
-const apiURL = `${pythonURI}/api/guess`; // Make sure pythonURI is set correctly
-
-submitButton.addEventListener('click', async () => {
-    const userGuess = guessInput.value.trim();
-    const correctWord = correctWordInput.value.trim();
-
-    // Validate user input
-    if (!userGuess || !correctWord) {
-        alert("Both the guess and the correct word are required.");
-        return;
-    }
-
-    const payload = {
-        user_guess: userGuess,
-        correct_word: correctWord
-    };
-
-    try {
-        // Send POST request to submit the guess
-        const response = await fetch(apiURL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}` // Ensure JWT token is being passed
-            },
-            body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            alert("Guess submitted successfully!");
-        } else {
-            alert(`Error: ${result.error}`);
+    async function submitGuess(event) {
+        event.preventDefault();
+        const guessInput = document.getElementById('guess-input');
+        const userGuess = guessInput.value.trim();
+        const correctWord = images[currentImageIndex].label;
+        
+        if (!userGuess) {
+            alert("Enter your guess.");
+            return;
         }
-    } catch (error) {
-        alert("Something went wrong while submitting the guess.");
-        console.error("Error during guess submission:", error);
-    }
-});
 
-const statsContainer = document.getElementById("statsTableBody"); // Target the table body
-async function loadStats() {
-    try {
-        const response = await fetch(apiURL, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
+        const payload = {
+            guesser_name: "User", // Replace with actual username if available
+            guess: userGuess,
+            correct_answer: correctWord,
+            is_correct: userGuess.toLowerCase() === correctWord.toLowerCase()
+        };
+
+        try {
+            const response = await fetch(apiURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert("Guess submitted successfully!");
+                guessInput.value = "";
+                loadStats(); 
+            } else {
+                alert(`Error: ${result.error}`);
             }
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            console.error("Error loading stats:", result.error);
-            statsContainer.innerHTML = "<tr><td colspan='4'>Failed to load stats</td></tr>";
-            return;
+        } catch (error) {
+            alert("Something went wrong while submitting the guess.");
+            console.error("Error during guess submission:", error);
         }
+    }
 
-        // Clear existing table rows before adding new ones
-        statsContainer.innerHTML = "";
+    async function loadStats() {
+        try {
+            const response = await fetch(apiURL, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            });
 
-        if (result.recent_guesses.length === 0) {
-            statsContainer.innerHTML = "<tr><td colspan='4'>No guesses found.</td></tr>";
-            return;
+            const result = await response.json();
+            const statsContainer = document.getElementById("stats-body");
+
+            if (!response.ok) {
+                console.error("Error loading stats:", result.error);
+                statsContainer.innerHTML = "<tr><td colspan='4'>Failed to load stats</td></tr>";
+                return;
+            }
+
+            statsContainer.innerHTML = "";
+            if (result.length === 0) {
+                statsContainer.innerHTML = "<tr><td colspan='4'>No guesses found.</td></tr>";
+                return;
+            }
+
+            result.forEach((guess) => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${guess.guesser_name}</td>
+                    <td>${guess.guess}</td>
+                    <td>${guess.is_correct ? "✅ Correct" : "❌ Incorrect"}</td>
+                    <td>
+                        <button class="button" onclick="updateGuess('${guess.correct_answer}', '${guess.guess}')">Update</button>
+                        <button class="button" onclick="deleteGuess('${guess.correct_answer}')">Delete</button>
+                    </td>
+                `;
+
+                statsContainer.appendChild(row);
+            });
+        } catch (error) {
+            console.error("Error during stats loading:", error);
+            document.getElementById("stats-body").innerHTML = "<tr><td colspan='4'>Error loading stats</td></tr>";
         }
-
-        // Iterate through each guess and create table rows
-        result.recent_guesses.forEach((guess) => {
-            const row = document.createElement("tr");
-
-            row.innerHTML = `
-                <td>${guess.guesser_name}</td>
-                <td>${guess.guess}</td>
-                <td>${guess.correct_answer}</td>
-                <td>${guess.is_correct ? "✅ Correct" : "❌ Incorrect"}</td>
-            `;
-
-            statsContainer.appendChild(row);
-        });
-    } catch (error) {
-        console.error("Error during stats loading:", error);
-        statsContainer.innerHTML = "<tr><td colspan='4'>Error loading stats</td></tr>";
     }
-}
 
-// Call the function when the page loads
-loadStats();
+    async function updateGuess(correctWord, oldGuess) {
+        const newGuess = prompt("Enter the updated guess:", oldGuess);
+        if (!newGuess) return;
 
+        try {
+            const response = await fetch(apiURL, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    correct_answer: correctWord,
+                    guess: newGuess
+                })
+            });
 
-// Update a guess (PUT request)
-const updateGuess = async (id, updatedGuess, correctWord) => {
-    try {
-        const response = await fetch(`${pythonURI}/api/guess`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,  // Add token to the header
-            },
-            body: JSON.stringify({
-                id: id,  // Guess ID
-                user_guess: updatedGuess,  // Updated guess
-                correct_word: correctWord  // Correct word
-            }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            console.log("Guess updated:", data.guess);
-            alert(`Guess updated! It was ${data.correct ? "correct" : "incorrect"}`);
-        } else {
-            console.error("Error:", data.error);
-            alert("Failed to update guess");
+            if (response.ok) {
+                alert("Guess updated successfully!");
+                loadStats();
+            } else {
+                alert("Failed to update guess.");
+            }
+        } catch (error) {
+            console.error("Error updating guess:", error);
+            alert("Something went wrong while updating.");
         }
-    } catch (error) {
-        console.error("Network error:", error);
-        alert("Something went wrong while updating your guess.");
     }
-};
 
-// Delete a guess (DELETE request)
-const deleteGuess = async (id) => {
-    try {
-        const response = await fetch(`${pythonURI}/api/guess`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,  // Add token to the header
-            },
-            body: JSON.stringify({
-                id: id  // Guess ID
-            }),
-        });
+    async function deleteGuess(correctWord) {
+        if (!confirm("Are you sure you want to delete this guess?")) return;
 
-        const data = await response.json();
+        try {
+            const response = await fetch(apiURL, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ correct_answer: correctWord })
+            });
 
-        if (response.ok) {
-            console.log("Guess deleted:", data.message);
-            alert("Guess deleted successfully");
-        } else {
-            console.error("Error:", data.error);
-            alert("Failed to delete guess");
+            if (response.ok) {
+                alert("Guess deleted successfully!");
+                loadStats();
+            } else {
+                alert("Failed to delete guess.");
+            }
+        } catch (error) {
+            console.error("Error deleting guess:", error);
+            alert("Something went wrong while deleting.");
         }
-    } catch (error) {
-        console.error("Network error:", error);
-        alert("Something went wrong while deleting the guess.");
     }
-};
-
-// Render fetched guesses
-const renderGuesses = (guesses) => {
-    const guessesContainer = document.getElementById('guesses-container');
-    guessesContainer.innerHTML = '';  // Clear current content
-
-    guesses.forEach(guess => {
-        const guessElement = document.createElement('div');
-        guessElement.classList.add('guess');
-
-        guessElement.innerHTML = `
-            <p>Guesser: ${guess.guesser_name}</p>
-            <p>Guess: ${guess.guess}</p>
-            <p>Correct: ${guess.is_correct}</p>
-            <p>Date: ${guess.date_created}</p>
-        `;
-
-        guessesContainer.appendChild(guessElement);
-    });
-};
-
-
-
-function showMessage(message, type) {
-    const messageElement = document.createElement('div');
-    messageElement.classList.add(type === 'success' ? 'alert-success' : 'alert-error');
-    messageElement.textContent = message;
-    document.body.appendChild(messageElement);
-    setTimeout(() => {
-        messageElement.remove();
-    }, 3000);
-}
-
-    function showMessage(msg, type) {
-        const msgBox = document.getElementById('message-container');
-        msgBox.textContent = msg;
-        msgBox.className = type;
-    }
-    document.getElementById('guess-form').addEventListener('submit', submitGuess);
-    loadNewImage(); // Load the first image on page load
-    loadStats(); // Load past guesses initially
 
     function showMessage(msg, type) {
         const msgBox = document.getElementById('message-container');
@@ -407,6 +347,6 @@ function showMessage(message, type) {
     }
 
     document.getElementById('guess-form').addEventListener('submit', submitGuess);
-    loadNewImage(); // Load the first image on page load
-    loadStats(); // Load past guesses
+    loadNewImage();
+    loadStats();
 </script>
