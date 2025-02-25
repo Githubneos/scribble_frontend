@@ -67,30 +67,6 @@ permalink: /stats
             padding: 16px;
             color: var(--text-color);
         }
-        .input-form {
-            margin-top: 30px;
-            padding: 20px;
-            background: #1e1e1e;
-            border-radius: 15px;
-        }
-        .form-input {
-            padding: 12px 16px;
-            margin: 10px;
-            background: #2d2d2d;
-            border: 1px solid #333;
-            color: #fff;
-            border-radius: 5px;
-            width: calc(33% - 20px);
-        }
-        .submit-button {
-            padding: 12px 24px;
-            background: #00ffcc;
-            color: #121212;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
         .delete-btn {
             background: #ff4444;
             color: white;
@@ -106,11 +82,9 @@ permalink: /stats
             display: none;
         }
     </style>
-
     <div class="statistics-header">
         <h1>🎮 Game Statistics 🎯</h1>
     </div>
-
     <table class="stats-table">
         <thead>
             <tr>
@@ -124,24 +98,13 @@ permalink: /stats
         </thead>
         <tbody id="stats-body"></tbody>
     </table>
-
-    <div class="input-form">
-        <h2 style="color: #ffcc00;">Update Statistics</h2>
-        <select id="user-select" onchange="handleUserSelect()" class="form-input">
-            <option value="">Create New User</option>
-        </select>
-        <form onsubmit="return updateStatistics(event)">
-            <input type="text" id="username-input" class="form-input" placeholder="Username" required>
-            <input type="number" id="correct-guesses-input" class="form-input" placeholder="Correct Guesses" required min="0">
-            <input type="number" id="wrong-guesses-input" class="form-input" placeholder="Wrong Guesses" required min="0">
-            <button type="submit" class="submit-button">Update Stats</button>
-        </form>
-        <div id="message"></div>
-    </div>
+    <div id="message"></div>
 </div>
 
 <script>
-    const API_URL = 'http://localhost:8203/api';
+    const LOCAL_API_URL = 'http://localhost:8203/api';
+    const DEPLOYED_API_URL = 'https://scribble_backend.stu.nighthawkcodingsociety.com/api';
+    const API_URL = window.location.hostname === 'localhost' ? LOCAL_API_URL : DEPLOYED_API_URL;
 
     async function checkAuth() {
         const token = localStorage.getItem('token');
@@ -166,7 +129,6 @@ permalink: /stats
             if (!response.ok) throw new Error('Failed to fetch statistics');
             const data = await response.json();
             updateTable(data.data || []);
-            populateUserSelect(data.data || []);
         } catch (error) {
             console.error('Error:', error);
             showMessage('Error loading statistics', 'error');
@@ -191,39 +153,6 @@ permalink: /stats
             `;
             tbody.innerHTML += row;
         });
-    }
-
-    async function updateStatistics(event) {
-        event.preventDefault();
-        if (!await checkAuth()) return;
-
-        const username = document.getElementById('username-input').value;
-        const correct = parseInt(document.getElementById('correct-guesses-input').value) || 0;
-        const wrong = parseInt(document.getElementById('wrong-guesses-input').value) || 0;
-
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/statistics`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    username: username,
-                    correct: correct,
-                    wrong: wrong
-                })
-            });
-
-            if (!response.ok) throw new Error('Failed to update statistics');
-            showMessage('Stats updated successfully!', 'success');
-            clearForm();
-            await fetchStatistics();
-        } catch (error) {
-            console.error('Error:', error);
-            showMessage(error.message, 'error');
-        }
     }
 
     async function deleteStats(username) {
@@ -259,25 +188,6 @@ permalink: /stats
         setTimeout(() => messageEl.style.display = 'none', 3000);
     }
 
-    function clearForm() {
-        document.getElementById('username-input').value = '';
-        document.getElementById('correct-guesses-input').value = '';
-        document.getElementById('wrong-guesses-input').value = '';
-        document.getElementById('user-select').value = '';
-    }
-
-    function handleUserSelect() {
-        const select = document.getElementById('user-select');
-        const username = document.getElementById('username-input');
-        if (select.value) {
-            username.value = select.value;
-            username.readOnly = true;
-        } else {
-            username.value = '';
-            username.readOnly = false;
-        }
-    }
-
     function sortTable(n) {
         const table = document.querySelector('.stats-table');
         const rows = Array.from(table.querySelectorAll('tbody tr'));
@@ -305,8 +215,6 @@ permalink: /stats
     }
 
     // Add functions to window scope
-    window.updateStatistics = updateStatistics;
     window.deleteStats = deleteStats;
-    window.handleUserSelect = handleUserSelect;
     window.sortTable = sortTable;
 </script>
