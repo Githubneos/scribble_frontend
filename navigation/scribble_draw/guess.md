@@ -240,37 +240,54 @@ submitButton.addEventListener('click', async () => {
     }
 });
 
+const statsContainer = document.getElementById("statsTableBody"); // Target the table body
 async function loadStats() {
     try {
         const response = await fetch(apiURL, {
-            method: 'GET',
+            method: "GET",
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}` // Include token for authorization
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
             }
         });
 
         const result = await response.json();
-        if (response.ok) {
-            // Clear any existing stats
-            statsContainer.innerHTML = '';
 
-            // Display the fetched guesses
-            result.recent_guesses.forEach(guess => {
-                const guessElement = document.createElement('div');
-                guessElement.textContent = `Guesser: ${guess.guesser_name}, Guess: ${guess.guess}, Correct: ${guess.is_correct}`;
-                statsContainer.appendChild(guessElement);
-            });
-        } else {
-            alert("Error loading stats: " + result.error);
+        if (!response.ok) {
+            console.error("Error loading stats:", result.error);
+            statsContainer.innerHTML = "<tr><td colspan='4'>Failed to load stats</td></tr>";
+            return;
         }
+
+        // Clear existing table rows before adding new ones
+        statsContainer.innerHTML = "";
+
+        if (result.recent_guesses.length === 0) {
+            statsContainer.innerHTML = "<tr><td colspan='4'>No guesses found.</td></tr>";
+            return;
+        }
+
+        // Iterate through each guess and create table rows
+        result.recent_guesses.forEach((guess) => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${guess.guesser_name}</td>
+                <td>${guess.guess}</td>
+                <td>${guess.correct_answer}</td>
+                <td>${guess.is_correct ? "✅ Correct" : "❌ Incorrect"}</td>
+            `;
+
+            statsContainer.appendChild(row);
+        });
     } catch (error) {
-        alert("Error loading stats.");
         console.error("Error during stats loading:", error);
+        statsContainer.innerHTML = "<tr><td colspan='4'>Error loading stats</td></tr>";
     }
 }
 
-// Load stats initially when the page is loaded
+// Call the function when the page loads
 loadStats();
+
 
 // Update a guess (PUT request)
 const updateGuess = async (id, updatedGuess, correctWord) => {
