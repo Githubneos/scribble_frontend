@@ -158,37 +158,50 @@ search_exclude: true
     let currentHintIndex = 0;
 
     function loadNewImage() {
+    console.log("Loading new image..."); // Debugging log
+
     const canvas = document.getElementById('guess-canvas');
     if (!canvas) {
-        console.error("Canvas not found!");
+        console.error("Canvas element not found!");
         return;
     }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-        console.error("Could not get canvas context!");
+        console.error("Could not get 2D context for canvas!");
         return;
     }
 
-    const image = images[currentImageIndex]; // Get the selected image
-    const hintList = document.getElementById('hint-list');
-
-    // Clear previous drawing and hints
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    hintList.innerHTML = '';
-
-    // Check if the drawing function exists before calling it
-    if (typeof image.drawing === "function") {
-        requestAnimationFrame(() => image.drawing(ctx)); // Ensures smooth rendering
-    } else {
-        console.error("Drawing function is missing for the current image.");
+    const image = images[currentImageIndex]; // Get the current image
+    if (!image) {
+        console.error("No image found at index:", currentImageIndex);
+        return;
     }
 
-    // Reset hints
+    const hintList = document.getElementById('hint-list');
+
+    // Clear previous drawing
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white";  // Background color to avoid transparency issues
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath(); // Reset path
+
+    // Clear hints
+    hintList.innerHTML = '';
+
+    if (typeof image.drawing === "function") {
+        console.log("Drawing image:", image.label);
+        requestAnimationFrame(() => image.drawing(ctx)); // Render the image
+    } else {
+        console.error("Drawing function is missing for:", image.label);
+    }
+
+    // Reset hint tracker
     hintsUsed = 0;
     currentHintIndex = 0;
     document.getElementById('hint-button').disabled = false;
 }
+
 
 
     document.getElementById('reset-button').addEventListener('click', () => {
