@@ -101,6 +101,7 @@ search_exclude: true
 </div>
 
 <script>
+import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 const token = localStorage.getItem("token");
 const canvas = document.getElementById("guess-canvas");
 const ctx = canvas.getContext("2d");
@@ -162,10 +163,10 @@ let currentHintIndex = 0;
 function loadNewImage() {
     console.log("Loading new image...");
     const image = images[currentImageIndex];
-    
+
     // Clear the previous canvas drawing
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     // Draw the current image on the canvas using its drawing function
     image.drawing(ctx);
 
@@ -201,7 +202,7 @@ async function submitGuess(event) {
     event.preventDefault();
     const guessInput = document.getElementById("guess-input").value.trim();
     const correctWord = images[currentImageIndex].label;
-    
+
     if (!guessInput) {
         alert("Enter your guess.");
         return;
@@ -223,7 +224,7 @@ async function submitGuess(event) {
         });
 
         const result = await response.json();
-        
+
         if (response.ok) {
             alert("Guess submitted successfully!");
             document.getElementById("guess-input").value = "";
@@ -245,10 +246,10 @@ async function loadStats() {
                 "Authorization": `Bearer ${token}`
             }
         });
-        
+
         const result = await response.json();
         const statsContainer = document.getElementById("stats-body");
-        
+
         if (!response.ok) {
             console.error("Error loading stats:", result.error);
             statsContainer.innerHTML = "<tr><td colspan='4'>Failed to load stats</td></tr>";
