@@ -200,7 +200,8 @@ async function submitGuess(event) {
     event.preventDefault();
     const guess = document.getElementById('guess-input').value;
     const token = localStorage.getItem('token');
-    console.log('Token:', token);  // Check if token is retrieved properly
+
+    console.log('Token:', token); // Debugging token retrieval
 
     if (!token) {
         showMessage('You are not logged in. Please log in again.', 'error');
@@ -212,39 +213,54 @@ async function submitGuess(event) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` // Pass the token here
+                'Authorization': `Bearer ${token}` // Ensure token is passed
             },
             body: JSON.stringify({ user_guess: guess })
         });
 
         const result = await response.json();
+        console.log('Submit Guess Response:', result); // Debug response
+
         if (response.ok) {
             showMessage('Guess submitted successfully!', 'success');
             loadStats(); // Refresh stats after submission
         } else {
-            showMessage(result.message, 'error');
+            showMessage(result.message || 'Error submitting guess', 'error');
         }
     } catch (error) {
+        console.error('Error submitting guess:', error);
         showMessage('Error submitting guess', 'error');
     }
 }
-
 
 async function loadStats() {
     const statsBody = document.getElementById('stats-body');
     statsBody.innerHTML = ''; // Clear previous stats
 
+    const token = localStorage.getItem('token'); // Get token
+
     try {
+        console.log("Fetching stats from:", `${pythonURI}/api/guess`);
+
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        // If token exists, add Authorization header
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(`${pythonURI}/api/guess`, {
             method: 'GET',
-            // Remove Authorization header to not use the token
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: headers
         });
 
         const data = await response.json();
+        console.log('Load Stats Response:', data); // Debug response
+
         if (response.ok && data.recent_guesses && data.recent_guesses.length > 0) {
+            statsBody.innerHTML = "";
             data.recent_guesses.forEach(stat => {
                 statsBody.innerHTML += `
                     <tr>
@@ -261,33 +277,42 @@ async function loadStats() {
             statsBody.innerHTML = '<tr><td colspan="4">No guesses found</td></tr>';
         }
     } catch (error) {
+        console.error("Error loading stats:", error);
         showMessage('Error loading stats', 'error');
     }
 }
 
-
 async function updateGuess(guessId, currentGuess) {
     const updatedGuess = prompt("Update your guess:", currentGuess);
     if (updatedGuess === null || updatedGuess === "") return;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showMessage('You are not logged in. Please log in again.', 'error');
+        return;
+    }
 
     try {
         const response = await fetch(`${pythonURI}/api/guess`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ id: guessId, user_guess: updatedGuess })
         });
 
         const result = await response.json();
+        console.log('Update Guess Response:', result); // Debug response
+
         if (response.ok) {
             showMessage('Guess updated successfully!', 'success');
-            loadStats(); // Refresh the stats after update
+            loadStats(); // Refresh stats after update
         } else {
-            showMessage(result.message, 'error');
+            showMessage(result.message || 'Error updating guess', 'error');
         }
     } catch (error) {
+        console.error("Error updating guess:", error);
         showMessage('Error updating guess', 'error');
     }
 }
@@ -295,27 +320,37 @@ async function updateGuess(guessId, currentGuess) {
 async function deleteGuess(guessId) {
     if (!confirm('Are you sure you want to delete this guess?')) return;
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showMessage('You are not logged in. Please log in again.', 'error');
+        return;
+    }
+
     try {
         const response = await fetch(`${pythonURI}/api/guess`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ id: guessId })
         });
 
         const result = await response.json();
+        console.log('Delete Guess Response:', result); // Debug response
+
         if (response.ok) {
             showMessage('Guess deleted successfully!', 'success');
-            loadStats(); // Refresh the stats after deletion
+            loadStats(); // Refresh stats after deletion
         } else {
-            showMessage(result.message, 'error');
+            showMessage(result.message || 'Error deleting guess', 'error');
         }
     } catch (error) {
+        console.error("Error deleting guess:", error);
         showMessage('Error deleting guess', 'error');
     }
 }
+
 
 function showMessage(message, type) {
     const messageElement = document.createElement('div');
