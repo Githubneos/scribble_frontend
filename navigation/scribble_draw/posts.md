@@ -149,7 +149,7 @@ menu: nav/home.html
 <div class="picture-gallery">
     <div class="upload-form">
         <h2>Upload Drawing</h2>
-        <form id="picture-form">
+        <form id="picture-form" enctype="multipart/form-data">
             <div class="form-group">
                 <label class="form-label">Drawing Name</label>
                 <input type="text" id="drawingName" class="form-input" required>
@@ -160,7 +160,7 @@ menu: nav/home.html
             </div>
             <div class="form-group">
                 <label class="form-label">Picture (PNG only)</label>
-                <input type="file" id="image" accept=".png" class="form-input" required>
+                <input type="file" id="image" accept="image/png" class="form-input" required>
             </div>
             <button type="submit" class="submit-btn">Upload Drawing</button>
         </form>
@@ -181,7 +181,7 @@ menu: nav/home.html
 
     async function fetchPictures() {
         try {
-            const response = await fetch(`${pythonURI}/api/picture`, {
+            const response = await fetch(`${pythonURI}/api/pictures`, {
                 method: "GET",
                 ...fetchConfig
             });
@@ -208,9 +208,6 @@ menu: nav/home.html
                             ${picture.can_delete ? 
                                 `<button onclick="deletePicture(${picture.id})" class="delete-btn">Delete Drawing</button>` 
                                 : ''}
-                            ${picture.user_role === 'admin' ? 
-                                `<button onclick="deleteUser('${picture.user_name}')" class="delete-btn delete-user-btn">Delete User</button>`
-                                : ''}
                         </div>
                     </div>
                 `;
@@ -231,7 +228,7 @@ menu: nav/home.html
         formData.append('image', document.getElementById('image').files[0]);
 
         try {
-            const response = await fetch(`${pythonURI}/api/picture`, {
+            const response = await fetch(`${pythonURI}/api/pictures`, {
                 method: "POST",
                 ...fetchConfig,
                 body: formData
@@ -256,14 +253,9 @@ menu: nav/home.html
         if (!confirm('Are you sure you want to delete this picture?')) return;
 
         try {
-            const response = await fetch(`${pythonURI}/api/picture`, {
+            const response = await fetch(`${pythonURI}/api/pictures/delete/${pictureId}`, {
                 method: "DELETE",
-                ...fetchConfig,
-                headers: {
-                    ...fetchConfig.headers,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id: pictureId })
+                ...fetchConfig
             });
 
             const data = await response.json();
