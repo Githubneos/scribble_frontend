@@ -155,6 +155,7 @@ const images = [
             hints: ["It has leaves", "Found in forests", "Grows tall"]
         }
 ];
+<script/>
 let currentImageIndex = 0;
 let currentHintIndex = 0;
 function loadNewImage() {
