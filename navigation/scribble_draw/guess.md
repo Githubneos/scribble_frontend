@@ -156,38 +156,45 @@ const images = [
         }
 ];
 <script/>
-let currentImageIndex = 0;
-let currentHintIndex = 0;
+let currentImageIndex = 0; // Current image index
+// Function to load a new image
 function loadNewImage() {
     console.log("Loading new image...");
+    // Get the current image object from the images array
     const image = images[currentImageIndex];
-    const img = new Image();
-    img.src = image.src;
-     img.onload = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    };
-    document.getElementById("hint-list").innerHTML = "";
+    // Clear the previous canvas drawing
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Draw the new image on the canvas using the 'drawing' function from the image object
+    image.drawing(ctx);
+    // Reset the hint index for the next image
     currentHintIndex = 0;
+     // Enable the hint button
     document.getElementById("hint-button").disabled = false;
 }
+// Event listener for the reset button
 document.getElementById("reset-button").addEventListener("click", () => {
+    // Change to a random image from the images array
     currentImageIndex = Math.floor(Math.random() * images.length);
     loadNewImage();
 });
+// Event listener for the hint button
 document.getElementById("hint-button").addEventListener("click", () => {
     const hintList = document.getElementById("hint-list");
     const image = images[currentImageIndex];
+    // Show the next hint
     if (currentHintIndex < image.hints.length) {
         const hint = document.createElement("p");
         hint.textContent = image.hints[currentHintIndex];
         hintList.appendChild(hint);
         currentHintIndex++;
     } else {
+        // Disable the hint button when there are no more hints
         alert("No more hints available!");
         document.getElementById("hint-button").disabled = true;
     }
 });
+// Initialize the first image when the page loads
+loadNewImage();
 async function submitGuess(event) {
     event.preventDefault();
     const guessInput = document.getElementById("guess-input").value.trim();
