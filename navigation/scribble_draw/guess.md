@@ -99,116 +99,121 @@ search_exclude: true
         </table>
     </div>
 </div>
+
 <script>
-const apiURL = "https://scribble.stu.nighthawkcodingsociety.com/api/guess"; // Ensure this matches your backend endpoint
 const token = localStorage.getItem("token");
 const canvas = document.getElementById("guess-canvas");
 const ctx = canvas.getContext("2d");
 const images = [
-        {
-            label: "car",
-            drawing: function(ctx) {
-                ctx.fillStyle = "#3498db";
-                ctx.fillRect(100, 150, 200, 50);
-                ctx.fillStyle = "#2ecc71";
-                ctx.beginPath();
-                ctx.arc(130, 200, 20, 0, Math.PI * 2);
-                ctx.arc(270, 200, 20, 0, Math.PI * 2);
-                ctx.fill();
-            },
-            hints: ["It has wheels", "Used for transportation", "Has engine"]
+    {
+        label: "car",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#3498db";
+            ctx.fillRect(100, 150, 200, 50);
+            ctx.fillStyle = "#2ecc71";
+            ctx.beginPath();
+            ctx.arc(130, 200, 20, 0, Math.PI * 2);
+            ctx.arc(270, 200, 20, 0, Math.PI * 2);
+            ctx.fill();
         },
-        {
-            label: "house",
-            drawing: function(ctx) {
-                ctx.fillStyle = "#e74c3c";
-                ctx.fillRect(100, 100, 200, 150);
-                ctx.fillStyle = "#f39c12";
-                ctx.beginPath();
-                ctx.moveTo(100, 100);
-                ctx.lineTo(200, 50);
-                ctx.lineTo(300, 100);
-                ctx.fill();
-            },
-            hints: ["People live in it", "Has a roof", "Home"]
+        hints: ["It has wheels", "Used for transportation", "Has engine"]
+    },
+    {
+        label: "house",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#e74c3c";
+            ctx.fillRect(100, 100, 200, 150);
+            ctx.fillStyle = "#f39c12";
+            ctx.beginPath();
+            ctx.moveTo(100, 100);
+            ctx.lineTo(200, 50);
+            ctx.lineTo(300, 100);
+            ctx.fill();
         },
-        {
-            label: "sun",
-            drawing: function(ctx) {
-                ctx.fillStyle = "#f1c40f";
-                ctx.beginPath();
-                ctx.arc(200, 200, 50, 0, Math.PI * 2); // Sun
-                ctx.fill();
-            },
-            hints: ["It's bright", "Appears during the day", "Star of our solar system"]
+        hints: ["People live in it", "Has a roof", "Home"]
+    },
+    {
+        label: "sun",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#f1c40f";
+            ctx.beginPath();
+            ctx.arc(200, 200, 50, 0, Math.PI * 2); // Sun
+            ctx.fill();
         },
-        {
-            label: "tree",
-            drawing: function(ctx) {
-                ctx.fillStyle = "#8B4513";
-                ctx.fillRect(175, 180, 50, 100); // Trunk
-                ctx.fillStyle = "#228B22";
-                ctx.beginPath();
-                ctx.arc(200, 150, 50, 0, Math.PI * 2); // Leaves
-                ctx.fill();
-            },
-            hints: ["It has leaves", "Found in forests", "Grows tall"]
-        }
+        hints: ["It's bright", "Appears during the day", "Star of our solar system"]
+    },
+    {
+        label: "tree",
+        drawing: function(ctx) {
+            ctx.fillStyle = "#8B4513";
+            ctx.fillRect(175, 180, 50, 100); // Trunk
+            ctx.fillStyle = "#228B22";
+            ctx.beginPath();
+            ctx.arc(200, 150, 50, 0, Math.PI * 2); // Leaves
+            ctx.fill();
+        },
+        hints: ["It has leaves", "Found in forests", "Grows tall"]
+    }
 ];
-<script/>
-let currentImageIndex = 0; // Current image index
-// Function to load a new image
+
+let currentImageIndex = 0;
+let currentHintIndex = 0;
+
 function loadNewImage() {
     console.log("Loading new image...");
-    // Get the current image object from the images array
     const image = images[currentImageIndex];
+    
     // Clear the previous canvas drawing
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Draw the new image on the canvas using the 'drawing' function from the image object
+    
+    // Draw the current image on the canvas using its drawing function
     image.drawing(ctx);
-    // Reset the hint index for the next image
+
+    // Reset hints
     currentHintIndex = 0;
-     // Enable the hint button
     document.getElementById("hint-button").disabled = false;
 }
-// Event listener for the reset button
+
 document.getElementById("reset-button").addEventListener("click", () => {
-    // Change to a random image from the images array
+    // Select a random image
     currentImageIndex = Math.floor(Math.random() * images.length);
     loadNewImage();
 });
-// Event listener for the hint button
+
 document.getElementById("hint-button").addEventListener("click", () => {
     const hintList = document.getElementById("hint-list");
     const image = images[currentImageIndex];
-    // Show the next hint
+
+    // Show next hint
     if (currentHintIndex < image.hints.length) {
         const hint = document.createElement("p");
         hint.textContent = image.hints[currentHintIndex];
         hintList.appendChild(hint);
         currentHintIndex++;
     } else {
-        // Disable the hint button when there are no more hints
+        // Disable hint button if no more hints
         alert("No more hints available!");
         document.getElementById("hint-button").disabled = true;
     }
 });
-// Initialize the first image when the page loads
-loadNewImage();
+
 async function submitGuess(event) {
     event.preventDefault();
     const guessInput = document.getElementById("guess-input").value.trim();
     const correctWord = images[currentImageIndex].label;
-     if (!guessInput) {
+    
+    if (!guessInput) {
         alert("Enter your guess.");
         return;
     }
+
     const payload = {
         user_guess: guessInput,
         correct_word: correctWord
     };
+
     try {
-        const response = await fetch(apiURL, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -216,7 +221,9 @@ async function submitGuess(event) {
             },
             body: JSON.stringify(payload)
         });
-     const result = await response.json();
+
+        const result = await response.json();
+        
         if (response.ok) {
             alert("Guess submitted successfully!");
             document.getElementById("guess-input").value = "";
@@ -229,26 +236,31 @@ async function submitGuess(event) {
         alert("Something went wrong.");
     }
 }
+
 async function loadStats() {
     try {
-        const response = await fetch(apiURL, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`
             }
         });
+        
         const result = await response.json();
         const statsContainer = document.getElementById("stats-body");
+        
         if (!response.ok) {
             console.error("Error loading stats:", result.error);
             statsContainer.innerHTML = "<tr><td colspan='4'>Failed to load stats</td></tr>";
             return;
         }
+
         statsContainer.innerHTML = "";
         if (result.recent_guesses.length === 0) {
             statsContainer.innerHTML = "<tr><td colspan='4'>No guesses found.</td></tr>";
             return;
         }
+
         result.recent_guesses.forEach((guess) => {
             const row = document.createElement("tr");
             row.innerHTML = `
@@ -267,11 +279,13 @@ async function loadStats() {
         document.getElementById("stats-body").innerHTML = "<tr><td colspan='4'>Error loading stats</td></tr>";
     }
 }
+
 async function updateGuess(id, oldGuess, correctWord) {
     const newGuess = prompt("Enter the updated guess:", oldGuess);
     if (!newGuess) return;
+
     try {
-        const response = await fetch(apiURL, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -283,6 +297,7 @@ async function updateGuess(id, oldGuess, correctWord) {
                 correct_word: correctWord
             })
         });
+
         if (response.ok) {
             alert("Guess updated successfully!");
             loadStats();
@@ -294,10 +309,12 @@ async function updateGuess(id, oldGuess, correctWord) {
         alert("Something went wrong while updating.");
     }
 }
+
 async function deleteGuess(id) {
     if (!confirm("Are you sure you want to delete this guess?")) return;
+
     try {
-        const response = await fetch(apiURL, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -305,6 +322,7 @@ async function deleteGuess(id) {
             },
             body: JSON.stringify({ id: id })
         });
+
         if (response.ok) {
             alert("Guess deleted successfully!");
             loadStats();
@@ -316,6 +334,10 @@ async function deleteGuess(id) {
         alert("Something went wrong while deleting.");
     }
 }
+
 document.getElementById("guess-form").addEventListener("submit", submitGuess);
+
+// Initialize first image
 loadNewImage();
 loadStats();
+</script>
