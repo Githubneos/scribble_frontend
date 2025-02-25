@@ -202,7 +202,7 @@ async function submitGuess(event) {
         correct_word: correctWord
     };
     try {
-        const response = await fetch(pythonURI/api/guess, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -225,7 +225,7 @@ async function submitGuess(event) {
 }
 async function loadStats() {
     try {
-        const response = await fetch(pythonURI/api/guess, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -265,7 +265,7 @@ async function updateGuess(id, oldGuess, correctWord) {
     const newGuess = prompt("Enter the updated guess:", oldGuess);
     if (!newGuess) return;
     try {
-        const response = await fetch(pythonURI/api/guess, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -291,7 +291,7 @@ async function updateGuess(id, oldGuess, correctWord) {
 async function deleteGuess(id) {
     if (!confirm("Are you sure you want to delete this guess?")) return;
     try {
-        const response = await fetch(pythonURI/api/guess, {
+        const response = await fetch(`${pythonURI}/api/guess`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
