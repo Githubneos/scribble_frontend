@@ -99,9 +99,9 @@ search_exclude: true
         </table>
     </div>
 </div>
-
-<script>
+<script type="module">
 import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+let isAdmin = false;
 const token = localStorage.getItem("token");
 const canvas = document.getElementById("guess-canvas");
 const ctx = canvas.getContext("2d");
