@@ -200,13 +200,20 @@ search_exclude: true
 async function submitGuess(event) {
     event.preventDefault();
     const guess = document.getElementById('guess-input').value;
+    const token = localStorage.getItem('token');
+    console.log('Token:', token);  // Check if token is retrieved properly
+
+    if (!token) {
+        showMessage('You are not logged in. Please log in again.', 'error');
+        return;
+    }
 
     try {
         const response = await fetch(pythonURI, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}` // Pass the token here
             },
             body: JSON.stringify({ user_guess: guess })
         });
@@ -222,6 +229,7 @@ async function submitGuess(event) {
         showMessage('Error submitting guess', 'error');
     }
 }
+
 
 async function loadStats() {
     const statsBody = document.getElementById('stats-body');
