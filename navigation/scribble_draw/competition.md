@@ -4,348 +4,381 @@ title: Competition
 permalink: /competition
 ---
 
-<table>
-    <tr>
-        <td><a href="{{site.baseurl}}/index">Home</a></td>
-        <td><a href="{{site.baseurl}}/competition">Competitive</a></td>
-        <td><a href="{{site.baseurl}}/guess">Guess Game</a></td>
-        <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
-        <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
-        <td><a href="{{site.baseurl}}/about">About Us</a></td>
-        <td><a href="{{site.baseurl}}/deploy">Deploy Blog</a></td>
-        <td><a href="{{site.baseurl}}/posts">Posts</a></td>
-    </tr>
-</table>
-
 <style>
-    body {
-        background: linear-gradient(145deg, #BAD8B6, #E1EACD, #F9F6E6, #8D77AB);
-    }
-    .game-container {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    .drawing-section {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    canvas {
-        background: white;
-        border: 2px solid #333;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .controls {
-        margin: 20px 0;
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .button {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        background: #4CAF50;
-        color: white;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    .button:hover {
-        background: #45a049;
-    }
-    .button:disabled {
-        background: #cccccc;
-        cursor: not-allowed;
-    }
-    .timer {
-        font-size: 2em;
-        margin: 20px 0;
-        text-align: center;
-        color: #333;
-    }
-    .word-display {
-        font-size: 1.5em;
-        margin: 10px 0;
-        color: #2c3e50;
-        font-weight: bold;
-    }
-    .message {
-        padding: 10px;
-        margin: 10px 0;
-        border-radius: 5px;
-        display: none;
-        text-align: center;
-    }
-    .entries-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-        background: rgba(255, 255, 255, 0.9);
-    }
-    .entries-table th, 
-    .entries-table td {
-        padding: 12px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-    }
-    .entries-table th {
-        background: #4CAF50;
-        color: white;
-    }
+.competition-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    font-family: Arial, sans-serif;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    align-items: center;
+}
+
+.timer-input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100px;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.start-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.stop-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.save-btn {
+    background-color: #2196F3;
+    color: white;
+}
+
+.timer-display {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 1rem 0;
+    color: #333;
+}
+
+.word-display {
+    font-size: 1.5rem;
+    color: #666;
+    margin: 1rem 0;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+}
+
+.results-table th,
+.results-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.results-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.results-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.drawing-container {
+    margin: 2rem 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.canvas-controls {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f5f5f5;
+}
+
+#drawingCanvas {
+    background: white;
+    cursor: crosshair;
+}
+
+.color-picker {
+    width: 50px;
+    height: 30px;
+    padding: 0;
+    border: none;
+}
+
+.brush-size {
+    width: 100px;
+}
+
+.clear-btn {
+    background-color: #ff9800;
+    color: white;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    display: none;
+}
 </style>
 
-<div class="game-container">
-    <div class="drawing-section">
-        <h1>🎨 Competitive Drawing</h1>
-        <div id="message" class="message"></div>
-        <div id="word-display" class="word-display">Word to draw: Waiting for timer...</div>
-        <div id="timer" class="timer">Time: Not Started</div>
-        
-        <canvas id="drawingCanvas" width="800" height="500"></canvas>
-        
-        <div class="controls">
-            <input type="color" id="colorPicker" value="#000000">
-            <input type="range" id="brushSize" min="1" max="20" value="5">
-            <button class="button" id="clearButton">Clear Canvas</button>
-            <input type="number" id="timerInput" placeholder="Time in seconds" min="1">
-            <button class="button" id="startTimer">Start Timer</button>
-            <button class="button" id="submitDrawing" disabled>Submit Drawing</button>
-        </div>
+<div class="competition-container">
+    <div id="errorMessage" class="error-message" style="display: none;"></div>
+    <div class="timer-controls">
+        <input type="number" id="timerDuration" class="timer-input" placeholder="Seconds" min="1" value="60">
+        <button id="startTimer" class="btn start-btn">Start Timer</button>
+        <button id="stopTimer" class="btn stop-btn" disabled>Stop Timer</button>
+        <button id="saveDrawing" class="btn save-btn">Save Drawing</button>
     </div>
 
-    <table class="entries-table">
+    <div class="timer-display" id="timerDisplay">Time: 60s</div>
+    <div class="word-display" id="wordDisplay">Word: </div>
+
+    <div class="drawing-container">
+        <div class="canvas-controls">
+            <input type="color" id="colorPicker" class="color-picker" value="#000000">
+            <input type="range" id="brushSize" class="brush-size" min="1" max="20" value="5">
+            <button id="clearCanvas" class="btn clear-btn">Clear Canvas</button>
+        </div>
+        <canvas id="drawingCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <table class="results-table">
         <thead>
             <tr>
-                <th>Player</th>
-                <th>Time Taken (seconds)</th>
-                <th>Actions</th>
+                <th>User</th>
+                <th>Time Taken (s)</th>
+                <th>Word Drawn</th>
             </tr>
         </thead>
-        <tbody id="entriesTable"></tbody>
+        <tbody id="resultsBody">
+        </tbody>
     </table>
 </div>
 
 <script type="module">
 import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
-const fetchConfig = {
-    credentials: 'include',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-Origin': 'client'
-    }
-};
-
-let currentWord = '';
-let isDrawing = false;
 const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
+const colorPicker = document.getElementById('colorPicker');
+const brushSize = document.getElementById('brushSize');
+const clearButton = document.getElementById('clearCanvas');
 
-// Drawing functions - Define these before adding event listeners
-function startDrawing(e) {
-    isDrawing = true;
-    const rect = canvas.getBoundingClientRect();
-    ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-}
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
 
 function draw(e) {
     if (!isDrawing) return;
-    const rect = canvas.getBoundingClientRect();
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-    ctx.strokeStyle = document.getElementById('colorPicker').value;
-    ctx.lineWidth = document.getElementById('brushSize').value;
+    
+    ctx.strokeStyle = colorPicker.value;
+    ctx.lineWidth = brushSize.value;
     ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    ctx.lineTo(x, y);
     ctx.stroke();
+    
+    [lastX, lastY] = [x, y];
 }
 
-function stopDrawing() {
-    isDrawing = false;
-    ctx.closePath();
-}
+canvas.addEventListener('mousedown', (e) => {
+    isDrawing = true;
+    const rect = canvas.getBoundingClientRect();
+    [lastX, lastY] = [e.clientX - rect.left, e.clientY - rect.top];
+});
 
-// Add event listeners after functions are defined
-canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', stopDrawing);
-canvas.addEventListener('mouseout', stopDrawing);
+canvas.addEventListener('mouseup', () => isDrawing = false);
+canvas.addEventListener('mouseout', () => isDrawing = false);
 
-// Clear canvas function
-document.getElementById('clearButton').addEventListener('click', () => {
+clearButton.addEventListener('click', () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
-// Timer functionality
+document.getElementById('saveDrawing').addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = `drawing_${currentWord}_${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+});
+
+function resizeCanvas() {
+    const container = canvas.parentElement;
+    const containerWidth = container.clientWidth;
+    canvas.width = containerWidth - 20;
+    canvas.height = Math.min(600, window.innerHeight - 300);
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas(); // Initial sizing
+
+let currentWord = '';
 let timerInterval;
 
 document.getElementById('startTimer').addEventListener('click', async () => {
-    const duration = parseInt(document.getElementById('timerInput').value);
-    if (!duration || duration <= 0) {
-        showMessage('Please enter a valid duration', 'error');
+    const duration = parseInt(document.getElementById('timerDuration').value);
+    if (duration <= 0) {
+        alert('Please enter a valid duration');
         return;
     }
 
     try {
-        const response = await fetch(`${pythonURI}/api/competition/timer`, {
-            ...fetchConfig,
-            method: 'POST',
-            body: JSON.stringify({ duration })
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'Failed to start timer');
-
-        currentWord = data.word;
-        document.getElementById('word-display').textContent = `Word to draw: ${currentWord}`;
-        showMessage(`Timer started! Draw: ${currentWord}`, 'success');
-        document.getElementById('submitDrawing').disabled = false;
-    } catch (error) {
-        console.error('Error:', error);
-        showMessage(error.message, 'error');
-    }
-});
-
-// Update the submit drawing event listener
-document.getElementById('submitDrawing').addEventListener('click', async () => {
-    try {
-        // Get current timer value
-        const timerText = document.getElementById('timer').textContent;
-        const timeMatch = timerText.match(/\d+/);
+        // Disable save drawing button when starting new timer
+        document.getElementById('saveDrawing').disabled = true;
         
-        if (!timeMatch) {
-            showMessage('Invalid timer value', 'error');
-            return;
-        }
+        // Clear previous drawing
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Save the drawing as PNG
-        const imageData = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = `drawing_${Date.now()}.png`;
-        link.href = imageData;
-        link.click();
-
-        // Create payload matching the API requirements
-        const payload = {
-            time_taken: parseInt(timeMatch[0])
-        };
-
-        const response = await fetch(`${pythonURI}/api/competition`, {
+        const response = await fetch(`${pythonURI}/api/competition/timer`, {
             method: 'POST',
-            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
                 'X-Origin': 'client'
             },
-            body: JSON.stringify(payload)
+            credentials: 'include',
+            body: JSON.stringify({ duration })
         });
 
         const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to save time');
-        }
+        if (!response.ok) throw new Error(data.message);
 
-        showMessage('Drawing saved and time recorded!', 'success');
-        
-        // Reset game state
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        document.getElementById('submitDrawing').disabled = true;
-        
-        // Refresh the entries table
-        await fetchEntries();
+        currentWord = data.word;
+        document.getElementById('wordDisplay').textContent = `Word: ${currentWord}`;
+        document.getElementById('startTimer').disabled = true;
+        document.getElementById('stopTimer').disabled = false;
+
+        // Start timer display update
+        updateTimerDisplay();
+
     } catch (error) {
-        console.error('Submission error:', error);
-        showMessage(error.message, 'error');
+        console.error('Error:', error);
+        document.getElementById('saveDrawing').disabled = false;
+        alert('Failed to start timer: ' + error.message);
     }
 });
 
-async function fetchEntries() {
+document.getElementById('stopTimer').addEventListener('click', async () => {
     try {
-        const response = await fetch(`${pythonURI}/api/competition`, {
-            method: 'GET'
-        });
+        document.getElementById('stopTimer').disabled = true;
 
-        if (!response.ok) throw new Error('Failed to fetch entries');
-        const entries = await response.json();
-        updateTable(entries);
-    } catch (error) {
-        console.error('Error:', error);
-        showMessage(error.message, 'error');
-    }
-}
-
-// Update the table update function
-function updateTable(entries) {
-    const tbody = document.getElementById('entriesTable');
-    tbody.innerHTML = '';
-
-    entries.forEach(entry => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${entry.users_name}</td>
-            <td>${entry.time_taken}</td>
-            <td>${entry.created_by ? 
-                `<button onclick="deleteEntry(${entry.id})" class="button">Delete</button>` 
-                : ''}</td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-window.deleteEntry = async function(id) {
-    if (!confirm('Are you sure you want to delete this entry?')) return;
-
-    try {
-        const response = await fetch(`${pythonURI}/api/competition`, {
-            ...fetchConfig,
-            method: 'DELETE',
-            body: JSON.stringify({ id })
+        const response = await fetch(`${pythonURI}/api/competition/timer`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Origin': 'client'
+            },
+            credentials: 'include'
         });
 
         const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'Failed to delete entry');
+        
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
 
-        showMessage('Entry deleted successfully', 'success');
-        await fetchEntries();
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to stop timer');
+        }
+
+        // Update UI state
+        document.getElementById('startTimer').disabled = false;
+        document.getElementById('timerDisplay').textContent = 'Time: 0s';
+        document.getElementById('wordDisplay').textContent = 'Word: ';
+        
+        // Save drawing functionality - enable after successful stop
+        document.getElementById('saveDrawing').disabled = false;
+
+        // Update results table with latest data
+        await fetchResults();
+
     } catch (error) {
         console.error('Error:', error);
-        showMessage(error.message, 'error');
+        document.getElementById('stopTimer').disabled = false;
+        alert(`Failed to stop timer: ${error.message}`);
     }
-};
+});
 
-function showMessage(text, type) {
-    const msgEl = document.getElementById('message');
-    msgEl.textContent = text;
-    msgEl.className = `message ${type}`;
-    msgEl.style.display = 'block';
-    msgEl.style.backgroundColor = type === 'error' ? '#fee2e2' : '#dcfce7';
-    msgEl.style.color = type === 'error' ? '#ef4444' : '#10b981';
-    setTimeout(() => msgEl.style.display = 'none', 3000);
+async function updateTimerDisplay() {
+    timerInterval = setInterval(async () => {
+        try {
+            const response = await fetch(`${pythonURI}/api/competition/timer`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            document.getElementById('timerDisplay').textContent = 
+                `Time: ${data.time_remaining}s`;
+
+            if (!data.is_active) {
+                clearInterval(timerInterval);
+                document.getElementById('startTimer').disabled = false;
+                document.getElementById('stopTimer').disabled = true;
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            clearInterval(timerInterval);
+        }
+    }, 1000);
 }
 
-// Update timer status
-setInterval(async () => {
+async function fetchResults() {
     try {
-        const response = await fetch(`${pythonURI}/api/competition/timer`, {
-            ...fetchConfig,
-            method: 'GET'
+        const response = await fetch(`${pythonURI}/api/competition/times`, {
+            credentials: 'include'
         });
-        
-        if (!response.ok) throw new Error('Failed to fetch timer status');
-        const status = await response.json();
-        
-        document.getElementById('timer').textContent = 
-            status.is_active ? `Time: ${status.time_remaining}s` : 'Time: Not Started';
-        
-        if (status.is_active && status.time_remaining === 0) {
-            showMessage('Time\'s up!', 'error');
-        }
-    } catch (error) {
-        console.error('Timer status error:', error);
-    }
-}, 1000);
 
-// Initialize
-document.addEventListener('DOMContentLoaded', fetchEntries);
+        if (!response.ok) {
+            throw new Error('Failed to fetch results');
+        }
+
+        const entries = await response.json();
+        const tbody = document.getElementById('resultsBody');
+        tbody.innerHTML = '';
+
+        entries.forEach(entry => {
+            const row = tbody.insertRow();
+            row.insertCell().textContent = entry.users_name || 'Unknown'; // Changed from profile_name
+            row.insertCell().textContent = entry.time_taken || '0';
+            row.insertCell().textContent = entry.drawn_word || 'Unknown'; // Changed from word_drawn
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to fetch results: ' + error.message);
+    }
+}
+
+// Initial fetch of results
+document.addEventListener('DOMContentLoaded', fetchResults);
+
+function showError(message) {
+    const errorDiv = document.getElementById('errorMessage');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 3000);
+}
 </script>
