@@ -101,7 +101,7 @@ search_exclude: true
 </div>
 
 <script>
-import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js'
 const token = localStorage.getItem("token");
 const canvas = document.getElementById("guess-canvas");
 const ctx = canvas.getContext("2d");
