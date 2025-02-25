@@ -23,7 +23,7 @@ menu: nav/home.html
     :root {
         --primary-color: #1a237e;
         --secondary-color: #283593;
-        --background: linear-gradient(145deg, #C6E7FF, #D4F6FF, #FBFBFB, #FFDDAE);
+        --background: linear-gradient(145deg, #89A8B2, #B3C8CF, #E5E1DA, #F1F0E8);
         --text-color: #e1e1e1;
         --card-bg: rgba(30, 41, 59, 0.8);
         --error: #e74c3c;

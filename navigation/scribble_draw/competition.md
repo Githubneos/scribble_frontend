@@ -9,6 +9,7 @@ permalink: /competition
     max-width: 1200px;
     margin: 2rem auto;
     padding: 1rem;
+    background: linear-gradient(145deg, #A6AEbF, #C5D3E8, #D0E8C5, #FFF8DE);
     font-family: Arial, sans-serif;
 }
 

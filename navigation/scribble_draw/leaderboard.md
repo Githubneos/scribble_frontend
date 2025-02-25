@@ -10,7 +10,7 @@ search_exclude: true
     max-width: 1200px;
     margin: 2rem auto;
     padding: 1rem;
-    background: linear-gradient(145deg, #727D73, #AAB99A, #D0DDD0, #F0F0D7);
+    background: linear-gradient(145deg, #789DBC, #FFE3E3, #FEF9F2, #C9E9D2);
 }
 
 .score-form {
