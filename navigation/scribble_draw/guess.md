@@ -230,7 +230,10 @@ async function loadStats() {
     try {
         const response = await fetch(pythonURI, {
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            // Remove Authorization header to not use the token
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
 
         const data = await response.json();
@@ -254,6 +257,7 @@ async function loadStats() {
         showMessage('Error loading stats', 'error');
     }
 }
+
 
 async function updateGuess(guessId, currentGuess) {
     const updatedGuess = prompt("Update your guess:", currentGuess);
