@@ -196,8 +196,8 @@ search_exclude: true
         }
     });
 
-// Submit a guess (POST request)
 const submitGuess = async (userGuess, correctWord) => {
+    console.log("Submitting guess:", userGuess, correctWord); // Log the data to ensure it's correct
     try {
         const response = await fetch(`${pythonURI}/api/guess`, {
             method: "POST",
@@ -206,12 +206,13 @@ const submitGuess = async (userGuess, correctWord) => {
                 "Authorization": `Bearer ${token}`,  // Add token to the header
             },
             body: JSON.stringify({
-                user_guess: userGuess,  // user guess
-                correct_word: correctWord  // correct word
+                user_guess: userGuess,
+                correct_word: correctWord
             }),
         });
 
         const data = await response.json();
+        console.log("Response data:", data); // Log the response to inspect it
 
         if (response.ok) {
             console.log("Guess submitted:", data.guess);
@@ -225,6 +226,7 @@ const submitGuess = async (userGuess, correctWord) => {
         alert("Something went wrong while submitting your guess.");
     }
 };
+
 
 // Fetch all guesses (GET request)
 const getGuesses = async () => {
