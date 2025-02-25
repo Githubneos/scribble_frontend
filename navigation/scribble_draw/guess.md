@@ -162,33 +162,26 @@ const images = [
 ];
 let currentImageIndex = 0;
 let currentHintIndex = 0;
-
 function loadNewImage() {
     console.log("Loading new image...");
     const image = images[currentImageIndex];
-
-    // Clear the previous canvas drawing
+// Clear the previous canvas drawing
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the current image on the canvas using its drawing function
+// Draw the current image on the canvas using its drawing function
     image.drawing(ctx);
-
-    // Reset hints
+// Reset hints
     currentHintIndex = 0;
     document.getElementById("hint-button").disabled = false;
 }
-
 document.getElementById("reset-button").addEventListener("click", () => {
     // Select a random image
     currentImageIndex = Math.floor(Math.random() * images.length);
     loadNewImage();
 });
-
 document.getElementById("hint-button").addEventListener("click", () => {
     const hintList = document.getElementById("hint-list");
     const image = images[currentImageIndex];
-
-    // Show next hint
+// Show next hint
     if (currentHintIndex < image.hints.length) {
         const hint = document.createElement("p");
         hint.textContent = image.hints[currentHintIndex];
@@ -200,22 +193,18 @@ document.getElementById("hint-button").addEventListener("click", () => {
         document.getElementById("hint-button").disabled = true;
     }
 });
-
 async function submitGuess(event) {
     event.preventDefault();
     const guessInput = document.getElementById("guess-input").value.trim();
     const correctWord = images[currentImageIndex].label;
-
     if (!guessInput) {
         alert("Enter your guess.");
         return;
     }
-
     const payload = {
         user_guess: guessInput,
         correct_word: correctWord
     };
-
     try {
         const response = await fetch(`${pythonURI}/api/guess`, {
             method: "POST",
@@ -225,9 +214,7 @@ async function submitGuess(event) {
             },
             body: JSON.stringify(payload)
         });
-
         const result = await response.json();
-
         if (response.ok) {
             alert("Guess submitted successfully!");
             document.getElementById("guess-input").value = "";
@@ -240,7 +227,6 @@ async function submitGuess(event) {
         alert("Something went wrong.");
     }
 }
-
 async function loadStats() {
     try {
         const response = await fetch(`${pythonURI}/api/guess`, {
@@ -249,22 +235,18 @@ async function loadStats() {
                 "Authorization": `Bearer ${token}`
             }
         });
-
         const result = await response.json();
         const statsContainer = document.getElementById("stats-body");
-
         if (!response.ok) {
             console.error("Error loading stats:", result.error);
             statsContainer.innerHTML = "<tr><td colspan='4'>Failed to load stats</td></tr>";
             return;
         }
-
         statsContainer.innerHTML = "";
         if (result.recent_guesses.length === 0) {
             statsContainer.innerHTML = "<tr><td colspan='4'>No guesses found.</td></tr>";
             return;
         }
-
         result.recent_guesses.forEach((guess) => {
             const row = document.createElement("tr");
             row.innerHTML = `
@@ -283,11 +265,9 @@ async function loadStats() {
         document.getElementById("stats-body").innerHTML = "<tr><td colspan='4'>Error loading stats</td></tr>";
     }
 }
-
 async function updateGuess(id, oldGuess, correctWord) {
     const newGuess = prompt("Enter the updated guess:", oldGuess);
     if (!newGuess) return;
-
     try {
         const response = await fetch(`${pythonURI}/api/guess`, {
             method: "PUT",
@@ -301,7 +281,6 @@ async function updateGuess(id, oldGuess, correctWord) {
                 correct_word: correctWord
             })
         });
-
         if (response.ok) {
             alert("Guess updated successfully!");
             loadStats();
@@ -313,10 +292,8 @@ async function updateGuess(id, oldGuess, correctWord) {
         alert("Something went wrong while updating.");
     }
 }
-
 async function deleteGuess(id) {
     if (!confirm("Are you sure you want to delete this guess?")) return;
-
     try {
         const response = await fetch(`${pythonURI}/api/guess`, {
             method: "DELETE",
@@ -326,7 +303,6 @@ async function deleteGuess(id) {
             },
             body: JSON.stringify({ id: id })
         });
-
         if (response.ok) {
             alert("Guess deleted successfully!");
             loadStats();
@@ -338,9 +314,7 @@ async function deleteGuess(id) {
         alert("Something went wrong while deleting.");
     }
 }
-
 document.getElementById("guess-form").addEventListener("submit", submitGuess);
-
 // Initialize first image
 loadNewImage();
 loadStats();
