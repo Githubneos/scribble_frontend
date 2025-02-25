@@ -253,55 +253,55 @@ search_exclude: true
             showMessage('Error loading stats', 'error');
         }
     }
+    async function updateGuess(guessId, currentGuess) {
+    const updatedGuess = prompt("Update your guess:", currentGuess);
+    if (updatedGuess === null || updatedGuess === "") return;
+
+    try {
+        const response = await fetch("`${pythonURI}/api/guess", {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ id: guessId, user_guess: updatedGuess })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            showMessage('Guess updated successfully!', 'success');
+            loadStats(); // Refresh the stats after update
+        } else {
+            showMessage(result.message, 'error');
+        }
+    } catch (error) {
+        showMessage('Error updating guess', 'error');
+    }
+    }
 
     async function deleteGuess(guessId) {
-        if (!confirm('Are you sure you want to delete this guess?')) return;
+    if (!confirm('Are you sure you want to delete this guess?')) return;
 
-        try {
-            const response = await fetch("`${pythonURI}/api/guess", {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ id: guessId })
-            });
+    try {
+        const response = await fetch("https://scribble.stu.nighthawkcodingsociety.com/api/guess", {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ id: guessId })
+        });
 
-            const result = await response.json();
-            if (response.ok) {
-                showMessage('Guess deleted successfully!', 'success');
-                loadStats(); // Refresh the stats after deletion
-            } else {
-                showMessage(result.message, 'error');
-            }
-        } catch (error) {
-            showMessage('Error deleting guess', 'error');
+        const result = await response.json();
+        if (response.ok) {
+            showMessage('Guess deleted successfully!', 'success');
+            loadStats(); // Refresh the stats after deletion
+        } else {
+            showMessage(result.message, 'error');
         }
+    } catch (error) {
+        showMessage('Error deleting guess', 'error');
     }
-    async function updateGuess(guessId, currentGuess) {
-        const updatedGuess = prompt("Update your guess:", currentGuess);
-        if (updatedGuess === null || updatedGuess === "") return;
-
-        try {
-            const response = await fetch("`${pythonURI}/api/guess", {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ id: guessId, user_guess: updatedGuess })
-            });
-
-            const result = await response.json();
-            if (response.ok) {
-                showMessage('Guess updated successfully!', 'success');
-                loadStats(); // Refresh the stats after update
-            } else {
-                showMessage(result.message, 'error');
-            }
-        } catch (error) {
-            showMessage('Error updating guess', 'error');
-        }
     }
     function showMessage(msg, type) {
         const msgBox = document.getElementById('message-container');
