@@ -30,102 +30,119 @@ menu: nav/home.html
         --success: #2ecc71;
     }
 
-    body {
-        background: var(--background);
-        color: var(--text-color);
-        min-height: 100vh;
-    }
-
     .picture-gallery {
         max-width: 1200px;
         margin: 2rem auto;
-        padding: 1rem;
+        padding: 0 1rem;
     }
 
     .upload-form {
-        background: var(--card-bg);
+        background-color: var(--card-bg);
         padding: 2rem;
         border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         margin-bottom: 2rem;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }
 
     .form-label {
         display: block;
         margin-bottom: 0.5rem;
         color: var(--text-color);
-        font-weight: 500;
     }
 
     .form-input {
         width: 100%;
-        padding: 0.75rem;
+        padding: 0.5rem;
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 4px;
-        background: rgba(15, 23, 42, 0.7);
+        background-color: rgba(255, 255, 255, 0.05);
         color: var(--text-color);
-        transition: border-color 0.3s ease;
+    }
+
+    .submit-btn {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .submit-btn:hover {
+        background-color: var(--secondary-color);
     }
 
     .gallery-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 2rem;
+        gap: 1.5rem;
+        padding: 1rem 0;
     }
 
     .picture-card {
-        background: var(--card-bg);
+        background-color: var(--card-bg);
         border-radius: 8px;
         overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
+        transition: transform 0.3s;
+        max-width: 300px;
+        margin: 0 auto;
     }
 
     .picture-img {
         width: 100%;
-        height: 200px;
+        height: 160px;
         object-fit: contain;
-        background: #fff;
-        padding: 1rem;
+        background-color: rgba(0, 0, 0, 0.1);
+        padding: 0.5rem;
     }
 
     .picture-info {
         padding: 1rem;
+        color: var(--text-color);
     }
 
-    .submit-btn {
-        background: #3b82f6;
+    .picture-info h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-color);
+    }
+
+    .picture-info p {
+        margin: 0 0 1rem 0;
+        font-size: 0.9rem;
+        color: rgba(225, 225, 225, 0.8);
+    }
+
+    .delete-btn {
+        background-color: var(--error);
         color: white;
         border: none;
-        padding: 0.75rem 1.5rem;
+        padding: 0.5rem 1rem;
         border-radius: 4px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: opacity 0.3s;
+    }
+
+    .delete-btn:hover {
+        opacity: 0.9;
     }
 
     .message {
-        padding: 1rem;
-        margin: 1rem 0;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 2rem;
         border-radius: 4px;
-        text-align: center;
+        animation: fadeIn 0.3s ease-in;
+        z-index: 1000;
     }
 
-    .error {
-        background: rgba(231, 76, 60, 0.2);
-        color: #e74c3c;
-        border: 1px solid #e74c3c;
-    }
-
-    .success {
-        background: rgba(46, 204, 113, 0.2);
-        color: #2ecc71;
-        border: 1px solid #2ecc71;
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 
@@ -165,7 +182,8 @@ menu: nav/home.html
     async function fetchPictures() {
         try {
             const response = await fetch(`${pythonURI}/api/picture`, {
-                method: "GET"
+                method: "GET",
+                ...fetchConfig
             });
 
             if (!response.ok) throw new Error('Failed to load pictures');
@@ -178,7 +196,7 @@ menu: nav/home.html
                 const card = document.createElement('div');
                 card.className = 'picture-card';
                 card.innerHTML = `
-                    <img src="data:image/png;base64,${picture.image_data}" 
+                    <img src="${picture.image_data}" 
                          alt="${picture.drawing_name}" 
                          class="picture-img">
                     <div class="picture-info">
@@ -186,9 +204,14 @@ menu: nav/home.html
                         <p>${picture.description || 'No description'}</p>
                         <small>By: ${picture.user_name}</small>
                         <br>
-                        ${picture.can_delete ? 
-                            `<button onclick="deletePicture(${picture.id})" class="delete-btn">Delete</button>` 
-                            : ''}
+                        <div class="button-group">
+                            ${picture.can_delete ? 
+                                `<button onclick="deletePicture(${picture.id})" class="delete-btn">Delete Drawing</button>` 
+                                : ''}
+                            ${picture.user_role === 'admin' ? 
+                                `<button onclick="deleteUser('${picture.user_name}')" class="delete-btn delete-user-btn">Delete User</button>`
+                                : ''}
+                        </div>
                     </div>
                 `;
                 gallery.appendChild(card);
@@ -210,10 +233,7 @@ menu: nav/home.html
         try {
             const response = await fetch(`${pythonURI}/api/picture`, {
                 method: "POST",
-                credentials: "include",
-                headers: {
-                    'X-Origin': 'client'
-                },
+                ...fetchConfig,
                 body: formData
             });
 
@@ -238,10 +258,10 @@ menu: nav/home.html
         try {
             const response = await fetch(`${pythonURI}/api/picture`, {
                 method: "DELETE",
-                credentials: "include",
+                ...fetchConfig,
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-Origin': 'client'
+                    ...fetchConfig.headers,
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ id: pictureId })
             });
@@ -257,6 +277,34 @@ menu: nav/home.html
         } catch (error) {
             console.error('Error:', error);
             showMessage('Delete failed: ' + error.message, true);
+        }
+    };
+
+    window.deleteUser = async function(username) {
+        if (!confirm(`Are you sure you want to delete user: ${username}?`)) return;
+
+        try {
+            const response = await fetch(`${pythonURI}/api/admin/user`, {
+                method: "DELETE",
+                ...fetchConfig,
+                headers: {
+                    ...fetchConfig.headers,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to delete user');
+            }
+
+            showMessage('User deleted successfully');
+            await fetchPictures();
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage('Delete user failed: ' + error.message, true);
         }
     };
 
