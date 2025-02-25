@@ -158,22 +158,38 @@ search_exclude: true
     let currentHintIndex = 0;
 
     function loadNewImage() {
-        const image = images[currentImageIndex];
-        const canvas = document.getElementById('guess-canvas');
-        const ctx = canvas.getContext('2d');
-        const hintList = document.getElementById('hint-list');
-        
-        // Clear previous image and hints
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        hintList.innerHTML = '';
-
-        // Draw the new image
-        image.drawing(ctx);
-
-        // Reset hint and counter
-        hintsUsed = 0;
-        currentHintIndex = 0;
+    const canvas = document.getElementById('guess-canvas');
+    if (!canvas) {
+        console.error("Canvas not found!");
+        return;
     }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error("Could not get canvas context!");
+        return;
+    }
+
+    const image = images[currentImageIndex]; // Get the selected image
+    const hintList = document.getElementById('hint-list');
+
+    // Clear previous drawing and hints
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hintList.innerHTML = '';
+
+    // Check if the drawing function exists before calling it
+    if (typeof image.drawing === "function") {
+        requestAnimationFrame(() => image.drawing(ctx)); // Ensures smooth rendering
+    } else {
+        console.error("Drawing function is missing for the current image.");
+    }
+
+    // Reset hints
+    hintsUsed = 0;
+    currentHintIndex = 0;
+    document.getElementById('hint-button').disabled = false;
+}
+
 
     document.getElementById('reset-button').addEventListener('click', () => {
         currentImageIndex = Math.floor(Math.random() * images.length); // Randomize image
