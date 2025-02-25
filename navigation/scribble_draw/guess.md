@@ -201,8 +201,6 @@ async function submitGuess(event) {
     const guess = document.getElementById('guess-input').value;
     const token = localStorage.getItem('token');
 
-    console.log('Token:', token); // Debugging token retrieval
-
     if (!token) {
         showMessage('You are not logged in. Please log in again.', 'error');
         return;
@@ -213,17 +211,20 @@ async function submitGuess(event) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` // Ensure token is passed
+                'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ user_guess: guess })
+            body: JSON.stringify({
+                user_guess: guess,
+                correct_word: "apple" // Change this dynamically based on the image
+            })
         });
 
         const result = await response.json();
-        console.log('Submit Guess Response:', result); // Debug response
+        console.log('Submit Guess Response:', result);
 
         if (response.ok) {
             showMessage('Guess submitted successfully!', 'success');
-            loadStats(); // Refresh stats after submission
+            loadStats();
         } else {
             showMessage(result.message || 'Error submitting guess', 'error');
         }
