@@ -1,9 +1,9 @@
 ---
 layout: post
-title: Picture Gallery
+title: Drawing Board
 search_exclude: true
-description: Dark Themed Picture Gallery
-Author: Daksha
+description: A Light Themed Drawing Pad
+Author: Zach
 ---
 
 <table>
