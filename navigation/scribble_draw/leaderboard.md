@@ -6,11 +6,22 @@ search_exclude: true
 ---
 
 <style>
+:root {
+    --background: linear-gradient(145deg, #A6AEBF, #C5D3E8, #D0E8C5, #FFF8DE, rgb(166, 174, 191), rgb(197, 211, 232), rgb(208, 232, 197), rgb(255, 248, 222));
+}
+
+body {
+    background: var(--background);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
 .container {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 1rem;
-    background: linear-gradient(145deg, #789DBC, #FFE3E3, #FEF9F2, #C9E9D2);
+    background: white;
 }
 
 .score-form {

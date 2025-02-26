@@ -5,11 +5,22 @@ permalink: /competition
 ---
 
 <style>
+:root {
+    --background: linear-gradient(145deg, #89A8B2, #B3C8CF, #E5E1DA, #F1F0E8, rgb(137, 168, 178), rgb(179, 200, 207), rgb(229, 225, 218), rgb(241, 240, 232));
+}
+
+body {
+    background: var(--background);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
 .competition-container {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 1rem;
-    background: linear-gradient(145deg, #A6AEbF, #C5D3E8, #D0E8C5, #FFF8DE);
+    background: white;
     font-family: Arial, sans-serif;
 }
 

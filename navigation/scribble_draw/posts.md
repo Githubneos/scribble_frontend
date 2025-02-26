@@ -23,17 +23,25 @@ menu: nav/home.html
     :root {
         --primary-color: #1a237e;
         --secondary-color: #283593;
-        --background: linear-gradient(145deg, #89A8B2, #B3C8CF, #E5E1DA, #F1F0E8);
+        --background: linear-gradient(145deg, #789DBC, #FFE3E3, #FEF9F2, #C9E9D2, rgb(120, 157, 188), rgb(255, 227, 227), rgb(254, 249, 242), rgb(201, 233, 210));
         --text-color: #e1e1e1;
         --card-bg: rgba(30, 41, 59, 0.8);
         --error: #e74c3c;
         --success: #2ecc71;
     }
 
+    body {
+        background: var(--background);
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+
     .picture-gallery {
         max-width: 1200px;
         margin: 2rem auto;
         padding: 0 1rem;
+        background: white;
     }
 
     .upload-form {
