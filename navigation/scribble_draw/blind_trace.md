@@ -261,13 +261,33 @@ function resetDrawing() {
     showReferenceImage();
 }
 
+let drawingStartTime = null; // Store the start time when the user starts drawing
+
+// Function to start tracking the drawing time
+function startDrawing() {
+    drawingStartTime = new Date(); // Set the start time when the user starts drawing
+}
+
 // Function to handle submitting the drawing
 async function submitDrawing() {
     const drawingData = canvas.toDataURL(); // Convert canvas to base64 data URL
 
+    // If the drawing start time is null, it means the user hasn't started drawing yet
+    if (!drawingStartTime) {
+        alert('Please start drawing before submitting!');
+        return;
+    }
+
+    const drawingEndTime = new Date(); // Get the current time when the user submits the drawing
+    const timeSpent = (drawingEndTime - drawingStartTime) / 1000; // Time spent in seconds
+
+    // Generate a random score based on the time spent
+    let score = generateScore(timeSpent);
+
     const requestData = {
         image_url: referenceImageUrl,
         drawing: drawingData,
+        score: score, // Include the score in the request
     };
 
     try {
@@ -282,7 +302,8 @@ async function submitDrawing() {
 
         const result = await response.json();
         if (response.ok) {
-            alert(`Drawing submitted successfully! Score: ${result.score}`);
+            alert(`Drawing submitted successfully! Score: ${score}`);
+            loadPastSubmissions(); // Reload past submissions after submission
         } else {
             alert(`Error: ${result.message}`);
         }
@@ -291,10 +312,28 @@ async function submitDrawing() {
     }
 }
 
-// Fetch past submissions for the current user
+// Function to generate a random score based on time spent (in seconds)
+function generateScore(timeSpent) {
+    // Adjust this formula based on how you want time to affect the score
+    // For example, let's say 1 second equals 1 point, and the score is capped at 1000.
+    let score = Math.min(timeSpent * 10, 1000); // Multiplies time by 10 for score
+    score = Math.floor(score); // Ensure the score is an integer
+
+    // Optionally add some random variance to the score
+    const randomVariance = Math.floor(Math.random() * 50); // Random variance between 0 and 50
+    score += randomVariance;
+
+    // Ensure the score is between 0 and 1000
+    return Math.min(Math.max(score, 0), 1000);
+}
+
+// Start the drawing when the user begins
+document.getElementById('drawing-canvas').addEventListener('mousedown', startDrawing);
+
+// Fetch past submissions for the current user (GET)
 async function loadPastSubmissions() {
     try {
-        const response = await fetch('/api/submission', {
+        const response = await fetch('/api/submissions', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`, // Use JWT stored in localStorage
@@ -303,7 +342,7 @@ async function loadPastSubmissions() {
 
         const result = await response.json();
         if (response.ok) {
-            displayPastSubmissions(result.submissions);
+            displayPastSubmissions(result.submissions); // Display submissions if GET is successful
         } else {
             alert(`Error: ${result.message}`);
         }
@@ -312,25 +351,42 @@ async function loadPastSubmissions() {
     }
 }
 
-// Display past submissions in the DOM
+// Display past submissions in a table
 function displayPastSubmissions(submissions) {
     const submissionsContainer = document.getElementById('submissions-container');
     submissionsContainer.innerHTML = ''; // Clear existing content
 
+    // Create a table to display the submissions
+    const table = document.createElement('table');
+    table.classList.add('submissions-table');
+    table.innerHTML = `
+        <tr>
+            <th>User</th>
+            <th>Score</th>
+            <th>Actions</th>
+        </tr>
+    `;
+
+    // Loop through submissions and display each one
     submissions.forEach(submission => {
-        const submissionDiv = document.createElement('div');
-        submissionDiv.classList.add('submission');
-        submissionDiv.innerHTML = `
-            <p>Drawing: ${submission.image_url}</p>
-            <p>Score: ${submission.score}</p>
-            <button onclick="deleteSubmission(${submission.id})">Delete Submission</button>
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${submission.username}</td>
+            <td>${submission.score}</td>
+            <td>
+                <button onclick="deleteSubmission(${submission.id})">Delete</button>
+            </td>
         `;
-        submissionsContainer.appendChild(submissionDiv);
+        table.appendChild(row);
     });
+
+    submissionsContainer.appendChild(table);
 }
 
-// Delete a past submission
+// Delete a specific submission (DELETE)
 async function deleteSubmission(submissionId) {
+    if (!confirm('Are you sure you want to delete this submission?')) return;
+
     const requestData = { id: submissionId };
 
     try {
@@ -346,7 +402,7 @@ async function deleteSubmission(submissionId) {
         const result = await response.json();
         if (response.ok) {
             alert('Submission deleted successfully');
-            loadPastSubmissions(); // Reload submissions after deletion
+            loadPastSubmissions(); // Reload the submissions after deletion
         } else {
             alert(`Error: ${result.message}`);
         }
@@ -354,6 +410,10 @@ async function deleteSubmission(submissionId) {
         alert('Failed to delete submission. Please try again later.');
     }
 }
+
+// Automatically load past submissions on page load
+document.addEventListener('DOMContentLoaded', loadPastSubmissions);
+
 
 // Toggle eraser mode
 function toggleEraser() {
