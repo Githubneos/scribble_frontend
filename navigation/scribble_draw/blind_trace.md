@@ -47,11 +47,12 @@ body {
 }
 
 .canvas {
-    border: 1px solid #ccc;
-    background: white;
+    border: 2px solid #ccc;
+    background-color: #fafafa;  /* Light grey background for better visibility */
     width: 80%;
     height: 400px;
     margin-bottom: 1rem;
+    cursor: crosshair; /* Change the cursor to indicate drawing */
 }
 
 .tool-panel {
@@ -101,23 +102,53 @@ body {
     color: #721c24;
 }
 
+.image-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Dark background */
+    z-index: 1000; /* Above other content */
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
+}
+
+.image-modal img {
+    max-width: 80%;
+    max-height: 80%;
+    border: 5px solid white;
+    border-radius: 8px;
+}
+
 .image-container {
     margin-bottom: 2rem;
     text-align: center;
 }
 
-.image-container img {
-    max-width: 80%;
-    margin-bottom: 1rem;
+#start-button-container {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+#reference-image {
     display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.tool-btn,
+#view-btn {
+    margin-top: 1rem;
 }
 </style>
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
-    <div class="image-container" id="reference-image-container" style="display: none;">
-        <img id="reference-image" style="display: none;" />
-    </div>
+    
     <div class="canvas-container" id="canvas-container" style="display: none;">
         <canvas id="drawing-canvas" class="canvas"></canvas>
         <div class="tool-panel">
@@ -126,6 +157,7 @@ body {
             <button id="view-btn" class="tool-btn">View Image</button>
         </div>
     </div>
+
     <div class="color-picker">
         <label>Select Color:</label>
         <input type="color" id="color-picker" value="#000000">
@@ -139,8 +171,16 @@ body {
     </div>
     <div id="message" class="message"></div>
     <div id="submissions-container"></div>
-    <div id="start-button-container" style="text-align: center;">
+
+    <!-- Start Game Button -->
+    <div id="start-button-container">
         <button id="start-btn" class="tool-btn">Start Game</button>
+    </div>
+
+    <!-- Modal to display the reference image -->
+    <div id="image-modal" class="image-modal">
+        <img id="reference-image" />
+        <button id="close-modal-btn" class="tool-btn" style="margin-top: 10px;">Close Image</button>
     </div>
 </div>
 
@@ -274,7 +314,7 @@ function draw(event) {
 
     ctx.lineTo(event.offsetX, event.offsetY);
     ctx.strokeStyle = currentColor;
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 3;  // Thinner line width for smoother drawing
     ctx.lineCap = 'round';
     ctx.stroke();
 }
@@ -296,16 +336,16 @@ function resetDrawing() {
 
 function viewImage() {
     if (imageViewCount < 3) {
-        document.getElementById('reference-image-container').style.display = 'block';
-        document.getElementById('reference-image').style.display = 'block';
+        document.getElementById('image-modal').style.display = 'flex';
+        document.getElementById('reference-image').src = referenceImageUrl;
         imageViewCount++;
-        setTimeout(() => {
-            document.getElementById('reference-image-container').style.display = 'none';
-            document.getElementById('canvas-container').style.display = 'block';
-        }, 5000);  // Display for 5 seconds
     } else {
         alert("You have viewed the image 3 times already.");
     }
+}
+
+function closeImageModal() {
+    document.getElementById('image-modal').style.display = 'none';
 }
 
 async function submitDrawing() {
@@ -353,10 +393,8 @@ function startGame() {
     document.getElementById('start-button-container').style.display = 'none';
     document.getElementById('reference-image-container').style.display = 'block';
     document.getElementById('reference-image').style.display = 'block';
-
-    setTimeout(() => {
-        document.getElementById('reference-image-container').style.display = 'none';
-        document.getElementById('canvas-container').style.display = 'block';
-    }, 5000);  // Display for 5 seconds
+    document.getElementById('canvas-container').style.display = 'block';
 }
+
+document.getElementById('close-modal-btn').addEventListener('click', closeImageModal);
 </script>
