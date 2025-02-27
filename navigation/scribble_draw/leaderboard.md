@@ -1,13 +1,13 @@
 ---
 layout: needsAuth
-title: Drawing Leaderboard
-permalink: /leaderboard
+title: Blind Trace Submissions
+permalink: /blind-trace
 search_exclude: true
 ---
 
 <style>
 :root {
-    --background: linear-gradient(145deg, #A6AEBF, #C5D3E8, #D0E8C5, #FFF8DE, rgb(166, 174, 191), rgb(197, 211, 232), rgb(208, 232, 197), rgb(255, 248, 222));
+    --background: linear-gradient(145deg, #A6AEBF, #C5D3E8, #D0E8C5, #FFF8DE);
 }
 
 body {
@@ -22,9 +22,11 @@ body {
     margin: 2rem auto;
     padding: 1rem;
     background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.score-form {
+.submission-form {
     background: white;
     padding: 2rem;
     border-radius: 8px;
@@ -43,24 +45,12 @@ body {
     font-weight: bold;
 }
 
-.form-group input {
+.form-group input, .form-group textarea {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
-}
-
-.speed-info {
-    background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 4px;
-    margin-top: 0.5rem;
-}
-
-.speed-info ul {
-    margin: 0.5rem 0;
-    padding-left: 1.5rem;
 }
 
 .submit-btn {
@@ -80,81 +70,24 @@ body {
     background: #1976D2;
 }
 
-.word-section {
+.submission-entry {
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 2rem;
-    overflow: hidden;
+    padding: 1rem;
 }
 
-.word-title {
+.submission-title {
     background: #f8f9fa;
     padding: 1rem;
     margin: 0;
-    border-bottom: 1px solid #eee;
     font-size: 1.25rem;
     color: #333;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
-.admin-badge {
-    background: #dc3545;
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-}
-
-.leaderboard-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.leaderboard-table th,
-.leaderboard-table td {
+.submission-info {
     padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-}
-
-.leaderboard-table th {
-    font-weight: bold;
-    color: #666;
-    background: #f8f9fa;
-}
-
-.score-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.score-high {
-    background: #4CAF50;
-    color: white;
-}
-
-.score-medium {
-    background: #FFC107;
-    color: black;
-}
-
-.score-low {
-    background: #FF5722;
-    color: white;
-}
-
-.speed-badge {
-    font-size: 0.8rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 3px;
-    background: rgba(255,255,255,0.2);
 }
 
 .delete-btn {
@@ -192,36 +125,25 @@ body {
 </style>
 
 <div class="container">
-    <form class="score-form" id="score-form">
-        <h2>Submit Drawing Score</h2>
+    <form class="submission-form" id="submission-form">
+        <h2>Submit Blind Trace</h2>
         <div class="form-group">
-            <label for="drawingName">Drawing Name:</label>
-            <input type="text" id="drawingName" required>
+            <label for="imageUrl">Reference Image URL:</label>
+            <input type="text" id="imageUrl" required>
         </div>
         <div class="form-group">
-            <label for="score">Manual Score (0-1000, optional):</label>
-            <input type="number" id="score" min="0" max="1000">
-            <div class="speed-info">
-                <strong>Speed-Based Scoring System:</strong>
-                <ul>
-                    <li>2x speed (half the time) = 1000 points</li>
-                    <li>1x speed (normal time) = 500 points</li>
-                    <li>0.5x speed (double time) = 250 points</li>
-                </ul>
-                <small>Leave blank to use automatic speed-based scoring from your competition time</small>
-            </div>
+            <label for="drawingData">Base64 Drawing Data:</label>
+            <textarea id="drawingData" rows="4" required></textarea>
         </div>
-        <button type="submit" class="submit-btn">Submit Score</button>
+        <button type="submit" class="submit-btn">Submit Drawing</button>
         <div id="message" class="message"></div>
     </form>
 
-    <div id="leaderboard-sections"></div>
+    <div id="submissions-container"></div>
 </div>
 
 <script type="module">
 import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
-
-let isAdmin = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -229,28 +151,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             credentials: 'include'
         });
         const userData = await response.json();
-        isAdmin = userData.role === 'Admin';
-        fetchLeaderboard();
+        fetchSubmissions();
     } catch (error) {
-        console.error('Error checking admin status:', error);
+        console.error('Error fetching user data:', error);
         showMessage('Error loading user data', 'error');
     }
 });
 
-async function fetchLeaderboard() {
+async function fetchSubmissions() {
     try {
-        const response = await fetch(`${pythonURI}/api/leaderboard`, {
+        const response = await fetch(`${pythonURI}/api/blind_trace/submission`, {
             credentials: 'include'
         });
-        
-        if (!response.ok) throw new Error('Failed to fetch leaderboard data');
-        
+
+        if (!response.ok) throw new Error('Failed to fetch submissions');
+
         const data = await response.json();
-        const container = document.getElementById('leaderboard-sections');
+        const container = document.getElementById('submissions-container');
         container.innerHTML = '';
 
-        Object.entries(data).forEach(([word, entries]) => {
-            container.appendChild(createWordSection(word, entries));
+        data.submissions.forEach(submission => {
+            container.appendChild(createSubmissionEntry(submission));
         });
     } catch (error) {
         console.error('Error:', error);
@@ -258,107 +179,114 @@ async function fetchLeaderboard() {
     }
 }
 
-function getScoreClass(score) {
-    if (score >= 750) return 'score-high';
-    if (score >= 500) return 'score-medium';
-    return 'score-low';
-}
+function createSubmissionEntry(submission) {
+    const entry = document.createElement('div');
+    entry.className = 'submission-entry';
 
-function getSpeedFactor(score) {
-    return (score / 500).toFixed(1);
-}
-
-function createWordSection(word, entries) {
-    const section = document.createElement('div');
-    section.className = 'word-section';
-    
-    section.innerHTML = `
-        <h3 class="word-title">
-            Drawing: ${word}
-            ${isAdmin ? '<span class="admin-badge">Admin Mode</span>' : ''}
-        </h3>
-        <table class="leaderboard-table">
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Score</th>
-                    ${isAdmin ? '<th>Actions</th>' : ''}
-                </tr>
-            </thead>
-            <tbody>
-                ${entries.map((entry, index) => `
-                    <tr>
-                        <td>#${index + 1}</td>
-                        <td>${entry.profile_name}</td>
-                        <td>
-                            <div class="score-indicator ${getScoreClass(entry.score)}">
-                                ${entry.score}
-                                <span class="speed-badge">${getSpeedFactor(entry.score)}x speed</span>
-                            </div>
-                        </td>
-                        ${isAdmin ? `
-                            <td>
-                                <button class="delete-btn" onclick="deleteEntry(${entry.id})">
-                                    Delete
-                                </button>
-                            </td>
-                        ` : ''}
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
+    entry.innerHTML = `
+        <h3 class="submission-title">Submission - ${new Date(submission.submission_time).toLocaleString()}</h3>
+        <div class="submission-info">
+            <p><strong>Reference Image:</strong> <a href="${submission.image_url}" target="_blank">${submission.image_url}</a></p>
+            <p><strong>Score:</strong> ${submission.score}</p>
+            <p><strong>Submitted At:</strong> ${new Date(submission.submission_time).toLocaleString()}</p>
+            <button class="delete-btn" onclick="deleteSubmission(${submission.id})">Delete</button>
+        </div>
     `;
-    
-    return section;
+
+    return entry;
 }
 
-document.getElementById('score-form').addEventListener('submit', async function(event) {
-    event.preventDefault();
-    const drawingName = document.getElementById('drawingName').value.trim();
-    const score = document.getElementById('score').value;
-    
+document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const body = { drawing_name: drawingName };
-        if (score) {
-            const scoreNum = parseInt(score);
-            if (scoreNum < 0 || scoreNum > 1000) {
-                showMessage('Score must be between 0 and 1000', 'error');
-                return;
-            }
-            body.score = scoreNum;
-        }
+        const response = await fetch(`${pythonURI}/api/user`, { credentials: 'include' });
+        const userData = await response.json();
+        fetchSubmissions();
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        showMessage('Error loading user data', 'error');
+    }
+});
 
-        const response = await fetch(`${pythonURI}/api/leaderboard`, {
+// GET - Fetch all Blind Trace submissions
+async function fetchSubmissions() {
+    try {
+        const response = await fetch(`${pythonURI}/api/submission`, { credentials: 'include' });
+
+        if (!response.ok) throw new Error('Failed to fetch submissions');
+
+        const data = await response.json();
+        const container = document.getElementById('submissions-container');
+        container.innerHTML = '';
+
+        data.submissions.forEach(submission => {
+            container.appendChild(createSubmissionEntry(submission));
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage(error.message, 'error');
+    }
+}
+
+// POST - Submit a new drawing
+document.getElementById('submission-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const imageUrl = document.getElementById('imageUrl').value.trim();
+    const drawing = document.getElementById('drawingData').value.trim(); 
+
+    if (!imageUrl || !drawing) {
+        showMessage('Please provide both an image URL and a drawing.', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${pythonURI}/api/submission`, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify({ image_url: imageUrl, drawing })
         });
 
         const data = await response.json();
-        
+
         if (!response.ok) throw new Error(data.message);
-        
-        showMessage('Score submitted successfully!', 'success');
+
+        showMessage('Submission successful!', 'success');
         this.reset();
-        await fetchLeaderboard();
+        await fetchSubmissions();
     } catch (error) {
         console.error('Error:', error);
         showMessage(error.message, 'error');
     }
 });
 
-window.deleteEntry = async function(id) {
-    if (!isAdmin) {
-        showMessage('Admin access required', 'error');
-        return;
-    }
-
-    if (!confirm('Are you sure you want to delete this entry?')) return;
-    
+// PUT - Update an existing submission
+async function updateSubmission(id, newImageUrl, newDrawing) {
     try {
-        const response = await fetch(`${pythonURI}/api/leaderboard`, {
+        const response = await fetch(`${pythonURI}/api/submission`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, image_url: newImageUrl, drawing: newDrawing })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.message);
+
+        showMessage('Submission updated successfully!', 'success');
+        await fetchSubmissions();
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage(error.message, 'error');
+    }
+}
+
+// DELETE - Remove a submission
+window.deleteSubmission = async function(id) {
+    if (!confirm('Are you sure you want to delete this submission?')) return;
+
+    try {
+        const response = await fetch(`${pythonURI}/api/submission`, {
             method: 'DELETE',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -366,16 +294,61 @@ window.deleteEntry = async function(id) {
         });
 
         const data = await response.json();
-        
+
         if (!response.ok) throw new Error(data.message);
-        
-        showMessage('Entry deleted successfully', 'success');
-        await fetchLeaderboard();
+
+        showMessage('Submission deleted successfully', 'success');
+        await fetchSubmissions();
     } catch (error) {
         console.error('Error:', error);
         showMessage(error.message, 'error');
     }
 };
+
+// Function to create submission elements in the UI
+function createSubmissionEntry(submission) {
+    const entry = document.createElement('div');
+    entry.className = 'submission-entry';
+
+    entry.innerHTML = `
+        <h3 class="submission-title">Submission - ${new Date(submission.submission_time).toLocaleString()}</h3>
+        <div class="submission-info">
+            <p><strong>Reference Image:</strong> <a href="${submission.image_url}" target="_blank">${submission.image_url}</a></p>
+            <p><strong>Score:</strong> ${submission.score}</p>
+            <p><strong>Submitted At:</strong> ${new Date(submission.submission_time).toLocaleString()}</p>
+            <button class="edit-btn" onclick="editSubmission(${submission.id}, '${submission.image_url}', '${submission.drawing}')">Edit</button>
+            <button class="delete-btn" onclick="deleteSubmission(${submission.id})">Delete</button>
+        </div>
+    `;
+
+    return entry;
+}
+
+// Function to prompt user and edit a submission
+window.editSubmission = function(id, currentImageUrl, currentDrawing) {
+    const newImageUrl = prompt('Enter new image URL:', currentImageUrl);
+    const newDrawing = prompt('Enter new base64 drawing data:', currentDrawing);
+
+    if (newImageUrl && newDrawing) {
+        updateSubmission(id, newImageUrl, newDrawing);
+    }
+};
+
+// Helper function to display messages
+function showMessage(text, type) {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = text;
+    messageEl.className = `message ${type}`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+        messageEl.style.opacity = '0';
+        setTimeout(() => {
+            messageEl.style.display = 'none';
+            messageEl.style.opacity = '1';
+        }, 300);
+    }, 3000);
+}
+
 
 function showMessage(text, type) {
     const messageEl = document.getElementById('message');
