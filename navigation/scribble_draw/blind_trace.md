@@ -85,11 +85,11 @@ search_exclude: true
 
 <script>
     const images = [
-        "https://www.google.com/url?sa=i&url=https%3A%2F%2Fpngtree.com%2Fso%2Fcar-side&psig=AOvVaw3zT8m70iBzhLfzlJrsuIwY&ust=1740701859843000&source=images&cd=vfe&opi=89978449&ved=0CBYQjRxqFwoTCMjenfLJ4osDFQAAAAAdAAAAABAP",
-        "https://www.google.com/url?sa=i&url=https%3A%2F%2Fstock.adobe.com%2Fsearch%3Fk%3Dmountain&psig=AOvVaw3wnw-i9cthiSmoRyyjVKMp&ust=1740701922045000&source=images&cd=vfe&opi=89978449&ved=0CBYQjRxqFwoTCNCr3pDK4osDFQAAAAAdAAAAABAE",
-        "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pexels.com%2Fsearch%2Flandmark%2F&psig=AOvVaw3lpWwoPjdNxXEcAsf4HHTa&ust=1740701960507000&source=images&cd=vfe&opi=89978449&ved=0CBYQjRxqFwoTCIiTqafK4osDFQAAAAAdAAAAABAK",
-        "https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fimages%2Fsearch%2Ffamous%2520landmark%2F&psig=AOvVaw3lpWwoPjdNxXEcAsf4HHTa&ust=1740701960507000&source=images&cd=vfe&opi=89978449&ved=0CBYQjRxqFwoTCIiTqafK4osDFQAAAAAdAAAAABAP",
-        "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.istockphoto.com%2Fphotos%2Finternational-landmark&psig=AOvVaw3lpWwoPjdNxXEcAsf4HHTa&ust=1740701960507000&source=images&cd=vfe&opi=89978449&ved=0CBYQjRxqFwoTCIiTqafK4osDFQAAAAAdAAAAABAg"
+        "https://thumbs.dreamstime.com/b/tower-bridge-sunset-popular-landmark-london-uk-29462158.jpg",
+        "https://t3.ftcdn.net/jpg/02/82/38/10/360_F_282381041_O7uUYn2MgQHcltBSnRnVf2daOZDR9nmO.jpg",
+        "https://www.pexels.com/photo/landmark-1796686/",
+        "https://www.pexels.com/photo/landmark-1796685/",
+        "https://www.pexels.com/photo/landmark-1796687/"
     ];
 
     let currentImageIndex = 0;
@@ -171,4 +171,3 @@ search_exclude: true
 
     loadNewImage();
 </script>
-
