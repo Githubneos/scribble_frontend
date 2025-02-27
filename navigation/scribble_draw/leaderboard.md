@@ -76,6 +76,7 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 2rem;
     padding: 1rem;
+    text-align: center;
 }
 
 .submission-title {
@@ -90,42 +91,28 @@ body {
     padding: 1rem;
 }
 
-.submission-image {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 1rem auto;
+.submission-info img {
+    max-width: 300px;
     border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 1rem 0;
 }
 
-.delete-btn, .edit-btn {
-    margin-right: 0.5rem;
+.edit-btn, .delete-btn {
+    color: white;
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9rem;
     transition: background-color 0.3s;
+    margin: 5px;
 }
 
-.delete-btn {
-    background: #dc3545;
-    color: white;
-}
+.edit-btn { background: #ffc107; }
+.edit-btn:hover { background: #e0a800; }
 
-.delete-btn:hover {
-    background: #c82333;
-}
-
-.edit-btn {
-    background: #ffc107;
-    color: white;
-}
-
-.edit-btn:hover {
-    background: #e0a800;
-}
+.delete-btn { background: #dc3545; }
+.delete-btn:hover { background: #c82333; }
 
 .message {
     padding: 1rem;
@@ -168,7 +155,7 @@ body {
 import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await fetchSubmissions();
+    fetchSubmissions();
 });
 
 async function fetchSubmissions() {
@@ -190,9 +177,28 @@ async function fetchSubmissions() {
     }
 }
 
+function createSubmissionEntry(submission) {
+    const entry = document.createElement('div');
+    entry.className = 'submission-entry';
+
+    entry.innerHTML = `
+        <h3 class="submission-title">Submission - ${new Date(submission.submission_time).toLocaleString()}</h3>
+        <div class="submission-info">
+            <p><strong>Reference Image:</strong></p>
+            <img src="${submission.image_url}" alt="Reference Image">
+            <p><strong>Submitted Drawing:</strong></p>
+            <img src="${submission.drawing}" alt="User Drawing">
+            <p><strong>Score:</strong> ${submission.score}</p>
+            <button class="edit-btn" onclick="editSubmission(${submission.id}, '${submission.image_url}', '${submission.drawing}')">Edit</button>
+            <button class="delete-btn" onclick="deleteSubmission(${submission.id})">Delete</button>
+        </div>
+    `;
+
+    return entry;
+}
+
 document.getElementById('submission-form').addEventListener('submit', async function(event) {
     event.preventDefault();
-
     const imageUrl = document.getElementById('imageUrl').value.trim();
     const drawing = document.getElementById('drawingData').value.trim();
 
@@ -209,63 +215,36 @@ document.getElementById('submission-form').addEventListener('submit', async func
             body: JSON.stringify({ image_url: imageUrl, drawing })
         });
 
-        if (!response.ok) throw new Error(await response.text());
+        if (!response.ok) throw new Error('Submission failed');
 
         showMessage('Submission successful!', 'success');
         this.reset();
-        await fetchSubmissions();
+        fetchSubmissions();
     } catch (error) {
         console.error('Error:', error);
         showMessage(error.message, 'error');
     }
 });
 
-async function deleteSubmission(id) {
+window.deleteSubmission = async function(id) {
     if (!confirm('Are you sure you want to delete this submission?')) return;
 
     try {
-        await fetch(`${pythonURI}/api/submission`, {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id })
-        });
-
+        await fetch(`${pythonURI}/api/submission/${id}`, { method: 'DELETE', credentials: 'include' });
         showMessage('Submission deleted successfully', 'success');
-        await fetchSubmissions();
+        fetchSubmissions();
     } catch (error) {
         console.error('Error:', error);
         showMessage(error.message, 'error');
     }
-}
+};
 
-function createSubmissionEntry(submission) {
-    const entry = document.createElement('div');
-    entry.className = 'submission-entry';
+window.editSubmission = function(id, imageUrl, drawing) {
+    const newImageUrl = prompt('Enter new image URL:', imageUrl);
+    const newDrawing = prompt('Enter new base64 drawing data:', drawing);
 
-    entry.innerHTML = `
-        <h3 class="submission-title">Submission - ${new Date(submission.submission_time).toLocaleString()}</h3>
-        <div class="submission-info">
-            <p><strong>Reference Image:</strong></p>
-            <img src="${submission.image_url}" alt="Reference Image" class="submission-image">
-            <p><strong>Submitted Drawing:</strong></p>
-            <img src="${submission.drawing}" alt="User Drawing" class="submission-image">
-            <p><strong>Score:</strong> ${submission.score}</p>
-            <button class="edit-btn">Edit</button>
-            <button class="delete-btn">Delete</button>
-        </div>
-    `;
-
-    entry.querySelector('.delete-btn').addEventListener('click', () => deleteSubmission(submission.id));
-
-    return entry;
-}
-
-function showMessage(text, type) {
-    const messageEl = document.getElementById('message');
-    messageEl.textContent = text;
-    messageEl.className = `message ${type}`;
-    messageEl.style.display = 'block';
-    setTimeout(() => messageEl.style.display = 'none', 3000);
-}
+    if (newImageUrl && newDrawing) {
+        updateSubmission(id, newImageUrl, newDrawing);
+    }
+};
 </script>
