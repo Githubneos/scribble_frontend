@@ -49,8 +49,6 @@ body {
 .canvas {
     border: 2px solid #ccc;
     background-color: #fafafa;  
-    width: 80%;
-    height: 400px;
     margin-bottom: 1rem;
     cursor: crosshair; 
 }
@@ -341,16 +339,25 @@ function startGame() {
 
     document.getElementById('canvas-container').style.display = 'block';
 
-    canvas.width = 800; // You can adjust canvas size as needed
-    canvas.height = 600;
-
-    // Draw the reference image on the canvas
     let img = new Image();
     img.src = referenceImageUrl;
-    img.onload = function() {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    };
 
-    document.getElementById('score').textContent = `Score: ${score}`;
+    img.onload = function() {
+        // Resize canvas to fit the reference image
+        const aspectRatio = img.width / img.height;
+        const canvasWidth = window.innerWidth * 0.8; // 80% of the window width
+        const canvasHeight = canvasWidth / aspectRatio;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        // Draw the reference image on the canvas
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // Show image for 5 seconds, then clear the canvas and allow drawing
+        setTimeout(() => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('score').textContent = `Score: ${score}`;
+        }, 5000); // 5 seconds to view the reference image
+    };
 }
 </script>
