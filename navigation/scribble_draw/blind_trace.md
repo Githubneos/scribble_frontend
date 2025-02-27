@@ -78,41 +78,6 @@ body {
     margin-top: 1rem;
 }
 
-.tool-btn:active {
-    background: #0d47a1;
-}
-
-#start-button-container {
-    text-align: center;
-    margin-top: 2rem;
-}
-
-.tool-btn,
-#view-btn {
-    margin-top: 1rem;
-}
-
-.image-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    overflow: auto;
-}
-
-.image-modal img {
-    max-width: 80%;
-    max-height: 80%;
-    border: 5px solid white;
-    border-radius: 8px;
-}
-
 #reference-image {
     transition: transform 0.5s ease-in-out;
 }
@@ -145,9 +110,6 @@ body {
         <button id="eraser-btn" class="tool-btn">Eraser</button>
         <button id="submit-btn" class="tool-btn">Submit Drawing</button>
     </div>
-    <div id="score-container">
-        <p id="score">Score: 0</p>
-    </div>
 
     <div id="image-modal" class="image-modal">
         <img id="modal-reference-image" />
@@ -160,6 +122,9 @@ let referenceImageUrl = "";
 let imageViewCount = 0;
 let rotationAngle = 0;
 let isImageRotating = false;
+let drawing = false;
+let erasing = false;
+let ctx, canvas;
 
 const referenceImages = [
     'assets/images/Bridge.jpg',
@@ -173,10 +138,25 @@ const referenceImages = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
+    canvas = document.getElementById('drawing-canvas');
+    ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth * 0.8;
+    canvas.height = canvas.width * (3 / 4);
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
     document.getElementById('start-game-btn').addEventListener('click', startGame);
     document.getElementById('view-btn').addEventListener('click', viewImage);
     document.getElementById('close-modal-btn').addEventListener('click', closeImageModal);
-    
+    document.getElementById('eraser-btn').addEventListener('click', toggleEraser);
+    document.getElementById('clear-btn').addEventListener('click', clearCanvas);
+    document.getElementById('reset-btn').addEventListener('click', resetDrawing);
+    document.getElementById('color-picker').addEventListener('input', changeColor);
+
     showReferenceImage();
 });
 
@@ -187,12 +167,13 @@ function showReferenceImage() {
 }
 
 function startGame() {
-    document.getElementById('image-display-container').style.display = 'none';
-    document.getElementById('canvas-section').style.display = 'block';
-
     setTimeout(() => {
         rotateReferenceImage();
         isImageRotating = true;
+        setTimeout(() => {
+            document.getElementById('image-display-container').style.display = 'none';
+            document.getElementById('canvas-section').style.display = 'block';
+        }, 1000);
     }, 3000);
 }
 
@@ -216,5 +197,41 @@ function viewImage() {
 
 function closeImageModal() {
     document.getElementById('image-modal').style.display = 'none';
+}
+
+function startDrawing(event) {
+    drawing = true;
+    ctx.beginPath();
+    ctx.moveTo(event.offsetX, event.offsetY);
+}
+
+function draw(event) {
+    if (!drawing) return;
+
+    ctx.strokeStyle = erasing ? "#ffffff" : document.getElementById('color-picker').value;
+    ctx.lineWidth = erasing ? 20 : 3;
+    ctx.lineCap = "round";
+    
+    ctx.lineTo(event.offsetX, event.offsetY);
+    ctx.stroke();
+}
+
+function stopDrawing() {
+    drawing = false;
+    ctx.closePath();
+}
+
+function toggleEraser() {
+    erasing = !erasing;
+    document.getElementById('eraser-btn').textContent = erasing ? "Drawing Mode" : "Eraser";
+}
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function resetDrawing() {
+    clearCanvas();
+    showReferenceImage();
 }
 </script>
