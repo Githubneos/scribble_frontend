@@ -1,236 +1,317 @@
 ---
 layout: needsAuth
-title: Blind Trace
-permalink: /blind_trace
-menu: nav/home.html
+title: Blind Trace Drawing Game
+permalink: /blind-trace
 search_exclude: true
 ---
 
 <style>
-    body {
-        background: linear-gradient(145deg, #F7CFD8, #F4F8D3, #A6F1E0, #73C7C7);
-        font-family: Arial, sans-serif;
-    }
-    .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        text-align: center;
-    }
-    .button {
-        padding: 8px 20px;
-        background: #3498DB;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin: 5px;
-    }
-    .button:hover {
-        background: #2980B9;
-    }
-    #drawing-canvas {
-        border: 2px solid #34495E;
-        border-radius: 8px;
-        margin: 20px 0;
-        background: white;
-    }
-    .table-container {
-        margin-top: 20px;
-        text-align: left;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    th, td {
-        border: 1px solid black;
-        padding: 8px;
-        text-align: center;
-    }
-    .delete-btn {
-        background: red;
-        color: white;
-        padding: 4px 8px;
-        border: none;
-        cursor: pointer;
-    }
+:root {
+    --background: linear-gradient(145deg, #A6AEBF, #C5D3E8, #D0E8C5, #FFF8DE);
+}
+
+body {
+    background: var(--background);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.canvas-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.canvas {
+    border: 1px solid #ccc;
+    background: white;
+    width: 80%;
+    height: 400px;
+    margin-bottom: 1rem;
+}
+
+.tool-panel {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.tool-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: #2196F3;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.tool-btn:hover {
+    background: #1976D2;
+}
+
+.color-picker {
+    margin-top: 1rem;
+}
+
+.tool-btn:active {
+    background: #0d47a1;
+}
+
+.message {
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    display: none;
+    transition: opacity 0.3s;
+}
+
+.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.image-container {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.image-container img {
+    max-width: 80%;
+    margin-bottom: 1rem;
+    display: block;
+}
 </style>
 
 <div class="container">
-    <h1>Blind Trace Challenge</h1>
-    <p>Memorize the image, then redraw it from memory!</p>
-
-    <div id="image-container">
-        <img id="target-image" src="" alt="Reference Image" width="300">
+    <h2>Blind Trace Drawing Game</h2>
+    <div class="canvas-container">
+        <canvas id="drawing-canvas" class="canvas"></canvas>
+        <div class="tool-panel">
+            <button id="clear-btn" class="tool-btn">Clear Canvas</button>
+            <button id="reset-btn" class="tool-btn">Reset Drawing</button>
+            <button id="view-btn" class="tool-btn">View Image</button>
+        </div>
     </div>
-
-    <canvas id="drawing-canvas" width="300" height="200"></canvas>
-    <br>
-    <button id="hide-btn" class="button">Start Challenge (Hide Image)</button>
-    <button id="submit-btn" class="button" disabled>Submit Drawing</button>
-    <button id="clear-btn" class="button">Clear Canvas</button>
-
-    <div class="table-container">
-        <h2>Previous Submissions</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Image</th>
-                    <th>Score</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="submissions-body"></tbody>
-        </table>
+    <div class="color-picker">
+        <label>Select Color:</label>
+        <input type="color" id="color-picker" value="#000000">
     </div>
+    <div class="tool-panel">
+        <button id="eraser-btn" class="tool-btn">Eraser</button>
+        <button id="submit-btn" class="tool-btn">Submit Drawing</button>
+    </div>
+    <div id="score-container">
+        <p id="score">Score: 0</p>
+    </div>
+    <div id="message" class="message"></div>
+    <div id="submissions-container"></div>
 </div>
 
-<script>
-    const pythonURI = "https://scribble.stu.nighthawkcodingsociety.com/api/blind_trace/submission";
-    const token = localStorage.getItem("token");  // Retrieve stored token
+<script type="module">
+import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
-    const image = document.getElementById("target-image");
-    const hideBtn = document.getElementById("hide-btn");
-    const submitBtn = document.getElementById("submit-btn");
-    const clearBtn = document.getElementById("clear-btn");
-    const canvas = document.getElementById("drawing-canvas");
-    const ctx = canvas.getContext("2d");
+let currentColor = "#000000";
+let drawingMode = true;
+let score = 0;
+let referenceImageUrl = "";
+let canvas, ctx;
+let imageWidth = 0;
+let imageHeight = 0;
+let imageIndex = 0;  // Used to cycle through images
 
-    let drawing = false;
-    let startTime = null;
-    let currentImageUrl = "";
+// Image generation functions (cityscape, bridge, etc.)
+function drawCityscape() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#8e9fbc'; // Buildings color
+    ctx.fillRect(0, canvas.height - 50, canvas.width, 50); // Ground
+    ctx.fillStyle = '#708090'; // Windows color
+    ctx.fillRect(100, 150, 50, 100); // Building 1
+    ctx.fillRect(200, 100, 50, 150); // Building 2
+    ctx.fillRect(300, 130, 50, 120); // Building 3
+    ctx.fillStyle = '#f0f0f0'; // Sky color
+    ctx.fillRect(0, 0, canvas.width, canvas.height - 50); // Sky
+}
 
-    function loadNewImage() {
-        fetch("https://api.unsplash.com/photos/random?query=sketch&client_id=YOUR_UNSPLASH_API_KEY")
-            .then(response => response.json())
-            .then(data => {
-                currentImageUrl = data.urls.small;
-                image.src = currentImageUrl;
-                image.style.display = "block";
-                hideBtn.disabled = false;
-                submitBtn.disabled = true;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            });
-    }
+function drawBridge() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#654321'; // Bridge color
+    ctx.fillRect(50, 200, 300, 20); // Bridge base
+    ctx.fillRect(50, 180, 20, 20); // Left pillar
+    ctx.fillRect(330, 180, 20, 20); // Right pillar
+    ctx.fillStyle = '#c0c0c0'; // Road color
+    ctx.fillRect(50, 220, 300, 20); // Road
+    ctx.fillStyle = '#87CEEB'; // Sky color
+    ctx.fillRect(0, 0, canvas.width, 180); // Sky
+}
 
-    hideBtn.addEventListener("click", () => {
-        image.style.display = "none";
-        hideBtn.disabled = true;
-        submitBtn.disabled = false;
-        startTime = Date.now();
-    });
+function drawForest() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#228B22'; // Tree leaves color
+    ctx.beginPath();
+    ctx.arc(100, 200, 50, 0, Math.PI * 2); // Tree 1
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(250, 200, 50, 0, Math.PI * 2); // Tree 2
+    ctx.fill();
+    ctx.fillStyle = '#8B4513'; // Tree trunk color
+    ctx.fillRect(90, 250, 20, 40); // Trunk 1
+    ctx.fillRect(240, 250, 20, 40); // Trunk 2
+    ctx.fillStyle = '#7CFC00'; // Grass color
+    ctx.fillRect(0, canvas.height - 50, canvas.width, 50); // Grass
+}
 
-    canvas.addEventListener("mousedown", () => { drawing = true; });
-    canvas.addEventListener("mouseup", () => { drawing = false; ctx.beginPath(); });
-    canvas.addEventListener("mousemove", draw);
+function drawCoralReef() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#20B2AA'; // Water color
+    ctx.fillRect(0, 0, canvas.width, canvas.height); // Water
+    ctx.fillStyle = '#FF4500'; // Coral color
+    ctx.beginPath();
+    ctx.arc(150, 350, 30, 0, Math.PI * 2); // Coral 1
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(250, 320, 30, 0, Math.PI * 2); // Coral 2
+    ctx.fill();
+    ctx.fillStyle = '#2E8B57'; // Seaweed color
+    ctx.fillRect(50, 380, 10, 40); // Seaweed 1
+    ctx.fillRect(200, 380, 10, 40); // Seaweed 2
+}
 
-    function draw(event) {
-        if (!drawing) return;
-        ctx.lineWidth = 2;
-        ctx.lineCap = "round";
-        ctx.strokeStyle = "black";
-        const rect = canvas.getBoundingClientRect();
-        ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
-    }
+function drawSolarSystem() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#FFD700'; // Sun color
+    ctx.beginPath();
+    ctx.arc(300, 200, 50, 0, Math.PI * 2); // Sun
+    ctx.fill();
+    ctx.fillStyle = '#4B0082'; // Planet color
+    ctx.beginPath();
+    ctx.arc(150, 200, 20, 0, Math.PI * 2); // Planet 1
+    ctx.fill();
+    ctx.fillStyle = '#00008B'; // Planet 2 color
+    ctx.beginPath();
+    ctx.arc(400, 200, 30, 0, Math.PI * 2); // Planet 2
+    ctx.fill();
+}
 
-    clearBtn.addEventListener("click", () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    });
+const drawings = [drawCityscape, drawBridge, drawForest, drawCoralReef, drawSolarSystem];
 
-    function getCanvasImage() {
-        return canvas.toDataURL("image/png");
-    }
+document.addEventListener('DOMContentLoaded', async () => {
+    canvas = document.getElementById('drawing-canvas');
+    ctx = canvas.getContext('2d');
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
 
-    submitBtn.addEventListener("click", async () => {
-        const drawingData = getCanvasImage();
+    document.getElementById('color-picker').addEventListener('input', changeColor);
+    document.getElementById('eraser-btn').addEventListener('click', toggleEraser);
+    document.getElementById('clear-btn').addEventListener('click', clearCanvas);
+    document.getElementById('reset-btn').addEventListener('click', resetDrawing);
+    document.getElementById('submit-btn').addEventListener('click', submitDrawing);
+    document.getElementById('view-btn').addEventListener('click', viewImage);
 
-        try {
-            const response = await fetch(, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    image_url: currentImageUrl,
-                    drawing: drawingData
-                })
-            });
+    fetchReferenceImage();
+});
 
-            const data = await response.json();
-            if (response.ok) {
-                alert(`Score: ${data.score}`);
-                fetchSubmissions();
-                loadNewImage();
-            } else {
-                console.error("Submission failed:", data.message);
-            }
-        } catch (error) {
-            console.error("Error submitting drawing:", error);
-        }
-    });
+function changeColor(event) {
+    currentColor = event.target.value;
+}
 
-    async function fetchSubmissions() {
-        try {
-            const response = await fetch(API_URL, {
-                method: "GET",
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+function toggleEraser() {
+    drawingMode = !drawingMode;
+    document.getElementById('eraser-btn').textContent = drawingMode ? "Eraser" : "Drawing";
+}
 
-            const data = await response.json();
-            if (response.ok) {
-                displaySubmissions(data.submissions);
-            } else {
-                console.error("Failed to fetch submissions:", data.message);
-            }
-        } catch (error) {
-            console.error("Error fetching submissions:", error);
-        }
-    }
+function startDrawing(event) {
+    if (!drawingMode) return;
 
-    function displaySubmissions(submissions) {
-        const tableBody = document.getElementById("submissions-body");
-        tableBody.innerHTML = "";
+    ctx.beginPath();
+    ctx.moveTo(event.offsetX, event.offsetY);
+    canvas.addEventListener('mousemove', draw);
+}
 
-        submissions.forEach(submission => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td><img src="${submission.image_url}" width="100"></td>
-                <td>${submission.score}</td>
-                <td><button class="delete-btn" onclick="deleteSubmission(${submission.id})">Delete</button></td>
-            `;
-            tableBody.appendChild(row);
+function draw(event) {
+    if (!drawingMode || !ctx) return;
+
+    ctx.lineTo(event.offsetX, event.offsetY);
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+}
+
+function stopDrawing() {
+    ctx.closePath();
+}
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function resetDrawing() {
+    clearCanvas();
+    score = 0;
+    document.getElementById('score').textContent = `Score: ${score}`;
+    fetchReferenceImage();
+}
+
+function viewImage() {
+    // Reference image display logic (not needed anymore)
+}
+
+async function submitDrawing() {
+    const drawingData = canvas.toDataURL('image/png');
+
+    try {
+        const response = await fetch(`${pythonURI}/api/submission`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                image_url: referenceImageUrl,
+                drawing: drawingData
+            })
         });
-    }
 
-    async function deleteSubmission(submissionId) {
-        try {
-            const response = await fetch(API_URL, {
-                method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ id: submissionId })
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                fetchSubmissions();
-            } else {
-                console.error("Failed to delete submission:", data.message);
-            }
-        } catch (error) {
-            console.error("Error deleting submission:", error);
+        const data = await response.json();
+        if (response.ok) {
+            score = data.score;
+            document.getElementById('score').textContent = `Score: ${score}`;
+            showMessage('Drawing submitted and scored successfully!', 'success');
+        } else {
+            showMessage(data.message, 'error');
         }
+    } catch (error) {
+        showMessage('Error submitting drawing', 'error');
     }
+}
 
-    document.addEventListener("DOMContentLoaded", () => {
-        loadNewImage();
-        fetchSubmissions();
-    });
+function showMessage(message, type) {
+    const messageElement = document.getElementById('message');
+    messageElement.textContent = message;
+    messageElement.className = `message ${type}`;
+    messageElement.style.display = 'block';
+}
+
+async function fetchReferenceImage() {
+    // Choose the next reference image and draw it
+    const drawingFunction = drawings[imageIndex];
+    imageIndex = (imageIndex + 1) % drawings.length;
+    drawingFunction();
+}
 </script>

@@ -1,13 +1,13 @@
 ---
 layout: needsAuth
-title: Blind Trace Drawing Game
-permalink: /blind-trace
+title: Drawing Leaderboard
+permalink: /leaderboard
 search_exclude: true
 ---
 
 <style>
 :root {
-    --background: linear-gradient(145deg, #A6AEBF, #C5D3E8, #D0E8C5, #FFF8DE);
+    --background: linear-gradient(145deg, #A6AEBF, #C5D3E8, #D0E8C5, #FFF8DE, rgb(166, 174, 191), rgb(197, 211, 232), rgb(208, 232, 197), rgb(255, 248, 222));
 }
 
 body {
@@ -22,50 +22,154 @@ body {
     margin: 2rem auto;
     padding: 1rem;
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.canvas-container {
-    text-align: center;
+.score-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 2rem;
 }
 
-.canvas {
-    border: 1px solid #ccc;
-    background: white;
-    width: 80%;
-    height: 400px;
-    margin-bottom: 1rem;
+.form-group {
+    margin-bottom: 1.5rem;
 }
 
-.tool-panel {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: bold;
 }
 
-.tool-btn {
-    padding: 0.5rem 1rem;
-    border: none;
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.speed-info {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.speed-info ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.submit-btn {
     background: #2196F3;
     color: white;
-    font-size: 1rem;
-    cursor: pointer;
+    border: none;
+    padding: 1rem 2rem;
     border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    font-size: 1rem;
     transition: background-color 0.3s;
 }
 
-.tool-btn:hover {
+.submit-btn:hover {
     background: #1976D2;
 }
 
-.color-picker {
-    margin-top: 1rem;
+.word-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
 }
 
-.tool-btn:active {
-    background: #0d47a1;
+.word-title {
+    background: #f8f9fa;
+    padding: 1rem;
+    margin: 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1.25rem;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-badge {
+    background: #dc3545;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.leaderboard-table th {
+    font-weight: bold;
+    color: #666;
+    background: #f8f9fa;
+}
+
+.score-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.score-high {
+    background: #4CAF50;
+    color: white;
+}
+
+.score-medium {
+    background: #FFC107;
+    color: black;
+}
+
+.score-low {
+    background: #FF5722;
+    color: white;
+}
+
+.speed-badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.2);
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.delete-btn:hover {
+    background: #c82333;
 }
 
 .message {
@@ -85,183 +189,205 @@ body {
     background: #f8d7da;
     color: #721c24;
 }
-
-.image-container {
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.image-container img {
-    max-width: 80%;
-    margin-bottom: 1rem;
-    display: block;
-}
 </style>
 
 <div class="container">
-    <h2>Blind Trace Drawing Game</h2>
-    <div class="image-container">
-        <img id="reference-image" src="" alt="Reference Image" style="display: none;">
-    </div>
-    <div class="canvas-container">
-        <canvas id="drawing-canvas" class="canvas"></canvas>
-        <div class="tool-panel">
-            <button id="clear-btn" class="tool-btn">Clear Canvas</button>
-            <button id="reset-btn" class="tool-btn">Reset Drawing</button>
-            <button id="view-btn" class="tool-btn">View Image</button>
+    <form class="score-form" id="score-form">
+        <h2>Submit Drawing Score</h2>
+        <div class="form-group">
+            <label for="drawingName">Drawing Name:</label>
+            <input type="text" id="drawingName" required>
         </div>
-    </div>
-    <div class="color-picker">
-        <label>Select Color:</label>
-        <input type="color" id="color-picker" value="#000000">
-    </div>
-    <div class="tool-panel">
-        <button id="eraser-btn" class="tool-btn">Eraser</button>
-        <button id="submit-btn" class="tool-btn">Submit Drawing</button>
-    </div>
-    <div id="score-container">
-        <p id="score">Score: 0</p>
-    </div>
-    <div id="message" class="message"></div>
-    <div id="submissions-container"></div>
+        <div class="form-group">
+            <label for="score">Manual Score (0-1000, optional):</label>
+            <input type="number" id="score" min="0" max="1000">
+            <div class="speed-info">
+                <strong>Speed-Based Scoring System:</strong>
+                <ul>
+                    <li>2x speed (half the time) = 1000 points</li>
+                    <li>1x speed (normal time) = 500 points</li>
+                    <li>0.5x speed (double time) = 250 points</li>
+                </ul>
+                <small>Leave blank to use automatic speed-based scoring from your competition time</small>
+            </div>
+        </div>
+        <button type="submit" class="submit-btn">Submit Score</button>
+        <div id="message" class="message"></div>
+    </form>
+
+    <div id="leaderboard-sections"></div>
 </div>
 
 <script type="module">
 import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
-let currentColor = "#000000";
-let drawingMode = true;
-let score = 0;
-let referenceImageUrl = "";
-let canvas, ctx;
-let imageWidth = 0;
-let imageHeight = 0;
-let imageIndex = 0;  // Used to cycle through images
-
-// Image generation functions (cityscape, bridge, etc.) as defined in the previous message
-const drawings = {
-    cityscape: drawCityscape,
-    bridge: drawBridge,
-    forest: drawForest,
-    coralReef: drawCoralReef,
-    solarSystem: drawSolarSystem
-};
-
-// Image data (empty for now, the drawing functions will replace it)
-const imageUrls = [];
+let isAdmin = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    canvas = document.getElementById('drawing-canvas');
-    ctx = canvas.getContext('2d');
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseout', stopDrawing);
-
-    document.getElementById('color-picker').addEventListener('input', changeColor);
-    document.getElementById('eraser-btn').addEventListener('click', toggleEraser);
-    document.getElementById('clear-btn').addEventListener('click', clearCanvas);
-    document.getElementById('reset-btn').addEventListener('click', resetDrawing);
-    document.getElementById('submit-btn').addEventListener('click', submitDrawing);
-    document.getElementById('view-btn').addEventListener('click', viewImage);
-
-    fetchReferenceImage();
+    try {
+        const response = await fetch(`${pythonURI}/api/user`, {
+            credentials: 'include'
+        });
+        const userData = await response.json();
+        isAdmin = userData.role === 'Admin';
+        fetchLeaderboard();
+    } catch (error) {
+        console.error('Error checking admin status:', error);
+        showMessage('Error loading user data', 'error');
+    }
 });
 
-function changeColor(event) {
-    currentColor = event.target.value;
-}
-
-function toggleEraser() {
-    drawingMode = !drawingMode;
-    document.getElementById('eraser-btn').textContent = drawingMode ? "Eraser" : "Drawing";
-}
-
-function startDrawing(event) {
-    if (!drawingMode) return;
-
-    ctx.beginPath();
-    ctx.moveTo(event.offsetX, event.offsetY);
-    canvas.addEventListener('mousemove', draw);
-}
-
-function draw(event) {
-    if (!drawingMode || !ctx) return;
-
-    ctx.lineTo(event.offsetX, event.offsetY);
-    ctx.strokeStyle = currentColor;
-    ctx.lineWidth = 5;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-}
-
-function stopDrawing() {
-    ctx.closePath();
-}
-
-function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-function resetDrawing() {
-    clearCanvas();
-    score = 0;
-    document.getElementById('score').textContent = `Score: ${score}`;
-    fetchReferenceImage();
-}
-
-function viewImage() {
-    const image = document.getElementById('reference-image');
-    image.style.display = image.style.display === 'none' ? 'block' : 'none';
-}
-
-async function submitDrawing() {
-    const drawingData = canvas.toDataURL('image/png');
-
+async function fetchLeaderboard() {
     try {
-        const response = await fetch(`${pythonURI}/api/submission`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                image_url: referenceImageUrl,
-                drawing: drawingData
-            })
+        const response = await fetch(`${pythonURI}/api/leaderboard`, {
+            credentials: 'include'
         });
-
+        
+        if (!response.ok) throw new Error('Failed to fetch leaderboard data');
+        
         const data = await response.json();
-        if (response.ok) {
-            score = data.score;
-            document.getElementById('score').textContent = `Score: ${score}`;
-            showMessage('Drawing submitted and scored successfully!', 'success');
-        } else {
-            throw new Error(data.message);
-        }
+        const container = document.getElementById('leaderboard-sections');
+        container.innerHTML = '';
+
+        Object.entries(data).forEach(([word, entries]) => {
+            container.appendChild(createWordSection(word, entries));
+        });
     } catch (error) {
-        console.error('Error submitting drawing:', error);
-        showMessage('Failed to submit drawing.', 'error');
+        console.error('Error:', error);
+        showMessage(error.message, 'error');
     }
 }
 
-function showMessage(message, type) {
-    const messageContainer = document.getElementById('message');
-    messageContainer.textContent = message;
-    messageContainer.className = `message ${type}`;
-    messageContainer.style.display = 'block';
-
-    setTimeout(() => {
-        messageContainer.style.display = 'none';
-    }, 5000);
+function getScoreClass(score) {
+    if (score >= 750) return 'score-high';
+    if (score >= 500) return 'score-medium';
+    return 'score-low';
 }
 
-function fetchReferenceImage() {
-    // Cycle through the images in the array
-    const drawingNames = Object.keys(drawings);
-    const randomDrawingName = drawingNames[Math.floor(Math.random() * drawingNames.length)];
-    drawings[randomDrawingName]();
+function getSpeedFactor(score) {
+    return (score / 500).toFixed(1);
+}
 
-    // Set reference image URL and make the image visible
-    referenceImageUrl = randomDrawingName;
-    document.getElementById('reference-image').style.display = 'block'; // Make sure the image is visible
+function createWordSection(word, entries) {
+    const section = document.createElement('div');
+    section.className = 'word-section';
+    
+    section.innerHTML = `
+        <h3 class="word-title">
+            Drawing: ${word}
+            ${isAdmin ? '<span class="admin-badge">Admin Mode</span>' : ''}
+        </h3>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                    ${isAdmin ? '<th>Actions</th>' : ''}
+                </tr>
+            </thead>
+            <tbody>
+                ${entries.map((entry, index) => `
+                    <tr>
+                        <td>#${index + 1}</td>
+                        <td>${entry.profile_name}</td>
+                        <td>
+                            <div class="score-indicator ${getScoreClass(entry.score)}">
+                                ${entry.score}
+                                <span class="speed-badge">${getSpeedFactor(entry.score)}x speed</span>
+                            </div>
+                        </td>
+                        ${isAdmin ? `
+                            <td>
+                                <button class="delete-btn" onclick="deleteEntry(${entry.id})">
+                                    Delete
+                                </button>
+                            </td>
+                        ` : ''}
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    
+    return section;
+}
+
+document.getElementById('score-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const drawingName = document.getElementById('drawingName').value.trim();
+    const score = document.getElementById('score').value;
+    
+    try {
+        const body = { drawing_name: drawingName };
+        if (score) {
+            const scoreNum = parseInt(score);
+            if (scoreNum < 0 || scoreNum > 1000) {
+                showMessage('Score must be between 0 and 1000', 'error');
+                return;
+            }
+            body.score = scoreNum;
+        }
+
+        const response = await fetch(`${pythonURI}/api/leaderboard`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) throw new Error(data.message);
+        
+        showMessage('Score submitted successfully!', 'success');
+        this.reset();
+        await fetchLeaderboard();
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage(error.message, 'error');
+    }
+});
+
+window.deleteEntry = async function(id) {
+    if (!isAdmin) {
+        showMessage('Admin access required', 'error');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to delete this entry?')) return;
+    
+    try {
+        const response = await fetch(`${pythonURI}/api/leaderboard`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) throw new Error(data.message);
+        
+        showMessage('Entry deleted successfully', 'success');
+        await fetchLeaderboard();
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage(error.message, 'error');
+    }
+};
+
+function showMessage(text, type) {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = text;
+    messageEl.className = `message ${type}`;
+    messageEl.style.display = 'block';
+    setTimeout(() => {
+        messageEl.style.opacity = '0';
+        setTimeout(() => {
+            messageEl.style.display = 'none';
+            messageEl.style.opacity = '1';
+        }, 300);
+    }, 3000);
 }
 </script>
