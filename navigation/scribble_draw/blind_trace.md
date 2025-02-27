@@ -134,11 +134,13 @@ body {
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
+
     <!-- Image Display Section -->
     <div id="image-display-container" class="canvas-container">
         <img id="reference-image" src="" alt="Reference Image" class="canvas">
         <button id="start-game-btn" class="tool-btn">Start Game</button>
     </div>
+
     <!-- Drawing Canvas Section -->
     <div id="canvas-section" class="canvas-container" style="display: none;">
         <canvas id="drawing-canvas" class="canvas"></canvas>
@@ -148,6 +150,7 @@ body {
             <button id="view-btn" class="tool-btn">View Image</button>
         </div>
     </div>
+
     <div class="color-picker">
         <label>Select Color:</label>
         <input type="color" id="color-picker" value="#000000">
@@ -161,6 +164,7 @@ body {
     </div>
     <div id="message" class="message"></div>
     <div id="submissions-container"></div>
+
     <div id="image-modal" class="image-modal">
         <img id="modal-reference-image" />
         <button id="close-modal-btn" class="tool-btn" style="margin-top: 10px;">Close Image</button>
@@ -261,7 +265,6 @@ function viewImage() {
 
 function closeImageModal() {
     document.getElementById('image-modal').style.display = 'none';
-    startDrawingAfterDelay();
 }
 
 function showReferenceImage() {
@@ -275,31 +278,20 @@ function startGame() {
     document.getElementById('image-display-container').style.display = 'none';
     document.getElementById('canvas-section').style.display = 'block';
 
-    // Load the image again and set the canvas size based on the image's aspect ratio
+    // Reset drawing
+    canvas.width = window.innerWidth * 0.8;
+    canvas.height = canvas.width * (4 / 3);  // Adjust based on desired aspect ratio
+
     let img = new Image();
     img.src = referenceImageUrl;
 
     img.onload = function() {
-        const aspectRatio = img.width / img.height;
-        const canvasWidth = window.innerWidth * 0.8;
-        const canvasHeight = canvasWidth / aspectRatio;
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-
-        // Draw the reference image on the canvas
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
+        // Clear the canvas after 5 seconds
         setTimeout(() => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }, 5000); // Display the reference image for 5 seconds
     };
-}
-
-function startDrawingAfterDelay() {
-    setTimeout(() => {
-        // Switch back to canvas for drawing
-        document.getElementById('image-modal').style.display = 'none';
-        document.getElementById('canvas-section').style.display = 'block';
-    }, 3000); // 3 seconds after viewing image
 }
 </script>
