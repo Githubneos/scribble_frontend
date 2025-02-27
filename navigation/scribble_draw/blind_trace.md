@@ -116,12 +116,10 @@ body {
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
-    <!-- Image Display Section -->
     <div id="image-display-container" class="canvas-container">
         <img id="reference-image" src="" alt="Reference Image" class="canvas">
         <button id="start-game-btn" class="tool-btn">Start Game</button>
     </div>
-    <!-- Drawing Canvas Section (Hidden initially) -->
     <div id="canvas-section" class="canvas-container" style="display: none;">
         <canvas id="drawing-canvas" class="canvas"></canvas>
         <div class="tool-panel">
@@ -138,7 +136,7 @@ body {
         <button id="eraser-btn" class="tool-btn">Eraser</button>
         <button id="submit-btn" class="tool-btn">Submit Drawing</button>
     </div>
-    <div id="score-container">
+     <div id="score-container">
         <p id="score">Score: 0</p>
     </div>
     <div id="message" class="message"></div>
@@ -152,10 +150,9 @@ body {
 <script type="module">
 let referenceImageUrl = "";
 let imageViewCount = 0;
-let rotationAngle = 0;
-let isImageRotating = false;
 let drawing = false;
 let ctx, canvas;
+let drawingStartTime = null;
 
 const referenceImages = [
     'images/Bridge.jpg',
@@ -193,49 +190,40 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPastSubmissions();
 });
 
-// Show a random reference image for the user to trace
 function showReferenceImage() {
     const randomIndex = Math.floor(Math.random() * referenceImages.length);
     referenceImageUrl = referenceImages[randomIndex];
-
     const referenceImage = document.getElementById('reference-image');
     referenceImage.src = referenceImageUrl;
-    referenceImage.style.display = "block"; 
 }
 
-// Start the game and hide the reference image
 function startGame() {
-    setTimeout(() => {
-        document.getElementById('image-display-container').style.display = 'none';
-        document.getElementById('canvas-section').style.display = 'block';
-        imageViewCount = 0;
-    }, 3000);
+    document.getElementById('image-display-container').style.display = 'none';
+    document.getElementById('canvas-section').style.display = 'block';
+    imageViewCount = 0;
+    drawingStartTime = new Date();
 }
 
-// Open the modal to view the reference image
 function viewImage() {
     if (imageViewCount < 3) {
         document.getElementById('image-modal').style.display = 'flex';
         document.getElementById('modal-reference-image').src = referenceImageUrl;
         imageViewCount++;
     } else {
-        alert("❌ You have viewed the image 3 times already.");
+        alert("You have reached the maximum number of views for this round!");
     }
 }
 
-// Close the modal
 function closeImageModal() {
     document.getElementById('image-modal').style.display = 'none';
 }
 
-// Start drawing on the canvas
 function startDrawing(event) {
     drawing = true;
     ctx.beginPath();
     ctx.moveTo(event.offsetX, event.offsetY);
 }
 
-// Draw on the canvas as the mouse moves
 function draw(event) {
     if (!drawing) return;
     ctx.lineTo(event.offsetX, event.offsetY);
@@ -245,49 +233,34 @@ function draw(event) {
     ctx.stroke();
 }
 
-// Stop drawing when mouse is released or leaves the canvas
 function stopDrawing() {
     drawing = false;
 }
 
-// Clear the canvas
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-// Reset the drawing (clear canvas)
 function resetDrawing() {
     clearCanvas();
     showReferenceImage();
 }
 
-let drawingStartTime = null; // Store the start time when the user starts drawing
-
-// Function to start tracking the drawing time
-function startDrawing() {
-    drawingStartTime = new Date(); // Set the start time when the user starts drawing
-}
-
-// Function to handle submitting the drawing
 async function submitDrawing() {
-    const drawingData = canvas.toDataURL(); // Convert canvas to base64 data URL
-
-    // If the drawing start time is null, it means the user hasn't started drawing yet
     if (!drawingStartTime) {
-        alert('Please start drawing before submitting!');
+        alert("Please start drawing before submitting!");
         return;
     }
 
-    const drawingEndTime = new Date(); // Get the current time when the user submits the drawing
-    const timeSpent = (drawingEndTime - drawingStartTime) / 1000; // Time spent in seconds
-
-    // Generate a random score based on the time spent
+    const drawingData = canvas.toDataURL();
+    const drawingEndTime = new Date();
+    const timeSpent = (drawingEndTime - drawingStartTime) / 1000;
     let score = generateScore(timeSpent);
 
     const requestData = {
         image_url: referenceImageUrl,
         drawing: drawingData,
-        score: score, // Include the score in the request
+        score,
     };
 
     try {
@@ -295,7 +268,7 @@ async function submitDrawing() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`, // Use JWT stored in localStorage
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
             },
             body: JSON.stringify(requestData),
         });
@@ -303,7 +276,7 @@ async function submitDrawing() {
         const result = await response.json();
         if (response.ok) {
             alert(`Drawing submitted successfully! Score: ${score}`);
-            loadPastSubmissions(); // Reload past submissions after submission
+            loadPastSubmissions();
         } else {
             alert(`Error: ${result.message}`);
         }
@@ -312,51 +285,38 @@ async function submitDrawing() {
     }
 }
 
-// Function to generate a random score based on time spent (in seconds)
 function generateScore(timeSpent) {
-    // Adjust this formula based on how you want time to affect the score
-    // For example, let's say 1 second equals 1 point, and the score is capped at 1000.
-    let score = Math.min(timeSpent * 10, 1000); // Multiplies time by 10 for score
-    score = Math.floor(score); // Ensure the score is an integer
-
-    // Optionally add some random variance to the score
-    const randomVariance = Math.floor(Math.random() * 50); // Random variance between 0 and 50
+    let score = Math.min(timeSpent * 10, 1000);
+    score = Math.floor(score);
+    const randomVariance = Math.floor(Math.random() * 50);
     score += randomVariance;
-
-    // Ensure the score is between 0 and 1000
     return Math.min(Math.max(score, 0), 1000);
 }
 
-// Start the drawing when the user begins
-document.getElementById('drawing-canvas').addEventListener('mousedown', startDrawing);
-
-// Fetch past submissions for the current user (GET)
 async function loadPastSubmissions() {
     try {
         const response = await fetch('/api/submissions', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`, // Use JWT stored in localStorage
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
             },
         });
 
         const result = await response.json();
         if (response.ok) {
-            displayPastSubmissions(result.submissions); // Display submissions if GET is successful
+            displayPastSubmissions(result.submissions);
         } else {
             alert(`Error: ${result.message}`);
         }
     } catch (error) {
-        alert('Failed to load past submissions. Please try again later.');
+        alert('Failed to load past submissions.');
     }
 }
 
-// Display past submissions in a table
 function displayPastSubmissions(submissions) {
     const submissionsContainer = document.getElementById('submissions-container');
-    submissionsContainer.innerHTML = ''; // Clear existing content
+    submissionsContainer.innerHTML = '';
 
-    // Create a table to display the submissions
     const table = document.createElement('table');
     table.classList.add('submissions-table');
     table.innerHTML = `
@@ -367,14 +327,13 @@ function displayPastSubmissions(submissions) {
         </tr>
     `;
 
-    // Loop through submissions and display each one
     submissions.forEach(submission => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${submission.username}</td>
             <td>${submission.score}</td>
             <td>
-                <button onclick="deleteSubmission(${submission.id})">Delete</button>
+                <button class="delete-btn" onclick="deleteSubmission(${submission.id})">Delete</button>
             </td>
         `;
         table.appendChild(row);
@@ -383,44 +342,29 @@ function displayPastSubmissions(submissions) {
     submissionsContainer.appendChild(table);
 }
 
-// Delete a specific submission (DELETE)
 async function deleteSubmission(submissionId) {
-    if (!confirm('Are you sure you want to delete this submission?')) return;
-
-    const requestData = { id: submissionId };
-
     try {
-        const response = await fetch('/api/submission', {
+        const response = await fetch(`/api/submission/${submissionId}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`, // Use JWT stored in localStorage
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
             },
-            body: JSON.stringify(requestData),
         });
 
-        const result = await response.json();
         if (response.ok) {
-            alert('Submission deleted successfully');
-            loadPastSubmissions(); // Reload the submissions after deletion
+            loadPastSubmissions();
         } else {
-            alert(`Error: ${result.message}`);
+            alert('Failed to delete submission.');
         }
     } catch (error) {
-        alert('Failed to delete submission. Please try again later.');
+        alert('Error deleting submission.');
     }
 }
 
-// Automatically load past submissions on page load
-document.addEventListener('DOMContentLoaded', loadPastSubmissions);
-
-
-// Toggle eraser mode
 function toggleEraser() {
-    ctx.globalCompositeOperation = ctx.globalCompositeOperation === 'source-over' ? 'destination-out' : 'source-over';
+    ctx.strokeStyle = '#FFFFFF';
 }
 
-// Change drawing color
 function changeColor(event) {
     ctx.strokeStyle = event.target.value;
 }
