@@ -271,7 +271,7 @@ async function submitDrawing() {
     };
 
     try {
-        const response = await fetch('/api/blind_trace/submission', {
+        const response = await fetch('/api/submission', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -294,7 +294,7 @@ async function submitDrawing() {
 // Fetch past submissions for the current user
 async function loadPastSubmissions() {
     try {
-        const response = await fetch('/api/blind_trace/submission', {
+        const response = await fetch('/api/submission', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`, // Use JWT stored in localStorage
@@ -334,7 +334,7 @@ async function deleteSubmission(submissionId) {
     const requestData = { id: submissionId };
 
     try {
-        const response = await fetch('/api/blind_trace/submission', {
+        const response = await fetch('/api/submission', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
