@@ -171,3 +171,132 @@ search_exclude: true
 
     loadNewImage();
 </script>
+
+<script>
+    const pythonURI = "https://scribble.stu.nighthawkcodingsociety.com";
+
+    async function fetchSubmissions() {
+        try {
+            const response = await fetch(`${pythonURI}/blind_trace/submissions`);
+            const data = await response.json();
+
+            if (response.ok) {
+                updateSubmissionsTable(data);
+            } else {
+                console.error("Failed to fetch submissions:", data.message);
+            }
+        } catch (error) {
+            console.error("Error fetching submissions:", error);
+        }
+    }
+
+    async function submitDrawing() {
+        const drawingData = canvas.toDataURL("image/png"); // Convert drawing to Base64
+
+        const payload = {
+            profile_name: "User123", // Replace with actual logged-in user
+            image_url: image.src,
+            drawing_url: drawingData
+        };
+
+        try {
+            const response = await fetch(`${pythonURI}/blind_trace/submit`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("Drawing submitted!");
+                loadNewImage();
+                fetchSubmissions();
+            } else {
+                console.error("Submission failed:", data.message);
+            }
+        } catch (error) {
+            console.error("Error submitting drawing:", error);
+        }
+    }
+
+    async function updateDrawing(submissionId) {
+        const drawingData = canvas.toDataURL("image/png"); // Convert updated drawing
+
+        const payload = { drawing_url: drawingData };
+
+        try {
+            const response = await fetch(`${pythonURI}/blind_trace/update/${submissionId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("Drawing updated!");
+                fetchSubmissions();
+            } else {
+                console.error("Update failed:", data.message);
+            }
+        } catch (error) {
+            console.error("Error updating drawing:", error);
+        }
+    }
+
+    async function deleteSubmission(submissionId) {
+        try {
+            const response = await fetch(`${pythonURI}/blind_trace/delete/${submissionId}`, {
+                method: "DELETE",
+            });
+
+            if (response.ok) {
+                alert("Submission deleted!");
+                fetchSubmissions();
+            } else {
+                console.error("Delete failed:", await response.json());
+            }
+        } catch (error) {
+            console.error("Error deleting submission:", error);
+        }
+    }
+
+    function updateSubmissionsTable(submissions) {
+        const tableBody = document.getElementById("submissions-body");
+        tableBody.innerHTML = "";
+
+        submissions.forEach((submission) => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${submission.profile_name}</td>
+                <td><img src="${submission.image_url}" width="100"></td>
+                <td><img src="${submission.drawing_url}" width="100"></td>
+                <td>
+                    <button class="button" onclick="updateDrawing(${submission.id})">Update</button>
+                    <button class="button" onclick="deleteSubmission(${submission.id})" style="background: red;">Delete</button>
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+        });
+    }
+
+    submitBtn.addEventListener("click", submitDrawing);
+
+    document.addEventListener("DOMContentLoaded", fetchSubmissions);
+</script>
+
+<h2>Previous Submissions</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Original Image</th>
+            <th>Your Drawing</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="submissions-body"></tbody>
+</table>
