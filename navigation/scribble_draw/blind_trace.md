@@ -48,9 +48,9 @@ body {
 
 .canvas {
     border: 2px solid #ccc;
-    background-color: #fafafa;  
+    background-color: #fafafa;
     margin-bottom: 1rem;
-    cursor: crosshair; 
+    cursor: crosshair;
 }
 
 .tool-panel {
@@ -101,14 +101,14 @@ body {
 }
 
 .image-modal {
-    display: flex; 
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8); 
-    z-index: 1000; 
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
     justify-content: center;
     align-items: center;
     overflow: auto;
@@ -119,11 +119,6 @@ body {
     max-height: 80%;
     border: 5px solid white;
     border-radius: 8px;
-}
-
-.image-container {
-    margin-bottom: 2rem;
-    text-align: center;
 }
 
 #start-button-container {
@@ -139,7 +134,6 @@ body {
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
-    <!-- Canvas Container (Initially Hidden) -->
     <div class="canvas-container" id="canvas-container">
         <canvas id="drawing-canvas" class="canvas"></canvas>
         <div class="tool-panel">
@@ -161,100 +155,31 @@ body {
     </div>
     <div id="message" class="message"></div>
     <div id="submissions-container"></div>
-    <!-- Modal to display the reference image -->
-    <div id="image-modal" class="image-modal" style="display: none;">
+    <div id="image-modal" class="image-modal">
         <img id="modal-reference-image" />
         <button id="close-modal-btn" class="tool-btn" style="margin-top: 10px;">Close Image</button>
     </div>
 </div>
 
 <script type="module">
-import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
-
 let currentColor = "#000000";
 let drawingMode = true;
 let score = 0;
 let referenceImageUrl = "";
+let imageViewCount = 0;
+
+const referenceImages = [
+    'assets/images/Bridge.jpg',
+    'assets/images/car.jpg',
+    'assets/images/colloseum.jpg',
+    'assets/images/french.jpg',
+    'assets/images/House.jpg',
+    'assets/images/stonehenge.jpg',
+    'assets/images/taj_mahal.jpg',
+    'assets/images/tower.jpg',
+];
+
 let canvas, ctx;
-let imageWidth = 0;
-let imageHeight = 0;
-let imageIndex = 0;  // Used to cycle through images
-let imageViewCount = 0;  // Counter to track how many times the image has been viewed
-
-// Image generation functions (cityscape, bridge, etc.)
-function drawCityscape() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#8e9fbc'; // Buildings color
-    ctx.fillRect(0, canvas.height - 50, canvas.width, 50); // Ground
-    ctx.fillStyle = '#708090'; // Windows color
-    ctx.fillRect(100, 150, 50, 100); // Building 1
-    ctx.fillRect(200, 100, 50, 150); // Building 2
-    ctx.fillRect(300, 130, 50, 120); // Building 3
-    ctx.fillStyle = '#f0f0f0'; // Sky color
-    ctx.fillRect(0, 0, canvas.width, canvas.height - 50); // Sky
-}
-
-function drawBridge() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#654321'; // Bridge color
-    ctx.fillRect(50, 200, 300, 20); // Bridge base
-    ctx.fillRect(50, 180, 20, 20); // Left pillar
-    ctx.fillRect(330, 180, 20, 20); // Right pillar
-    ctx.fillStyle = '#c0c0c0'; // Road color
-    ctx.fillRect(50, 220, 300, 20); // Road
-    ctx.fillStyle = '#87CEEB'; // Sky color
-    ctx.fillRect(0, 0, canvas.width, 180); // Sky
-}
-
-function drawForest() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#228B22'; // Tree leaves color
-    ctx.beginPath();
-    ctx.arc(100, 200, 50, 0, Math.PI * 2); // Tree 1
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(250, 200, 50, 0, Math.PI * 2); // Tree 2
-    ctx.fill();
-    ctx.fillStyle = '#8B4513'; // Tree trunk color
-    ctx.fillRect(90, 250, 20, 40); // Trunk 1
-    ctx.fillRect(240, 250, 20, 40); // Trunk 2
-    ctx.fillStyle = '#7CFC00'; // Grass color
-    ctx.fillRect(0, canvas.height - 50, canvas.width, 50); // Grass
-}
-
-function drawCoralReef() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#20B2AA'; // Water color
-    ctx.fillRect(0, 0, canvas.width, canvas.height); // Water
-    ctx.fillStyle = '#FF4500'; // Coral color
-    ctx.beginPath();
-    ctx.arc(150, 350, 30, 0, Math.PI * 2); // Coral 1
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(250, 320, 30, 0, Math.PI * 2); // Coral 2
-    ctx.fill();
-    ctx.fillStyle = '#2E8B57'; // Seaweed color
-    ctx.fillRect(50, 380, 10, 40); // Seaweed 1
-    ctx.fillRect(200, 380, 10, 40); // Seaweed 2
-}
-
-function drawSolarSystem() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#FFD700'; // Sun color
-    ctx.beginPath();
-    ctx.arc(300, 200, 50, 0, Math.PI * 2); // Sun
-    ctx.fill();
-    ctx.fillStyle = '#4B0082'; // Planet color
-    ctx.beginPath();
-    ctx.arc(150, 200, 20, 0, Math.PI * 2); // Planet 1
-    ctx.fill();
-    ctx.fillStyle = '#00008B'; // Planet 2 color
-    ctx.beginPath();
-    ctx.arc(400, 200, 30, 0, Math.PI * 2); // Planet 2
-    ctx.fill();
-}
-
-const drawings = [drawCityscape, drawBridge, drawForest, drawCoralReef, drawSolarSystem];
 
 document.addEventListener('DOMContentLoaded', () => {
     canvas = document.getElementById('drawing-canvas');
@@ -272,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('view-btn').addEventListener('click', viewImage);
     document.getElementById('close-modal-btn').addEventListener('click', closeImageModal);
 
-    // Start the game and load the reference image
     startGame();
 });
 
@@ -333,31 +257,25 @@ function closeImageModal() {
 }
 
 function startGame() {
-    // Randomly select an image from the referenceImages array
     const randomImage = referenceImages[Math.floor(Math.random() * referenceImages.length)];
     referenceImageUrl = randomImage;
-
-    document.getElementById('canvas-container').style.display = 'block';
 
     let img = new Image();
     img.src = referenceImageUrl;
 
     img.onload = function() {
-        // Resize canvas to fit the reference image
         const aspectRatio = img.width / img.height;
-        const canvasWidth = window.innerWidth * 0.8; // 80% of the window width
+        const canvasWidth = window.innerWidth * 0.8;
         const canvasHeight = canvasWidth / aspectRatio;
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
 
-        // Draw the reference image on the canvas
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // Show image for 5 seconds, then clear the canvas and allow drawing
         setTimeout(() => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            document.getElementById('score').textContent = `Score: ${score}`;
-        }, 5000); // 5 seconds to view the reference image
+        }, 5000); // Display the reference image for 5 seconds
+
     };
 }
 </script>
