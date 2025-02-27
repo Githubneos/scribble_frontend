@@ -9,6 +9,7 @@ permalink: /stats
         <td><a href="{{site.baseurl}}/index">Home</a></td>
         <td><a href="{{site.baseurl}}/competition">Competitive</a></td>
         <td><a href="{{site.baseurl}}/guess">Guess Game</a></td>
+        <td><a href="{{site.baseurl}}/blind_trace">Blind Trace</a></td>
         <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
         <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
         <td><a href="{{site.baseurl}}/about">About Us</a></td>
