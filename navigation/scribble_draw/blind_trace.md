@@ -134,13 +134,11 @@ body {
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
-
     <!-- Image Display Section -->
     <div id="image-display-container" class="canvas-container">
         <img id="reference-image" src="" alt="Reference Image" class="canvas">
         <button id="start-game-btn" class="tool-btn">Start Game</button>
     </div>
-
     <!-- Drawing Canvas Section -->
     <div id="canvas-section" class="canvas-container" style="display: none;">
         <canvas id="drawing-canvas" class="canvas"></canvas>
@@ -150,7 +148,6 @@ body {
             <button id="view-btn" class="tool-btn">View Image</button>
         </div>
     </div>
-
     <div class="color-picker">
         <label>Select Color:</label>
         <input type="color" id="color-picker" value="#000000">
@@ -164,7 +161,6 @@ body {
     </div>
     <div id="message" class="message"></div>
     <div id="submissions-container"></div>
-
     <div id="image-modal" class="image-modal">
         <img id="modal-reference-image" />
         <button id="close-modal-btn" class="tool-btn" style="margin-top: 10px;">Close Image</button>
@@ -279,6 +275,7 @@ function startGame() {
     document.getElementById('image-display-container').style.display = 'none';
     document.getElementById('canvas-section').style.display = 'block';
 
+    // Load the image again and set the canvas size based on the image's aspect ratio
     let img = new Image();
     img.src = referenceImageUrl;
 
@@ -289,6 +286,7 @@ function startGame() {
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
 
+        // Draw the reference image on the canvas
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
         setTimeout(() => {
