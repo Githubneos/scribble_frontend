@@ -1,10 +1,24 @@
 ---
 layout: needsAuth
-title: Blind Trace Drawing Game
-permalink: /blind-trace
+title: Blind Trace
+permalink: /blind_trace
+menu: nav/home.html
 search_exclude: true
 ---
 
+<table>
+    <tr>
+        <td><a href="{{site.baseurl}}/index">Home</a></td>
+        <td><a href="{{site.baseurl}}/competition">Competitive</a></td>
+        <td><a href="{{site.baseurl}}/guess">Guess Game</a></td>
+        <td><a href="{{site.baseurl}}/blind_trace">Blind Trace</a></td>
+        <td><a href="{{site.baseurl}}/leaderboard">LeaderBoard</a></td>
+        <td><a href="{{site.baseurl}}/stats">Statistics</a></td>
+        <td><a href="{{site.baseurl}}/about">About Us</a></td>
+        <td><a href="{{site.baseurl}}/deploy">Deploy Blog</a></td>
+        <td><a href="{{site.baseurl}}/posts">Posts</a></td>
+    </tr>
+</table>
 <style>
 :root {
     --background: linear-gradient(145deg, #A6AEBF, #C5D3E8, #D0E8C5, #FFF8DE);
