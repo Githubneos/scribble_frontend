@@ -48,11 +48,11 @@ body {
 
 .canvas {
     border: 2px solid #ccc;
-    background-color: #fafafa;  /* Light grey background for better visibility */
+    background-color: #fafafa;  
     width: 80%;
     height: 400px;
     margin-bottom: 1rem;
-    cursor: crosshair; /* Change the cursor to indicate drawing */
+    cursor: crosshair; 
 }
 
 .tool-panel {
@@ -103,14 +103,14 @@ body {
 }
 
 .image-modal {
-    display: flex; /* Modal is now flex to center the image */
+    display: flex; 
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8); /* Dark background */
-    z-index: 1000; /* Above other content */
+    background-color: rgba(0, 0, 0, 0.8); 
+    z-index: 1000; 
     justify-content: center;
     align-items: center;
     overflow: auto;
@@ -133,13 +133,6 @@ body {
     margin-top: 2rem;
 }
 
-#reference-image {
-    display: block;
-    margin: 0 auto;
-    max-width: 100%;
-    border-radius: 8px;
-}
-
 .tool-btn,
 #view-btn {
     margin-top: 1rem;
@@ -148,15 +141,8 @@ body {
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
-        <!-- Reference Image Container -->
-    <div id="image-container" class="image-container">
-        <img id="reference-image" src="" alt="Reference Image" />
-        <div class="tool-panel">
-            <button id="start-btn" class="tool-btn">Start Game</button>
-        </div>
-    </div>
     <!-- Canvas Container (Initially Hidden) -->
-    <div class="canvas-container" id="canvas-container" style="display: none;">
+    <div class="canvas-container" id="canvas-container">
         <canvas id="drawing-canvas" class="canvas"></canvas>
         <div class="tool-panel">
             <button id="clear-btn" class="tool-btn">Clear Canvas</button>
@@ -272,7 +258,7 @@ function drawSolarSystem() {
 
 const drawings = [drawCityscape, drawBridge, drawForest, drawCoralReef, drawSolarSystem];
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     canvas = document.getElementById('drawing-canvas');
     ctx = canvas.getContext('2d');
     canvas.addEventListener('mousedown', startDrawing);
@@ -286,10 +272,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('reset-btn').addEventListener('click', resetDrawing);
     document.getElementById('submit-btn').addEventListener('click', submitDrawing);
     document.getElementById('view-btn').addEventListener('click', viewImage);
+    document.getElementById('close-modal-btn').addEventListener('click', closeImageModal);
 
-    document.getElementById('start-btn').addEventListener('click', startGame);
-
-    fetchReferenceImage();
+    // Start the game and load the reference image
+    startGame();
 });
 
 function changeColor(event) {
@@ -314,7 +300,7 @@ function draw(event) {
 
     ctx.lineTo(event.offsetX, event.offsetY);
     ctx.strokeStyle = currentColor;
-    ctx.lineWidth = 3;  // Thinner line width for smoother drawing
+    ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.stroke();
 }
@@ -331,7 +317,7 @@ function resetDrawing() {
     clearCanvas();
     score = 0;
     document.getElementById('score').textContent = `Score: ${score}`;
-    fetchReferenceImage();
+    startGame();
 }
 
 function viewImage() {
@@ -348,25 +334,23 @@ function closeImageModal() {
     document.getElementById('image-modal').style.display = 'none';
 }
 
-async function fetchReferenceImage() {
-    try {
-        // Fetch image URL from the backend or local resource
-        const response = await fetch(pythonURI + '/get_reference_image');
-        const data = await response.json();
-        referenceImageUrl = data.imageUrl;
-        document.getElementById('reference-image').src = referenceImageUrl;
-    } catch (error) {
-        console.error('Error fetching reference image:', error);
-    }
-}
-
 function startGame() {
-    document.getElementById('image-container').style.display = 'none';
+    // Randomly select an image from the referenceImages array
+    const randomImage = referenceImages[Math.floor(Math.random() * referenceImages.length)];
+    referenceImageUrl = randomImage;
+
     document.getElementById('canvas-container').style.display = 'block';
-    currentDrawingIndex++;
-    if (currentDrawingIndex >= drawings.length) {
-        currentDrawingIndex = 0;
-    }
-    drawings[currentDrawingIndex]();
+
+    canvas.width = 800; // You can adjust canvas size as needed
+    canvas.height = 600;
+
+    // Draw the reference image on the canvas
+    let img = new Image();
+    img.src = referenceImageUrl;
+    img.onload = function() {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    };
+
+    document.getElementById('score').textContent = `Score: ${score}`;
 }
 </script>
