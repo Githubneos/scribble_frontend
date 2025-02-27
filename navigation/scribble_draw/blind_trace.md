@@ -116,13 +116,11 @@ body {
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
-
     <!-- Image Display Section -->
     <div id="image-display-container" class="canvas-container">
         <img id="reference-image" src="" alt="Reference Image" class="canvas">
         <button id="start-game-btn" class="tool-btn">Start Game</button>
     </div>
-
     <!-- Drawing Canvas Section (Hidden initially) -->
     <div id="canvas-section" class="canvas-container" style="display: none;">
         <canvas id="drawing-canvas" class="canvas"></canvas>
@@ -132,7 +130,6 @@ body {
             <button id="view-btn" class="tool-btn">View Image</button>
         </div>
     </div>
-
     <div class="color-picker">
         <label>Select Color:</label>
         <input type="color" id="color-picker" value="#000000">
@@ -146,7 +143,6 @@ body {
     </div>
     <div id="message" class="message"></div>
     <div id="submissions-container"></div>
-
     <div id="image-modal" class="image-modal">
         <img id="modal-reference-image" />
         <button id="close-modal-btn" class="tool-btn" style="margin-top: 10px;">Close Image</button>
@@ -191,10 +187,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('clear-btn').addEventListener('click', clearCanvas);
     document.getElementById('reset-btn').addEventListener('click', resetDrawing);
     document.getElementById('color-picker').addEventListener('input', changeColor);
+    document.getElementById('submit-btn').addEventListener('click', submitDrawing);
 
     showReferenceImage();
+    loadPastSubmissions();
 });
 
+// Show a random reference image for the user to trace
 function showReferenceImage() {
     const randomIndex = Math.floor(Math.random() * referenceImages.length);
     referenceImageUrl = referenceImages[randomIndex];
@@ -204,6 +203,7 @@ function showReferenceImage() {
     referenceImage.style.display = "block"; 
 }
 
+// Start the game and hide the reference image
 function startGame() {
     setTimeout(() => {
         document.getElementById('image-display-container').style.display = 'none';
@@ -212,6 +212,7 @@ function startGame() {
     }, 3000);
 }
 
+// Open the modal to view the reference image
 function viewImage() {
     if (imageViewCount < 3) {
         document.getElementById('image-modal').style.display = 'flex';
@@ -222,16 +223,19 @@ function viewImage() {
     }
 }
 
+// Close the modal
 function closeImageModal() {
     document.getElementById('image-modal').style.display = 'none';
 }
 
+// Start drawing on the canvas
 function startDrawing(event) {
     drawing = true;
     ctx.beginPath();
     ctx.moveTo(event.offsetX, event.offsetY);
 }
 
+// Draw on the canvas as the mouse moves
 function draw(event) {
     if (!drawing) return;
     ctx.lineTo(event.offsetX, event.offsetY);
@@ -241,11 +245,123 @@ function draw(event) {
     ctx.stroke();
 }
 
+// Stop drawing when mouse is released or leaves the canvas
 function stopDrawing() {
     drawing = false;
 }
 
+// Clear the canvas
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// Reset the drawing (clear canvas)
+function resetDrawing() {
+    clearCanvas();
+    showReferenceImage();
+}
+
+// Function to handle submitting the drawing
+async function submitDrawing() {
+    const drawingData = canvas.toDataURL(); // Convert canvas to base64 data URL
+
+    const requestData = {
+        image_url: referenceImageUrl,
+        drawing: drawingData,
+    };
+
+    try {
+        const response = await fetch('/api/blind_trace/submission', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`, // Use JWT stored in localStorage
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert(`Drawing submitted successfully! Score: ${result.score}`);
+        } else {
+            alert(`Error: ${result.message}`);
+        }
+    } catch (error) {
+        alert('Failed to submit drawing. Please try again later.');
+    }
+}
+
+// Fetch past submissions for the current user
+async function loadPastSubmissions() {
+    try {
+        const response = await fetch('/api/blind_trace/submission', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`, // Use JWT stored in localStorage
+            },
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            displayPastSubmissions(result.submissions);
+        } else {
+            alert(`Error: ${result.message}`);
+        }
+    } catch (error) {
+        alert('Failed to load past submissions. Please try again later.');
+    }
+}
+
+// Display past submissions in the DOM
+function displayPastSubmissions(submissions) {
+    const submissionsContainer = document.getElementById('submissions-container');
+    submissionsContainer.innerHTML = ''; // Clear existing content
+
+    submissions.forEach(submission => {
+        const submissionDiv = document.createElement('div');
+        submissionDiv.classList.add('submission');
+        submissionDiv.innerHTML = `
+            <p>Drawing: ${submission.image_url}</p>
+            <p>Score: ${submission.score}</p>
+            <button onclick="deleteSubmission(${submission.id})">Delete Submission</button>
+        `;
+        submissionsContainer.appendChild(submissionDiv);
+    });
+}
+
+// Delete a past submission
+async function deleteSubmission(submissionId) {
+    const requestData = { id: submissionId };
+
+    try {
+        const response = await fetch('/api/blind_trace/submission', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`, // Use JWT stored in localStorage
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert('Submission deleted successfully');
+            loadPastSubmissions(); // Reload submissions after deletion
+        } else {
+            alert(`Error: ${result.message}`);
+        }
+    } catch (error) {
+        alert('Failed to delete submission. Please try again later.');
+    }
+}
+
+// Toggle eraser mode
+function toggleEraser() {
+    ctx.globalCompositeOperation = ctx.globalCompositeOperation === 'source-over' ? 'destination-out' : 'source-over';
+}
+
+// Change drawing color
+function changeColor(event) {
+    ctx.strokeStyle = event.target.value;
 }
 </script>
