@@ -1,7 +1,7 @@
 ---
 layout: needsAuth
-title: Picture Guessing Game
-permalink: /guess
+title: Blind trace
+permalink: /blind_trace
 menu: nav/home.html
 search_exclude: true
 ---
