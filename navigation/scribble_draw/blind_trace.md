@@ -127,14 +127,14 @@ let erasing = false;
 let ctx, canvas;
 
 const referenceImages = [
-    'assets/images/Bridge.jpg',
-    'assets/images/car.jpg',
-    'assets/images/colloseum.jpg',
-    'assets/images/french.jpg',
-    'assets/images/House.jpg',
-    'assets/images/stonehenge.jpg',
-    'assets/images/taj_mahal.jpg',
-    'assets/images/tower.jpg',
+    'images/Bridge.jpg',
+    'images/car.jpg',
+    'images/colloseum.jpg',
+    'images/french.jpg',
+    'images/House.jpg',
+    'images/stonehenge.jpg',
+    'images/taj_mahal.jpg',
+    'images/tower.jpg',
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
