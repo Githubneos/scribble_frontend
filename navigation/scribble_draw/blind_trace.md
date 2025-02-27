@@ -103,7 +103,7 @@ body {
 }
 
 .image-modal {
-    display: none; /* Hidden by default */
+    display: flex; /* Modal is now flex to center the image */
     position: fixed;
     top: 0;
     left: 0;
@@ -148,7 +148,14 @@ body {
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
-    
+        <!-- Reference Image Container -->
+    <div id="image-container" class="image-container">
+        <img id="reference-image" src="" alt="Reference Image" />
+        <div class="tool-panel">
+            <button id="start-btn" class="tool-btn">Start Game</button>
+        </div>
+    </div>
+    <!-- Canvas Container (Initially Hidden) -->
     <div class="canvas-container" id="canvas-container" style="display: none;">
         <canvas id="drawing-canvas" class="canvas"></canvas>
         <div class="tool-panel">
@@ -157,7 +164,6 @@ body {
             <button id="view-btn" class="tool-btn">View Image</button>
         </div>
     </div>
-
     <div class="color-picker">
         <label>Select Color:</label>
         <input type="color" id="color-picker" value="#000000">
@@ -171,15 +177,9 @@ body {
     </div>
     <div id="message" class="message"></div>
     <div id="submissions-container"></div>
-
-    <!-- Start Game Button -->
-    <div id="start-button-container">
-        <button id="start-btn" class="tool-btn">Start Game</button>
-    </div>
-
     <!-- Modal to display the reference image -->
-    <div id="image-modal" class="image-modal">
-        <img id="reference-image" />
+    <div id="image-modal" class="image-modal" style="display: none;">
+        <img id="modal-reference-image" />
         <button id="close-modal-btn" class="tool-btn" style="margin-top: 10px;">Close Image</button>
     </div>
 </div>
@@ -337,7 +337,7 @@ function resetDrawing() {
 function viewImage() {
     if (imageViewCount < 3) {
         document.getElementById('image-modal').style.display = 'flex';
-        document.getElementById('reference-image').src = referenceImageUrl;
+        document.getElementById('modal-reference-image').src = referenceImageUrl;
         imageViewCount++;
     } else {
         alert("You have viewed the image 3 times already.");
@@ -348,53 +348,25 @@ function closeImageModal() {
     document.getElementById('image-modal').style.display = 'none';
 }
 
-async function submitDrawing() {
-    const drawingData = canvas.toDataURL('image/png');
-
+async function fetchReferenceImage() {
     try {
-        const response = await fetch(`${pythonURI}/api/submission`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                image_url: referenceImageUrl,
-                drawing: drawingData
-            })
-        });
-
+        // Fetch image URL from the backend or local resource
+        const response = await fetch(pythonURI + '/get_reference_image');
         const data = await response.json();
-        if (response.ok) {
-            score = data.score;
-            document.getElementById('score').textContent = `Score: ${score}`;
-            showMessage('Drawing submitted and scored successfully!', 'success');
-        } else {
-            showMessage(data.message, 'error');
-        }
+        referenceImageUrl = data.imageUrl;
+        document.getElementById('reference-image').src = referenceImageUrl;
     } catch (error) {
-        showMessage('Error submitting drawing', 'error');
+        console.error('Error fetching reference image:', error);
     }
 }
 
-function showMessage(message, type) {
-    const messageElement = document.getElementById('message');
-    messageElement.textContent = message;
-    messageElement.className = `message ${type}`;
-    messageElement.style.display = 'block';
-}
-
-async function fetchReferenceImage() {
-    // Choose the next reference image and draw it
-    const drawingFunction = drawings[imageIndex];
-    imageIndex = (imageIndex + 1) % drawings.length;
-    drawingFunction();
-}
-
 function startGame() {
-    document.getElementById('start-button-container').style.display = 'none';
-    document.getElementById('reference-image-container').style.display = 'block';
-    document.getElementById('reference-image').style.display = 'block';
+    document.getElementById('image-container').style.display = 'none';
     document.getElementById('canvas-container').style.display = 'block';
+    currentDrawingIndex++;
+    if (currentDrawingIndex >= drawings.length) {
+        currentDrawingIndex = 0;
+    }
+    drawings[currentDrawingIndex]();
 }
-
-document.getElementById('close-modal-btn').addEventListener('click', closeImageModal);
 </script>
