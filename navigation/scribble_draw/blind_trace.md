@@ -164,6 +164,7 @@ const referenceImages = [
     'images/taj_mahal.jpg',
     'images/tower.jpg',
 ];
+import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     canvas = document.getElementById('drawing-canvas');
@@ -264,7 +265,7 @@ async function submitDrawing() {
     };
 
     try {
-        const response = await fetch('/api/submission', {
+        const response = await fetch(`${pythonURI}/api/submission`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -295,7 +296,7 @@ function generateScore(timeSpent) {
 
 async function loadPastSubmissions() {
     try {
-        const response = await fetch('/api/submissions', {
+        const response = await fetch(`${pythonURI}/api/submission`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -344,7 +345,7 @@ function displayPastSubmissions(submissions) {
 
 async function deleteSubmission(submissionId) {
     try {
-        const response = await fetch(`/api/submission/${submissionId}`, {
+        const response = await fetch(`${pythonURI}/api/submission${submissionId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
