@@ -78,8 +78,39 @@ body {
     margin-top: 1rem;
 }
 
-#reference-image {
-    transition: transform 0.5s ease-in-out;
+.tool-btn:active {
+    background: #0d47a1;
+}
+
+.image-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
+}
+
+.image-modal img {
+    max-width: 80%;
+    max-height: 80%;
+    border: 5px solid white;
+    border-radius: 8px;
+}
+
+#start-button-container {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.tool-btn,
+#view-btn {
+    margin-top: 1rem;
 }
 </style>
 
@@ -92,7 +123,7 @@ body {
         <button id="start-game-btn" class="tool-btn">Start Game</button>
     </div>
 
-    <!-- Drawing Canvas Section -->
+    <!-- Drawing Canvas Section (Hidden initially) -->
     <div id="canvas-section" class="canvas-container" style="display: none;">
         <canvas id="drawing-canvas" class="canvas"></canvas>
         <div class="tool-panel">
@@ -110,10 +141,15 @@ body {
         <button id="eraser-btn" class="tool-btn">Eraser</button>
         <button id="submit-btn" class="tool-btn">Submit Drawing</button>
     </div>
+    <div id="score-container">
+        <p id="score">Score: 0</p>
+    </div>
+    <div id="message" class="message"></div>
+    <div id="submissions-container"></div>
 
     <div id="image-modal" class="image-modal">
         <img id="modal-reference-image" />
-        <button id="close-modal-btn" class="tool-btn">Close Image</button>
+        <button id="close-modal-btn" class="tool-btn" style="margin-top: 10px;">Close Image</button>
     </div>
 </div>
 
@@ -123,7 +159,6 @@ let imageViewCount = 0;
 let rotationAngle = 0;
 let isImageRotating = false;
 let drawing = false;
-let erasing = false;
 let ctx, canvas;
 
 const referenceImages = [
@@ -161,37 +196,29 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function showReferenceImage() {
-    const randomImage = referenceImages[Math.floor(Math.random() * referenceImages.length)];
-    referenceImageUrl = randomImage;
-    document.getElementById('reference-image').src = referenceImageUrl;
+    const randomIndex = Math.floor(Math.random() * referenceImages.length);
+    referenceImageUrl = referenceImages[randomIndex];
+
+    const referenceImage = document.getElementById('reference-image');
+    referenceImage.src = referenceImageUrl;
+    referenceImage.style.display = "block"; 
 }
 
 function startGame() {
     setTimeout(() => {
-        rotateReferenceImage();
-        isImageRotating = true;
-        setTimeout(() => {
-            document.getElementById('image-display-container').style.display = 'none';
-            document.getElementById('canvas-section').style.display = 'block';
-        }, 1000);
+        document.getElementById('image-display-container').style.display = 'none';
+        document.getElementById('canvas-section').style.display = 'block';
+        imageViewCount = 0;
     }, 3000);
-}
-
-function rotateReferenceImage() {
-    if (isImageRotating) return;
-    rotationAngle += 90;
-    rotationAngle %= 360;
-    document.getElementById('reference-image').style.transform = `rotate(${rotationAngle}deg)`;
 }
 
 function viewImage() {
     if (imageViewCount < 3) {
-        rotateReferenceImage();
         document.getElementById('image-modal').style.display = 'flex';
         document.getElementById('modal-reference-image').src = referenceImageUrl;
         imageViewCount++;
     } else {
-        alert("You have viewed the image 3 times already.");
+        alert("❌ You have viewed the image 3 times already.");
     }
 }
 
@@ -207,31 +234,18 @@ function startDrawing(event) {
 
 function draw(event) {
     if (!drawing) return;
-
-    ctx.strokeStyle = erasing ? "#ffffff" : document.getElementById('color-picker').value;
-    ctx.lineWidth = erasing ? 20 : 3;
-    ctx.lineCap = "round";
-    
     ctx.lineTo(event.offsetX, event.offsetY);
+    ctx.strokeStyle = document.getElementById('color-picker').value;
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
     ctx.stroke();
 }
 
 function stopDrawing() {
     drawing = false;
-    ctx.closePath();
-}
-
-function toggleEraser() {
-    erasing = !erasing;
-    document.getElementById('eraser-btn').textContent = erasing ? "Drawing Mode" : "Eraser";
 }
 
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-function resetDrawing() {
-    clearCanvas();
-    showReferenceImage();
 }
 </script>
