@@ -1,9 +1,9 @@
 ---
 layout: post
-title: Picture Gallery
+title: Drawing Board
 search_exclude: true
-description: Dark Themed Picture Gallery
-Author: Daksha
+description: A Light Themed Drawing Pad
+Author: Zach
 ---
 
 <table>
@@ -23,7 +23,7 @@ Author: Daksha
     :root {
         --primary-color: #1a237e;
         --secondary-color: #283593;
-        --background: linear-gradient(135deg, #1a1a2e, #16213e);
+        --background: linear-gradient(145deg, #727D73, #AAB99A, #D0DDD0, #F0F0D7, rgb(114, 125, 115), rgb(170, 185, 154), rgb(208, 221, 208), rgb(240, 240, 215));
         --text-color: #e1e1e1;
         --card-bg: rgba(30, 41, 59, 0.8);
         --error: #e74c3c;
