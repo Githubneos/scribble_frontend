@@ -99,11 +99,9 @@ body {
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
-    
     <div class="image-container">
         <img id="reference-image" src="" alt="Reference Image">
     </div>
-
     <div class="canvas-container">
         <canvas id="drawing-canvas" class="canvas"></canvas>
         <div class="tool-panel">
@@ -112,23 +110,18 @@ body {
             <button id="view-btn" class="tool-btn">View Image</button>
         </div>
     </div>
-    
     <div class="color-picker">
         <label>Select Color:</label>
         <input type="color" id="color-picker" value="#000000">
     </div>
-
     <div class="tool-panel">
         <button id="eraser-btn" class="tool-btn">Eraser</button>
         <button id="submit-btn" class="tool-btn">Submit Drawing</button>
     </div>
-
     <div id="score-container">
         <p id="score">Score: 0</p>
     </div>
-
     <div id="message" class="message"></div>
-
     <div id="submissions-container"></div>
 </div>
 
@@ -142,6 +135,13 @@ let referenceImageUrl = "";
 let canvas, ctx;
 let imageWidth = 0;
 let imageHeight = 0;
+let imageIndex = 0;  // Used to cycle through images
+const imageUrls = [
+    "https://media.istockphoto.com/id/512495588/photo/ah-shi-sle-pah.jpg?s=612x612&w=0&k=20&c=CImiuqBcipYsSkNCmAF3gXU0jOuoSwTxGw2zC_hrtLI=",
+    "https://loveincorporated.blob.core.windows.net/contentimages/gallery/b8c7260b-8c13-4944-a006-6bfa005fdbb1-Landmark_Stonehenge.jpg",
+    "https://worldwildschooling.com/wp-content/uploads/2024/05/Most-Famous-Landmarks-in-the-World-Taj-Mahal-Agra-India_©-AlexAnton_Adobe-Stock-Photo_344552598.jpg"
+    // Add more direct URLs here
+];
 
 document.addEventListener('DOMContentLoaded', async () => {
     canvas = document.getElementById('drawing-canvas');
@@ -158,29 +158,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('submit-btn').addEventListener('click', submitDrawing);
     document.getElementById('view-btn').addEventListener('click', viewImage);
 
-    await fetchReferenceImage();
+    fetchReferenceImage();
 });
-
-async function fetchReferenceImage() {
-    try {
-        // Fetch random reference image
-        const response = await fetch(`${pythonURI}/api/blind_trace/submission`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        
-        const data = await response.json();
-        if (data.submissions.length > 0) {
-            referenceImageUrl = data.submissions[0].image_url;
-            document.getElementById('reference-image').src = referenceImageUrl;
-            imageWidth = 300; // Adjust as per actual image size
-            imageHeight = 300; // Adjust as per actual image size
-        }
-    } catch (error) {
-        console.error('Error fetching reference image:', error);
-        showMessage('Failed to load reference image.', 'error');
-    }
-}
 
 function changeColor(event) {
     currentColor = event.target.value;
@@ -233,7 +212,7 @@ async function submitDrawing() {
     const drawingData = canvas.toDataURL('image/png');
 
     try {
-        const response = await fetch(`${pythonURI}/api/blind_trace/submission`, {
+        const response = await fetch(`${pythonURI}/api/submission`, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -266,5 +245,14 @@ function showMessage(message, type) {
     setTimeout(() => {
         messageContainer.style.display = 'none';
     }, 5000);
+}
+
+function fetchReferenceImage() {
+    // Cycle through the images in the array
+    referenceImageUrl = imageUrls[imageIndex];
+    document.getElementById('reference-image').src = referenceImageUrl;
+
+    // Adjust the image index for the next round
+    imageIndex = (imageIndex + 1) % imageUrls.length;
 }
 </script>
