@@ -94,13 +94,14 @@ body {
 .image-container img {
     max-width: 80%;
     margin-bottom: 1rem;
+    display: block;
 }
 </style>
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
     <div class="image-container">
-        <img id="reference-image" src="" alt="Reference Image">
+        <img id="reference-image" src="" alt="Reference Image" style="display: none;">
     </div>
     <div class="canvas-container">
         <canvas id="drawing-canvas" class="canvas"></canvas>
@@ -251,6 +252,7 @@ function fetchReferenceImage() {
     // Cycle through the images in the array
     referenceImageUrl = imageUrls[imageIndex];
     document.getElementById('reference-image').src = referenceImageUrl;
+    document.getElementById('reference-image').style.display = 'block'; // Make sure the image is visible
 
     // Adjust the image index for the next round
     imageIndex = (imageIndex + 1) % imageUrls.length;
