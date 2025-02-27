@@ -1,6 +1,6 @@
 ---
 layout: needsAuth
-title: Blind Trace Submissions
+title: Blind Trace Drawing Game
 permalink: /blind-trace
 search_exclude: true
 ---
@@ -26,93 +26,47 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.submission-form {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.canvas-container {
+    text-align: center;
     margin-bottom: 2rem;
 }
 
-.form-group {
-    margin-bottom: 1.5rem;
+.canvas {
+    border: 1px solid #ccc;
+    background: white;
+    width: 80%;
+    height: 400px;
+    margin-bottom: 1rem;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #333;
-    font-weight: bold;
+.tool-panel {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
 }
 
-.form-group input, .form-group textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-.submit-btn {
+.tool-btn {
+    padding: 0.5rem 1rem;
+    border: none;
     background: #2196F3;
     color: white;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    width: 100%;
     font-size: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
     transition: background-color 0.3s;
 }
 
-.submit-btn:hover {
+.tool-btn:hover {
     background: #1976D2;
 }
 
-.submission-entry {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 2rem;
-    padding: 1rem;
-    text-align: center;
+.color-picker {
+    margin-top: 1rem;
 }
 
-.submission-title {
-    background: #f8f9fa;
-    padding: 1rem;
-    margin: 0;
-    font-size: 1.25rem;
-    color: #333;
+.tool-btn:active {
+    background: #0d47a1;
 }
-
-.submission-info {
-    padding: 1rem;
-}
-
-.submission-info img {
-    max-width: 300px;
-    border-radius: 4px;
-    margin: 1rem 0;
-}
-
-.edit-btn, .delete-btn {
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.3s;
-    margin: 5px;
-}
-
-.edit-btn { background: #ffc107; }
-.edit-btn:hover { background: #e0a800; }
-
-.delete-btn { background: #dc3545; }
-.delete-btn:hover { background: #c82333; }
 
 .message {
     padding: 1rem;
@@ -131,22 +85,49 @@ body {
     background: #f8d7da;
     color: #721c24;
 }
+
+.image-container {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.image-container img {
+    max-width: 80%;
+    margin-bottom: 1rem;
+}
 </style>
 
 <div class="container">
-    <form class="submission-form" id="submission-form">
-        <h2>Submit Blind Trace</h2>
-        <div class="form-group">
-            <label for="imageUrl">Reference Image URL:</label>
-            <input type="text" id="imageUrl" required>
+    <h2>Blind Trace Drawing Game</h2>
+    
+    <div class="image-container">
+        <img id="reference-image" src="" alt="Reference Image">
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="drawing-canvas" class="canvas"></canvas>
+        <div class="tool-panel">
+            <button id="clear-btn" class="tool-btn">Clear Canvas</button>
+            <button id="reset-btn" class="tool-btn">Reset Drawing</button>
+            <button id="view-btn" class="tool-btn">View Image</button>
         </div>
-        <div class="form-group">
-            <label for="drawingData">Base64 Drawing Data:</label>
-            <textarea id="drawingData" rows="4" required></textarea>
-        </div>
-        <button type="submit" class="submit-btn">Submit Drawing</button>
-        <div id="message" class="message"></div>
-    </form>
+    </div>
+    
+    <div class="color-picker">
+        <label>Select Color:</label>
+        <input type="color" id="color-picker" value="#000000">
+    </div>
+
+    <div class="tool-panel">
+        <button id="eraser-btn" class="tool-btn">Eraser</button>
+        <button id="submit-btn" class="tool-btn">Submit Drawing</button>
+    </div>
+
+    <div id="score-container">
+        <p id="score">Score: 0</p>
+    </div>
+
+    <div id="message" class="message"></div>
 
     <div id="submissions-container"></div>
 </div>
@@ -154,97 +135,136 @@ body {
 <script type="module">
 import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
+let currentColor = "#000000";
+let drawingMode = true;
+let score = 0;
+let referenceImageUrl = "";
+let canvas, ctx;
+let imageWidth = 0;
+let imageHeight = 0;
+
 document.addEventListener('DOMContentLoaded', async () => {
-    fetchSubmissions();
+    canvas = document.getElementById('drawing-canvas');
+    ctx = canvas.getContext('2d');
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    document.getElementById('color-picker').addEventListener('input', changeColor);
+    document.getElementById('eraser-btn').addEventListener('click', toggleEraser);
+    document.getElementById('clear-btn').addEventListener('click', clearCanvas);
+    document.getElementById('reset-btn').addEventListener('click', resetDrawing);
+    document.getElementById('submit-btn').addEventListener('click', submitDrawing);
+    document.getElementById('view-btn').addEventListener('click', viewImage);
+
+    await fetchReferenceImage();
 });
 
-async function fetchSubmissions() {
+async function fetchReferenceImage() {
     try {
-        const response = await fetch(`${pythonURI}/api/submission`, { credentials: 'include' });
-
-        if (!response.ok) throw new Error('Failed to fetch submissions');
-
-        const data = await response.json();
-        const container = document.getElementById('submissions-container');
-        container.innerHTML = '';
-
-        data.submissions.forEach(submission => {
-            container.appendChild(createSubmissionEntry(submission));
+        // Fetch random reference image
+        const response = await fetch(`${pythonURI}/api/blind_trace/submission`, {
+            method: 'GET',
+            credentials: 'include'
         });
+        
+        const data = await response.json();
+        if (data.submissions.length > 0) {
+            referenceImageUrl = data.submissions[0].image_url;
+            document.getElementById('reference-image').src = referenceImageUrl;
+            imageWidth = 300; // Adjust as per actual image size
+            imageHeight = 300; // Adjust as per actual image size
+        }
     } catch (error) {
-        console.error('Error:', error);
-        showMessage(error.message, 'error');
+        console.error('Error fetching reference image:', error);
+        showMessage('Failed to load reference image.', 'error');
     }
 }
 
-function createSubmissionEntry(submission) {
-    const entry = document.createElement('div');
-    entry.className = 'submission-entry';
-
-    entry.innerHTML = `
-        <h3 class="submission-title">Submission - ${new Date(submission.submission_time).toLocaleString()}</h3>
-        <div class="submission-info">
-            <p><strong>Reference Image:</strong></p>
-            <img src="${submission.image_url}" alt="Reference Image">
-            <p><strong>Submitted Drawing:</strong></p>
-            <img src="${submission.drawing}" alt="User Drawing">
-            <p><strong>Score:</strong> ${submission.score}</p>
-            <button class="edit-btn" onclick="editSubmission(${submission.id}, '${submission.image_url}', '${submission.drawing}')">Edit</button>
-            <button class="delete-btn" onclick="deleteSubmission(${submission.id})">Delete</button>
-        </div>
-    `;
-
-    return entry;
+function changeColor(event) {
+    currentColor = event.target.value;
 }
 
-document.getElementById('submission-form').addEventListener('submit', async function(event) {
-    event.preventDefault();
-    const imageUrl = document.getElementById('imageUrl').value.trim();
-    const drawing = document.getElementById('drawingData').value.trim();
+function toggleEraser() {
+    drawingMode = !drawingMode;
+    document.getElementById('eraser-btn').textContent = drawingMode ? "Eraser" : "Drawing";
+}
 
-    if (!imageUrl || !drawing) {
-        showMessage('Please provide both an image URL and a drawing.', 'error');
-        return;
-    }
+function startDrawing(event) {
+    if (!drawingMode) return;
+
+    ctx.beginPath();
+    ctx.moveTo(event.offsetX, event.offsetY);
+    canvas.addEventListener('mousemove', draw);
+}
+
+function draw(event) {
+    if (!drawingMode || !ctx) return;
+
+    ctx.lineTo(event.offsetX, event.offsetY);
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+}
+
+function stopDrawing() {
+    ctx.closePath();
+}
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function resetDrawing() {
+    clearCanvas();
+    score = 0;
+    document.getElementById('score').textContent = `Score: ${score}`;
+    fetchReferenceImage();
+}
+
+function viewImage() {
+    const image = document.getElementById('reference-image');
+    image.style.display = image.style.display === 'none' ? 'block' : 'none';
+}
+
+async function submitDrawing() {
+    const drawingData = canvas.toDataURL('image/png');
 
     try {
-        const response = await fetch(`${pythonURI}/api/submission`, {
+        const response = await fetch(`${pythonURI}/api/blind_trace/submission`, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image_url: imageUrl, drawing })
+            body: JSON.stringify({
+                image_url: referenceImageUrl,
+                drawing: drawingData
+            })
         });
 
-        if (!response.ok) throw new Error('Submission failed');
-
-        showMessage('Submission successful!', 'success');
-        this.reset();
-        fetchSubmissions();
+        const data = await response.json();
+        if (response.ok) {
+            score = data.score;
+            document.getElementById('score').textContent = `Score: ${score}`;
+            showMessage('Drawing submitted and scored successfully!', 'success');
+        } else {
+            throw new Error(data.message);
+        }
     } catch (error) {
-        console.error('Error:', error);
-        showMessage(error.message, 'error');
+        console.error('Error submitting drawing:', error);
+        showMessage('Failed to submit drawing.', 'error');
     }
-});
+}
 
-window.deleteSubmission = async function(id) {
-    if (!confirm('Are you sure you want to delete this submission?')) return;
+function showMessage(message, type) {
+    const messageContainer = document.getElementById('message');
+    messageContainer.textContent = message;
+    messageContainer.className = `message ${type}`;
+    messageContainer.style.display = 'block';
 
-    try {
-        await fetch(`${pythonURI}/api/submission/${id}`, { method: 'DELETE', credentials: 'include' });
-        showMessage('Submission deleted successfully', 'success');
-        fetchSubmissions();
-    } catch (error) {
-        console.error('Error:', error);
-        showMessage(error.message, 'error');
-    }
-};
-
-window.editSubmission = function(id, imageUrl, drawing) {
-    const newImageUrl = prompt('Enter new image URL:', imageUrl);
-    const newDrawing = prompt('Enter new base64 drawing data:', drawing);
-
-    if (newImageUrl && newDrawing) {
-        updateSubmission(id, newImageUrl, newDrawing);
-    }
-};
+    setTimeout(() => {
+        messageContainer.style.display = 'none';
+    }, 5000);
+}
 </script>
