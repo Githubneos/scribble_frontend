@@ -137,12 +137,18 @@ let canvas, ctx;
 let imageWidth = 0;
 let imageHeight = 0;
 let imageIndex = 0;  // Used to cycle through images
-const imageUrls = [
-    "https://media.istockphoto.com/id/512495588/photo/ah-shi-sle-pah.jpg?s=612x612&w=0&k=20&c=CImiuqBcipYsSkNCmAF3gXU0jOuoSwTxGw2zC_hrtLI=",
-    "https://loveincorporated.blob.core.windows.net/contentimages/gallery/b8c7260b-8c13-4944-a006-6bfa005fdbb1-Landmark_Stonehenge.jpg",
-    "https://worldwildschooling.com/wp-content/uploads/2024/05/Most-Famous-Landmarks-in-the-World-Taj-Mahal-Agra-India_©-AlexAnton_Adobe-Stock-Photo_344552598.jpg"
-    // Add more direct URLs here
-];
+
+// Image generation functions (cityscape, bridge, etc.) as defined in the previous message
+const drawings = {
+    cityscape: drawCityscape,
+    bridge: drawBridge,
+    forest: drawForest,
+    coralReef: drawCoralReef,
+    solarSystem: drawSolarSystem
+};
+
+// Image data (empty for now, the drawing functions will replace it)
+const imageUrls = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
     canvas = document.getElementById('drawing-canvas');
@@ -250,11 +256,12 @@ function showMessage(message, type) {
 
 function fetchReferenceImage() {
     // Cycle through the images in the array
-    referenceImageUrl = imageUrls[imageIndex];
-    document.getElementById('reference-image').src = referenceImageUrl;
-    document.getElementById('reference-image').style.display = 'block'; // Make sure the image is visible
+    const drawingNames = Object.keys(drawings);
+    const randomDrawingName = drawingNames[Math.floor(Math.random() * drawingNames.length)];
+    drawings[randomDrawingName]();
 
-    // Adjust the image index for the next round
-    imageIndex = (imageIndex + 1) % imageUrls.length;
+    // Set reference image URL and make the image visible
+    referenceImageUrl = randomDrawingName;
+    document.getElementById('reference-image').style.display = 'block'; // Make sure the image is visible
 }
 </script>
