@@ -20,9 +20,102 @@ search_exclude: true
     </tr>
 </table>
 
+<style>
+:root {
+    --background: linear-gradient(145deg, #A6AEBF, #C5D3E8, #D0E8C5, #FFF8DE);
+}
+
+body {
+    background: var(--background);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.canvas-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.canvas {
+    border: 1px solid #ccc;
+    background: white;
+    width: 80%;
+    height: 400px;
+    margin-bottom: 1rem;
+}
+
+.tool-panel {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.tool-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: #2196F3;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.tool-btn:hover {
+    background: #1976D2;
+}
+
+.color-picker {
+    margin-top: 1rem;
+}
+
+.tool-btn:active {
+    background: #0d47a1;
+}
+
+.message {
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    display: none;
+    transition: opacity 0.3s;
+}
+
+.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.image-container {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.image-container img {
+    max-width: 80%;
+    margin-bottom: 1rem;
+    display: block;
+}
+</style>
+
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
-    <div class="image-container" id="reference-image-container">
+    <div class="image-container" id="reference-image-container" style="display: none;">
         <img id="reference-image" style="display: none;" />
     </div>
     <div class="canvas-container" id="canvas-container" style="display: none;">
@@ -46,6 +139,9 @@ search_exclude: true
     </div>
     <div id="message" class="message"></div>
     <div id="submissions-container"></div>
+    <div id="start-button-container" style="text-align: center;">
+        <button id="start-btn" class="tool-btn">Start Game</button>
+    </div>
 </div>
 
 <script type="module">
@@ -151,6 +247,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('submit-btn').addEventListener('click', submitDrawing);
     document.getElementById('view-btn').addEventListener('click', viewImage);
 
+    document.getElementById('start-btn').addEventListener('click', startGame);
+
     fetchReferenceImage();
 });
 
@@ -249,5 +347,16 @@ async function fetchReferenceImage() {
     const drawingFunction = drawings[imageIndex];
     imageIndex = (imageIndex + 1) % drawings.length;
     drawingFunction();
+}
+
+function startGame() {
+    document.getElementById('start-button-container').style.display = 'none';
+    document.getElementById('reference-image-container').style.display = 'block';
+    document.getElementById('reference-image').style.display = 'block';
+
+    setTimeout(() => {
+        document.getElementById('reference-image-container').style.display = 'none';
+        document.getElementById('canvas-container').style.display = 'block';
+    }, 5000);  // Display for 5 seconds
 }
 </script>
