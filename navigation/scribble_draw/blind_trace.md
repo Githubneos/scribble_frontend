@@ -134,7 +134,15 @@ body {
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
-    <div class="canvas-container" id="canvas-container">
+
+    <!-- Image Display Section -->
+    <div id="image-display-container" class="canvas-container">
+        <img id="reference-image" src="" alt="Reference Image" class="canvas">
+        <button id="start-game-btn" class="tool-btn">Start Game</button>
+    </div>
+
+    <!-- Drawing Canvas Section -->
+    <div id="canvas-section" class="canvas-container" style="display: none;">
         <canvas id="drawing-canvas" class="canvas"></canvas>
         <div class="tool-panel">
             <button id="clear-btn" class="tool-btn">Clear Canvas</button>
@@ -142,6 +150,7 @@ body {
             <button id="view-btn" class="tool-btn">View Image</button>
         </div>
     </div>
+
     <div class="color-picker">
         <label>Select Color:</label>
         <input type="color" id="color-picker" value="#000000">
@@ -155,6 +164,7 @@ body {
     </div>
     <div id="message" class="message"></div>
     <div id="submissions-container"></div>
+
     <div id="image-modal" class="image-modal">
         <img id="modal-reference-image" />
         <button id="close-modal-btn" class="tool-btn" style="margin-top: 10px;">Close Image</button>
@@ -196,8 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('submit-btn').addEventListener('click', submitDrawing);
     document.getElementById('view-btn').addEventListener('click', viewImage);
     document.getElementById('close-modal-btn').addEventListener('click', closeImageModal);
+    document.getElementById('start-game-btn').addEventListener('click', startGame);
 
-    startGame();
+    showReferenceImage();
 });
 
 function changeColor(event) {
@@ -254,11 +265,19 @@ function viewImage() {
 
 function closeImageModal() {
     document.getElementById('image-modal').style.display = 'none';
+    startDrawingAfterDelay();
+}
+
+function showReferenceImage() {
+    const randomImage = referenceImages[Math.floor(Math.random() * referenceImages.length)];
+    referenceImageUrl = randomImage;
+    document.getElementById('reference-image').src = referenceImageUrl;
 }
 
 function startGame() {
-    const randomImage = referenceImages[Math.floor(Math.random() * referenceImages.length)];
-    referenceImageUrl = randomImage;
+    // Hide the image and show the canvas
+    document.getElementById('image-display-container').style.display = 'none';
+    document.getElementById('canvas-section').style.display = 'block';
 
     let img = new Image();
     img.src = referenceImageUrl;
@@ -275,7 +294,14 @@ function startGame() {
         setTimeout(() => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }, 5000); // Display the reference image for 5 seconds
-
     };
+}
+
+function startDrawingAfterDelay() {
+    setTimeout(() => {
+        // Switch back to canvas for drawing
+        document.getElementById('image-modal').style.display = 'none';
+        document.getElementById('canvas-section').style.display = 'block';
+    }, 3000); // 3 seconds after viewing image
 }
 </script>
