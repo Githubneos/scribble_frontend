@@ -19,102 +19,13 @@ search_exclude: true
         <td><a href="{{site.baseurl}}/posts">Posts</a></td>
     </tr>
 </table>
-<style>
-:root {
-    --background: linear-gradient(145deg, #A6AEBF, #C5D3E8, #D0E8C5, #FFF8DE);
-}
-
-body {
-    background: var(--background);
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 1rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.canvas-container {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.canvas {
-    border: 1px solid #ccc;
-    background: white;
-    width: 80%;
-    height: 400px;
-    margin-bottom: 1rem;
-}
-
-.tool-panel {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-}
-
-.tool-btn {
-    padding: 0.5rem 1rem;
-    border: none;
-    background: #2196F3;
-    color: white;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-}
-
-.tool-btn:hover {
-    background: #1976D2;
-}
-
-.color-picker {
-    margin-top: 1rem;
-}
-
-.tool-btn:active {
-    background: #0d47a1;
-}
-
-.message {
-    padding: 1rem;
-    border-radius: 4px;
-    margin: 1rem 0;
-    display: none;
-    transition: opacity 0.3s;
-}
-
-.success {
-    background: #d4edda;
-    color: #155724;
-}
-
-.error {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.image-container {
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.image-container img {
-    max-width: 80%;
-    margin-bottom: 1rem;
-    display: block;
-}
-</style>
 
 <div class="container">
     <h2>Blind Trace Drawing Game</h2>
-    <div class="canvas-container">
+    <div class="image-container" id="reference-image-container">
+        <img id="reference-image" style="display: none;" />
+    </div>
+    <div class="canvas-container" id="canvas-container" style="display: none;">
         <canvas id="drawing-canvas" class="canvas"></canvas>
         <div class="tool-panel">
             <button id="clear-btn" class="tool-btn">Clear Canvas</button>
@@ -148,6 +59,7 @@ let canvas, ctx;
 let imageWidth = 0;
 let imageHeight = 0;
 let imageIndex = 0;  // Used to cycle through images
+let imageViewCount = 0;  // Counter to track how many times the image has been viewed
 
 // Image generation functions (cityscape, bridge, etc.)
 function drawCityscape() {
@@ -285,7 +197,17 @@ function resetDrawing() {
 }
 
 function viewImage() {
-    // Reference image display logic (not needed anymore)
+    if (imageViewCount < 3) {
+        document.getElementById('reference-image-container').style.display = 'block';
+        document.getElementById('reference-image').style.display = 'block';
+        imageViewCount++;
+        setTimeout(() => {
+            document.getElementById('reference-image-container').style.display = 'none';
+            document.getElementById('canvas-container').style.display = 'block';
+        }, 5000);  // Display for 5 seconds
+    } else {
+        alert("You have viewed the image 3 times already.");
+    }
 }
 
 async function submitDrawing() {
