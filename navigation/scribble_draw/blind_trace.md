@@ -247,53 +247,27 @@ function resetDrawing() {
     showReferenceImage();
 }
 
-async function submitDrawing() {
-    if (!drawingStartTime) {
-        alert("Please start drawing before submitting!");
-        return;
-    }
+<div class="container mt-4">
+    <h2>Past Blind Trace Submissions</h2>
+    
+    <table id="blindTraceTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Score</th>
+                <th>Drawing</th>
+                <th>Submission Time</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody> 
+    </table>
+</div>
 
-    const drawingData = canvas.toDataURL();
-    const drawingEndTime = new Date();
-    const timeSpent = (drawingEndTime - drawingStartTime) / 1000;
-    let score = generateScore(timeSpent);
+<script>
+const pythonURI = "https://scribble.stu.nighthawkcodingsociety.com"; // Update with your actual API URI
 
-    const requestData = {
-        image_url: referenceImageUrl,
-        drawing: drawingData,
-        score,
-    };
-
-    try {
-        const response = await fetch(`${pythonURI}/api/submission`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-            },
-            body: JSON.stringify(requestData),
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            alert(`Drawing submitted successfully! Score: ${score}`);
-            loadPastSubmissions();
-        } else {
-            alert(`Error: ${result.message}`);
-        }
-    } catch (error) {
-        alert('Failed to submit drawing. Please try again later.');
-    }
-}
-
-function generateScore(timeSpent) {
-    let score = Math.min(timeSpent * 10, 1000);
-    score = Math.floor(score);
-    const randomVariance = Math.floor(Math.random() * 50);
-    score += randomVariance;
-    return Math.min(Math.max(score, 0), 1000);
-}
-
+// Function to load and display past submissions
 async function loadPastSubmissions() {
     try {
         const response = await fetch(`${pythonURI}/api/submission`, {
@@ -314,19 +288,10 @@ async function loadPastSubmissions() {
     }
 }
 
+// Function to display the past submissions in the table
 function displayPastSubmissions(submissions) {
-    const submissionsContainer = document.getElementById('submissions-container');
-    submissionsContainer.innerHTML = '';
-
-    const table = document.createElement('table');
-    table.classList.add('submissions-table');
-    table.innerHTML = `
-        <tr>
-            <th>User</th>
-            <th>Score</th>
-            <th>Actions</th>
-        </tr>
-    `;
+    const tableBody = document.querySelector('#blindTraceTable tbody');
+    tableBody.innerHTML = ''; // Clear existing data
 
     submissions.forEach(submission => {
         const row = document.createElement('tr');
@@ -334,61 +299,71 @@ function displayPastSubmissions(submissions) {
             <td>${submission.username}</td>
             <td>${submission.score}</td>
             <td>
-                <button class="delete-btn" onclick="deleteSubmission(${submission.id})">Delete</button>
+                <a href="${submission.drawing_url}" target="_blank">
+                    <img src="${submission.drawing_url}" alt="Drawing" width="50">
+                </a>
+            </td>
+            <td>${new Date(submission.submission_time).toLocaleString()}</td>
+            <td>
+                <button class="btn btn-danger delete-btn" data-id="${submission.id}">Delete</button>
             </td>
         `;
-        table.appendChild(row);
+        tableBody.appendChild(row);
     });
 
-    submissionsContainer.appendChild(table);
+    // Reinitialize DataTable (if already initialized, destroy first)
+    if ($.fn.DataTable.isDataTable("#blindTraceTable")) {
+        $("#blindTraceTable").DataTable().destroy();
+    }
+    
+    $("#blindTraceTable").DataTable({
+        order: [[1, 'desc']], // Sort by score descending
+        pageLength: 10
+    });
 }
 
-$(document).ready(function() {
-    // Initialize DataTable
-    $("#blindTraceTable").DataTable({
-        order: [[3, 'desc']], // Sort by score by default
-        pageLength: 25
-    });
+// Function to delete a submission
+$(document).on("click", ".delete-btn", function() {
+    var id = $(this).data("id");
 
-    // Handle delete/restore button clicks
-    $(document).on("click", ".delete-btn", function() {
-        var id = $(this).data("id");
-        var action = $(this).text().toLowerCase();
+    if (!confirm("Are you sure you want to delete this submission?")) {
+        return;
+    }
 
-        // Confirm action
-        if (!confirm(`Are you sure you want to ${action} this submission?`)) {
-            return;
+    fetch(`${pythonURI}/api/submission`, {
+        method: "DELETE",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+        body: JSON.stringify({ id: id })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message);
+            loadPastSubmissions(); // Refresh table after deletion
+        } else {
+            alert(data.error || "Operation failed");
         }
-
-        // Send the DELETE request to the backend
-        fetch("/api/submission", {
-            method: "DELETE",  // Ensure DELETE method is used
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ id: id })  // Sending the ID in the request body
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                alert(data.message);
-                location.reload();  // Reload the page to reflect changes
-            } else {
-                alert(data.error || "Operation failed");
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert("Failed to process request");
-        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("Failed to process request");
     });
 });
 
+// Load past submissions on page load
+$(document).ready(function() {
+    loadPastSubmissions();
+});
 
+// Eraser function
 function toggleEraser() {
     ctx.strokeStyle = '#FFFFFF';
 }
 
+// Function to change color
 function changeColor(event) {
     ctx.strokeStyle = event.target.value;
 }
