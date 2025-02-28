@@ -145,22 +145,6 @@ body {
     </table>
 </div>
 
-<div class="container mt-4">
-    <h2>Previous Guesses</h2>
-    <table id="previousGuessesTable" class="table table-striped">
-        <thead>
-            <tr>
-                <th>Guesser Name</th>
-                <th>Guess</th>
-                <th>Correct Answer</th>
-                <th>Correct?</th>
-                <th>Guess Time</th>
-            </tr>
-        </thead>
-        <tbody></tbody> 
-    </table>
-</div>
-
 <style>
 :root {
     --background: linear-gradient(145deg, #A6AEBF, #C5D3E8, #D0E8C5, #FFF8DE);
@@ -218,6 +202,39 @@ body {
     margin-top: 1rem;
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadReferenceImage();
+});
+
+function loadReferenceImage() {
+    const imageElement = document.getElementById("reference-image");
+    const imageList = [
+        "images/Bridge.jpg",
+        "images/car.png",
+        "images/colloseum.jpg",
+        "images/french.jpg",
+        "images/House.png",
+        "images.school_logo.png",
+        "images/stonehenge.jpg",
+        "images/taj_mahal.jpg",
+        "images.tower.jpg"
+    ];
+    const randomImage = imageList[Math.floor(Math.random() * imageList.length)];
+    imageElement.src = randomImage;
+}
+
+document.getElementById("start-game-btn").addEventListener("click", function () {
+    document.getElementById("image-display-container").style.display = "none";
+    document.getElementById("canvas-section").style.display = "block";
+});
+
+document.getElementById("view-btn").addEventListener("click", function () {
+    const img = document.getElementById("reference-image");
+    img.classList.toggle("hidden");
+});
+</script>
 
 <script>
 const pythonURI = "https://scribble.stu.nighthawkcodingsociety.com"; 
