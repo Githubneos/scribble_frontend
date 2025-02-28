@@ -203,15 +203,59 @@ body {
 }
 </style>
 
+<div class="container">
+    <h2>Blind Trace Drawing Game</h2>
+    <div id="image-display-container" class="canvas-container">
+        <img id="reference-image" src="" alt="Reference Image" class="canvas hidden">
+        <button id="start-game-btn" class="tool-btn">Start Game</button>
+        <p id="view-count">View Image: 3 left</p>
+    </div>
+    <div id="canvas-section" class="canvas-container" style="display: none;">
+        <canvas id="drawing-canvas" class="canvas"></canvas>
+        <div class="tool-panel">
+            <button id="clear-btn" class="tool-btn">Clear Canvas</button>
+            <button id="reset-btn" class="tool-btn">Reset Drawing</button>
+            <button id="view-btn" class="tool-btn">View Image</button>
+        </div>
+    </div>
+    <div class="color-picker">
+        <label>Select Color:</label>
+        <input type="color" id="color-picker" value="#000000">
+    </div>
+    <div class="tool-panel">
+        <button id="eraser-btn" class="tool-btn">Eraser</button>
+        <button id="submit-btn" class="tool-btn">Submit Drawing</button>
+    </div>
+    <div id="score-container">
+        <p id="score">Score: 0</p>
+    </div>
+    <div id="message" class="message"></div>
+    <div id="submissions-container"></div>
+</div>
+
 <script>
+const pythonURI = "https://scribble.stu.nighthawkcodingsociety.com"; 
+
+let viewCount = 3;
+let startTime;
+
+// Initialize canvas
+const canvas = document.getElementById("drawing-canvas");
+const ctx = canvas.getContext("2d");
+let isDrawing = false;
+canvas.width = 400;
+canvas.height = 400;
+
 document.addEventListener('DOMContentLoaded', () => {
     loadReferenceImage();
+    loadPastSubmissions();
 });
 
+// Load a random reference image
 function loadReferenceImage() {
     const imageElement = document.getElementById("reference-image");
     const imageList = [
-        "images/Bridge.jpg",
+       "images/Bridge.jpg",
         "images/car.png",
         "images/colloseum.jpg",
         "images/french.jpg",
@@ -221,31 +265,71 @@ function loadReferenceImage() {
         "images/taj_mahal.jpg",
         "images.tower.jpg"
     ];
-    const randomImage = imageList[Math.floor(Math.random() * imageList.length)];
-    imageElement.src = randomImage;
+    imageElement.src = imageList[Math.floor(Math.random() * imageList.length)];
 }
 
+// Start game
 document.getElementById("start-game-btn").addEventListener("click", function () {
     document.getElementById("image-display-container").style.display = "none";
     document.getElementById("canvas-section").style.display = "block";
+    startTime = Date.now();
 });
 
+// View reference image with limit
 document.getElementById("view-btn").addEventListener("click", function () {
-    const img = document.getElementById("reference-image");
-    img.classList.toggle("hidden");
+    if (viewCount > 0) {
+        document.getElementById("reference-image").classList.toggle("hidden");
+        viewCount--;
+        document.getElementById("view-count").innerText = `View Image: ${viewCount} left`;
+    } else {
+        alert("No more views left!");
+    }
 });
-</script>
 
-<script>
-// POST function to submit drawing
+// Drawing functionality
+canvas.addEventListener("mousedown", () => { isDrawing = true; });
+canvas.addEventListener("mouseup", () => { isDrawing = false; ctx.beginPath(); });
+canvas.addEventListener("mousemove", draw);
+
+function draw(event) {
+    if (!isDrawing) return;
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = document.getElementById("color-picker").value;
+
+    ctx.lineTo(event.offsetX, event.offsetY);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(event.offsetX, event.offsetY);
+}
+
+// Eraser functionality
+document.getElementById("eraser-btn").addEventListener("click", () => {
+    ctx.strokeStyle = "#ffffff";  // White for erasing
+});
+
+// Clear and Reset
+document.getElementById("clear-btn").addEventListener("click", () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+});
+
+document.getElementById("reset-btn").addEventListener("click", () => {
+    loadReferenceImage();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+});
+
+// Submit drawing with random score
 document.getElementById("submit-btn").addEventListener("click", async function () {
-    const canvas = document.getElementById("drawing-canvas");
-    const drawingDataURL = canvas.toDataURL("image/png");  // Convert drawing to image
+    const drawingDataURL = canvas.toDataURL("image/png");
+    const timeSpent = (Date.now() - startTime) / 1000;  // Time spent in seconds
+    const score = Math.floor(Math.max(0, 100 - timeSpent * 2)); // Decreases score over time
+
+    document.getElementById("score").innerText = `Score: ${score}`;
 
     const submissionData = {
         username: localStorage.getItem("username") || "Guest",
         drawing: drawingDataURL,
-        score: document.getElementById("score").innerText.split(": ")[1]
+        score: score
     };
 
     try {
@@ -261,7 +345,7 @@ document.getElementById("submit-btn").addEventListener("click", async function (
         const result = await response.json();
         if (response.ok) {
             alert("Submission successful!");
-            loadPastSubmissions(); // Refresh past submissions
+            loadPastSubmissions();
         } else {
             alert(`Error: ${result.message}`);
         }
@@ -269,20 +353,15 @@ document.getElementById("submit-btn").addEventListener("click", async function (
         alert("Failed to submit drawing.");
     }
 });
-const pythonURI = "https://scribble.stu.nighthawkcodingsociety.com"; 
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadPastSubmissions();
-    loadPreviousGuesses();
-});
-
+// Load past submissions
 async function loadPastSubmissions() {
     try {
         const response = await fetch(`${pythonURI}/api/submission`, {
-            method: 'GET',
+            method: "GET",
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-            },
+                "Authorization": `Bearer ${localStorage.getItem("auth_token")}`
+            }
         });
 
         const result = await response.json();
@@ -292,16 +371,17 @@ async function loadPastSubmissions() {
             alert(`Error: ${result.message}`);
         }
     } catch (error) {
-        alert('Failed to load past submissions.');
+        alert("Failed to load past submissions.");
     }
 }
 
+// Display past submissions
 function displayPastSubmissions(submissions) {
     const tableBody = document.querySelector('#blindTraceTable tbody');
-    tableBody.innerHTML = ''; 
+    tableBody.innerHTML = '';
 
     submissions.forEach(submission => {
-        const row = document.createElement('tr');
+        const row = document.createElement("tr");
         row.innerHTML = `
             <td>${submission.username}</td>
             <td>${submission.score}</td>
@@ -317,70 +397,29 @@ function displayPastSubmissions(submissions) {
         `;
         tableBody.appendChild(row);
     });
-
-    if ($.fn.DataTable.isDataTable("#blindTraceTable")) {
-        $("#blindTraceTable").DataTable().destroy();
-    }
-    
-    $("#blindTraceTable").DataTable({
-        order: [[1, 'desc']],
-        pageLength: 10
-    });
 }
 
+// Delete a submission
+document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("delete-btn")) {
+        const id = event.target.getAttribute("data-id");
 
-function displayPreviousGuesses(guesses) {
-    const tableBody = document.querySelector('#previousGuessesTable tbody');
-    tableBody.innerHTML = '';
+        if (!confirm("Are you sure you want to delete this submission?")) return;
 
-    guesses.forEach(guess => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${guess.guesser_name}</td>
-            <td>${guess.guess}</td>
-            <td>${guess.correct_answer}</td>
-            <td>${guess.is_correct ? '✔️' : '❌'}</td>
-            <td>${new Date(guess.date_created).toLocaleString()}</td>
-        `;
-        tableBody.appendChild(row);
-    });
-
-    if ($.fn.DataTable.isDataTable("#previousGuessesTable")) {
-        $("#previousGuessesTable").DataTable().destroy();
-    }
-    
-    $("#previousGuessesTable").DataTable({
-        order: [[4, 'desc']],
-        pageLength: 10
-    });
-}
-
-$(document).on("click", ".delete-btn", function() {
-    var id = $(this).data("id");
-
-    if (!confirm("Are you sure you want to delete this submission?")) {
-        return;
-    }
-
-    fetch(`${pythonURI}/api/submission`, {
-        method: "DELETE",
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify({ id: id })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            alert(data.message);
+        fetch(`${pythonURI}/api/submission`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("auth_token")}`
+            },
+            body: JSON.stringify({ id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message || "Deleted successfully");
             loadPastSubmissions();
-        } else {
-            alert(data.error || "Operation failed");
-        }
-    })
-    .catch(error => {
-        alert("Failed to process request");
-    });
+        })
+        .catch(() => alert("Failed to delete submission."));
+    }
 });
 </script>
