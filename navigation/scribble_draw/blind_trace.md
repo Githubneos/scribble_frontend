@@ -237,6 +237,38 @@ document.getElementById("view-btn").addEventListener("click", function () {
 </script>
 
 <script>
+// POST function to submit drawing
+document.getElementById("submit-btn").addEventListener("click", async function () {
+    const canvas = document.getElementById("drawing-canvas");
+    const drawingDataURL = canvas.toDataURL("image/png");  // Convert drawing to image
+
+    const submissionData = {
+        username: localStorage.getItem("username") || "Guest",
+        drawing: drawingDataURL,
+        score: document.getElementById("score").innerText.split(": ")[1]
+    };
+
+    try {
+        const response = await fetch(`${pythonURI}/api/submission`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("auth_token")}`
+            },
+            body: JSON.stringify(submissionData)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert("Submission successful!");
+            loadPastSubmissions(); // Refresh past submissions
+        } else {
+            alert(`Error: ${result.message}`);
+        }
+    } catch (error) {
+        alert("Failed to submit drawing.");
+    }
+});
 const pythonURI = "https://scribble.stu.nighthawkcodingsociety.com"; 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -296,25 +328,6 @@ function displayPastSubmissions(submissions) {
     });
 }
 
-async function loadPreviousGuesses() {
-    try {
-        const response = await fetch(`${pythonURI}/api/guess`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-            },
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            displayPreviousGuesses(result.guesses);
-        } else {
-            alert(`Error: ${result.message}`);
-        }
-    } catch (error) {
-        alert('Failed to load previous guesses.');
-    }
-}
 
 function displayPreviousGuesses(guesses) {
     const tableBody = document.querySelector('#previousGuessesTable tbody');
