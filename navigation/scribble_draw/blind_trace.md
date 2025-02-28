@@ -343,24 +343,47 @@ function displayPastSubmissions(submissions) {
     submissionsContainer.appendChild(table);
 }
 
-async function deleteSubmission(submissionId) {
-    try {
-        const response = await fetch(`${pythonURI}/api/submission${submissionId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-            },
-        });
+$(document).ready(function() {
+    // Initialize DataTable
+    $("#blindTraceTable").DataTable({
+        order: [[3, 'desc']], // Sort by score by default
+        pageLength: 25
+    });
 
-        if (response.ok) {
-            loadPastSubmissions();
-        } else {
-            alert('Failed to delete submission.');
+    // Handle delete/restore button clicks
+    $(document).on("click", ".delete-btn", function() {
+        var id = $(this).data("id");
+        var action = $(this).text().toLowerCase();
+
+        // Confirm action
+        if (!confirm(`Are you sure you want to ${action} this submission?`)) {
+            return;
         }
-    } catch (error) {
-        alert('Error deleting submission.');
-    }
-}
+
+        // Send the DELETE request to the backend
+        fetch("/api/submission", {
+            method: "DELETE",  // Ensure DELETE method is used
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: id })  // Sending the ID in the request body
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                location.reload();  // Reload the page to reflect changes
+            } else {
+                alert(data.error || "Operation failed");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Failed to process request");
+        });
+    });
+});
+
 
 function toggleEraser() {
     ctx.strokeStyle = '#FFFFFF';
