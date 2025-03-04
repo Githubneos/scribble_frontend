@@ -234,18 +234,15 @@ body {
 </div>
 
 <script>
-const pythonURI = "https://scribble.stu.nighthawkcodingsociety.com"; 
-
 let viewCount = 3;
 let startTime;
-
-// Initialize canvas
 const canvas = document.getElementById("drawing-canvas");
 const ctx = canvas.getContext("2d");
 let isDrawing = false;
 canvas.width = 400;
 canvas.height = 400;
 
+// Initialize canvas
 document.addEventListener('DOMContentLoaded', () => {
     loadReferenceImage();
     loadPastSubmissions();
@@ -255,12 +252,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadReferenceImage() {
     const imageElement = document.getElementById("reference-image");
     const imageList = [
-       "images/Bridge.jpg",
+        "images/Bridge.jpg",
         "images/car.png",
         "images/colloseum.jpg",
         "images/french.jpg",
         "images/House.png",
-        "images.school_logo.png",
+        "images/school_logo.png",
         "images/stonehenge.jpg",
         "images/taj_mahal.jpg",
         "images.tower.jpg"
@@ -319,7 +316,7 @@ document.getElementById("reset-btn").addEventListener("click", () => {
 });
 
 // Submit drawing with random score
-document.getElementById("submit-btn").addEventListener("click", async function () {
+document.getElementById("submit-btn").addEventListener("click", function () {
     const drawingDataURL = canvas.toDataURL("image/png");
     const timeSpent = (Date.now() - startTime) / 1000;  // Time spent in seconds
     const score = Math.floor(Math.max(0, 100 - timeSpent * 2)); // Decreases score over time
@@ -329,50 +326,24 @@ document.getElementById("submit-btn").addEventListener("click", async function (
     const submissionData = {
         username: localStorage.getItem("username") || "Guest",
         drawing: drawingDataURL,
-        score: score
+        score: score,
+        submission_time: new Date().toISOString()
     };
 
-    try {
-        const response = await fetch(`${pythonURI}/api/submission`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("auth_token")}`
-            },
-            body: JSON.stringify(submissionData)
-        });
+    // Get past submissions from localStorage or initialize an empty array
+    let submissions = JSON.parse(localStorage.getItem("blindTraceSubmissions")) || [];
+    submissions.push(submissionData);
 
-        const result = await response.json();
-        if (response.ok) {
-            alert("Submission successful!");
-            loadPastSubmissions();
-        } else {
-            alert(`Error: ${result.message}`);
-        }
-    } catch (error) {
-        alert("Failed to submit drawing.");
-    }
+    // Save updated submissions to localStorage
+    localStorage.setItem("blindTraceSubmissions", JSON.stringify(submissions));
+
+    loadPastSubmissions();
 });
 
 // Load past submissions
-async function loadPastSubmissions() {
-    try {
-        const response = await fetch(`${pythonURI}/api/submission`, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("auth_token")}`
-            }
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            displayPastSubmissions(result.submissions);
-        } else {
-            alert(`Error: ${result.message}`);
-        }
-    } catch (error) {
-        alert("Failed to load past submissions.");
-    }
+function loadPastSubmissions() {
+    const submissions = JSON.parse(localStorage.getItem("blindTraceSubmissions")) || [];
+    displayPastSubmissions(submissions);
 }
 
 // Display past submissions
@@ -380,46 +351,36 @@ function displayPastSubmissions(submissions) {
     const tableBody = document.querySelector('#blindTraceTable tbody');
     tableBody.innerHTML = '';
 
-    submissions.forEach(submission => {
+    submissions.forEach((submission, index) => {
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${submission.username}</td>
             <td>${submission.score}</td>
             <td>
-                <a href="${submission.drawing_url}" target="_blank">
-                    <img src="${submission.drawing_url}" alt="Drawing" width="50">
+                <a href="${submission.drawing}" target="_blank">
+                    <img src="${submission.drawing}" alt="Drawing" width="50">
                 </a>
             </td>
             <td>${new Date(submission.submission_time).toLocaleString()}</td>
             <td>
-                <button class="btn btn-danger delete-btn" data-id="${submission.id}">Delete</button>
+                <button class="delete-btn" data-index="${index}">Delete</button>
             </td>
         `;
         tableBody.appendChild(row);
     });
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', deleteSubmission);
+    });
 }
 
 // Delete a submission
-document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("delete-btn")) {
-        const id = event.target.getAttribute("data-id");
+function deleteSubmission(event) {
+    const index = event.target.getAttribute("data-index");
+    let submissions = JSON.parse(localStorage.getItem("blindTraceSubmissions")) || [];
+    submissions.splice(index, 1); // Remove the submission
 
-        if (!confirm("Are you sure you want to delete this submission?")) return;
-
-        fetch(`${pythonURI}/api/submission`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("auth_token")}`
-            },
-            body: JSON.stringify({ id: id })
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message || "Deleted successfully");
-            loadPastSubmissions();
-        })
-        .catch(() => alert("Failed to delete submission."));
-    }
-});
-</script>
+    localStorage.setItem("blindTraceSubmissions", JSON.stringify(submissions));
+    loadPastSubmissions();  // Re-render the submissions
+}
