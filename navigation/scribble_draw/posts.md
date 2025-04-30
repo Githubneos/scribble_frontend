@@ -192,7 +192,6 @@ menu: nav/home.html
         }
     };
 
-    // Drawing Board Implementation
     document.addEventListener('DOMContentLoaded', () => {
         const app = document.querySelector('#app');
         if (!app) {
@@ -200,7 +199,6 @@ menu: nav/home.html
             return;
         }
 
-        // Toolbar for drawing tools
         const toolbar = document.createElement('div');
         toolbar.style.cssText = `
             display: flex;
@@ -214,7 +212,6 @@ menu: nav/home.html
             flex-wrap: wrap;
         `;
 
-        // Color picker for drawing
         const colorPicker = document.createElement('input');
         colorPicker.type = 'color';
         colorPicker.value = '#000000';
@@ -234,7 +231,6 @@ menu: nav/home.html
             isEraser = false;
         });
 
-        // Brush size slider
         const brushSize = document.createElement('input');
         brushSize.type = 'range';
         brushSize.min = '1';
@@ -243,7 +239,6 @@ menu: nav/home.html
         brushSize.style.cssText = 'margin: 0 10px;';
         toolbar.appendChild(brushSize);
 
-        // Marker button
         const markerButton = document.createElement('button');
         markerButton.textContent = 'Marker';
         markerButton.style.cssText = `
@@ -279,7 +274,6 @@ menu: nav/home.html
         });
         toolbar.appendChild(eraserButton);
 
-        // Undo button
         const undoButton = document.createElement('button');
         undoButton.textContent = 'Undo';
         undoButton.style.cssText = `
@@ -305,7 +299,6 @@ menu: nav/home.html
         });
         toolbar.appendChild(undoButton);
 
-        // Reset button
         const resetButton = document.createElement('button');
         resetButton.textContent = 'Reset';
         resetButton.style.cssText = `
@@ -323,7 +316,6 @@ menu: nav/home.html
         });
         toolbar.appendChild(resetButton);
 
-        // Save button
         const saveButton = document.createElement('button');
         saveButton.textContent = 'Save Drawing';
         saveButton.style.cssText = `
@@ -344,7 +336,6 @@ menu: nav/home.html
         });
         toolbar.appendChild(saveButton);
 
-        // Canvas for drawing
         const canvas = document.createElement('canvas');
         canvas.width = 800;
         canvas.height = 600;
@@ -360,7 +351,6 @@ menu: nav/home.html
         let drawing = false;
         let undoStack = [];
 
-        // Event listeners for drawing
         canvas.addEventListener('mousedown', (e) => {
             drawing = true;
             ctx.beginPath();
@@ -387,7 +377,6 @@ menu: nav/home.html
             drawing = false;
         });
 
-        // Add toolbar and canvas to the app
         app.appendChild(toolbar);
         app.appendChild(canvas);
     });
