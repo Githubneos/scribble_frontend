@@ -8,6 +8,8 @@ menu: nav/home.html
 ---
 
 <table>
+    <!-- Navigation menu for the website -->
+    <!-- Provides links to different sections of the site -->
     <tr>
         <td><a href="{{site.baseurl}}/index">Home</a></td>
         <td><a href="{{site.baseurl}}/competition">Competitive</a></td>
@@ -23,16 +25,18 @@ menu: nav/home.html
 
 <style>
     :root {
-        --primary-color: #1a237e;
-        --secondary-color: #283593;
+        /* Define CSS variables for consistent styling across the page */
+        --primary-color: #1a237e; /* Primary color for buttons and highlights */
+        --secondary-color: #283593; /* Secondary color for hover effects */
         --background: linear-gradient(145deg, #789DBC, #FFE3E3, #FEF9F2, #C9E9D2, rgb(120, 157, 188), rgb(255, 227, 227), rgb(254, 249, 242), rgb(201, 233, 210));
-        --text-color: #e1e1e1;
-        --card-bg: rgba(30, 41, 59, 0.8);
-        --error: #e74c3c;
-        --success: #2ecc71;
+        --text-color: #e1e1e1; /* Text color for labels and descriptions */
+        --card-bg: rgba(30, 41, 59, 0.8); /* Background color for cards */
+        --error: #e74c3c; /* Error color for delete buttons */
+        --success: #2ecc71; /* Success color for messages */
     }
 
     body {
+        /* Set the background and ensure the page takes up the full height */
         background: var(--background);
         min-height: 100vh;
         margin: 0;
@@ -40,6 +44,7 @@ menu: nav/home.html
     }
 
     .picture-gallery {
+        /* Center the gallery and set a maximum width */
         max-width: 1200px;
         margin: 2rem auto;
         padding: 0 1rem;
@@ -47,6 +52,7 @@ menu: nav/home.html
     }
 
     .upload-form {
+        /* Style the upload form with a card-like appearance */
         background-color: var(--card-bg);
         padding: 2rem;
         border-radius: 8px;
@@ -54,16 +60,19 @@ menu: nav/home.html
     }
 
     .form-group {
+        /* Add spacing between form elements */
         margin-bottom: 1rem;
     }
 
     .form-label {
+        /* Style the labels for form inputs */
         display: block;
         margin-bottom: 0.5rem;
         color: var(--text-color);
     }
 
     .form-input {
+        /* Style the input fields */
         width: 100%;
         padding: 0.5rem;
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -73,6 +82,7 @@ menu: nav/home.html
     }
 
     .submit-btn {
+        /* Style the submit button */
         background-color: var(--primary-color);
         color: white;
         padding: 0.75rem 1.5rem;
@@ -83,10 +93,12 @@ menu: nav/home.html
     }
 
     .submit-btn:hover {
+        /* Change the background color on hover */
         background-color: var(--secondary-color);
     }
 
     .gallery-grid {
+        /* Create a responsive grid layout for the gallery */
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 1.5rem;
@@ -94,6 +106,7 @@ menu: nav/home.html
     }
 
     .picture-card {
+        /* Style individual picture cards */
         background-color: var(--card-bg);
         border-radius: 8px;
         overflow: hidden;
@@ -103,6 +116,7 @@ menu: nav/home.html
     }
 
     .picture-img {
+        /* Style the images inside the cards */
         width: 100%;
         height: 160px;
         object-fit: contain;
@@ -111,22 +125,26 @@ menu: nav/home.html
     }
 
     .picture-info {
+        /* Style the text information inside the cards */
         padding: 1rem;
         color: var(--text-color);
     }
 
     .picture-info h3 {
+        /* Style the title of the drawing */
         margin: 0 0 0.5rem 0;
         color: var(--text-color);
     }
 
     .picture-info p {
+        /* Style the description text */
         margin: 0 0 1rem 0;
         font-size: 0.9rem;
         color: rgba(225, 225, 225, 0.8);
     }
 
     .delete-btn {
+        /* Style the delete button */
         background-color: var(--error);
         color: white;
         border: none;
@@ -137,10 +155,12 @@ menu: nav/home.html
     }
 
     .delete-btn:hover {
+        /* Slightly reduce opacity on hover */
         opacity: 0.9;
     }
 
     .message {
+        /* Style the message box for notifications */
         position: fixed;
         top: 20px;
         right: 20px;
@@ -151,30 +171,36 @@ menu: nav/home.html
     }
 
     @keyframes fadeIn {
+        /* Animation for the message box */
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
     }
 </style>
 
 <div class="picture-gallery">
-    <!-- Drawing Board Section -->
+    <!-- Container for the drawing board and gallery -->
     <div id="app"></div>
-<!-- Upload Drawing Section -->
+
+    <!-- Upload Drawing Section -->
     <div class="upload-form">
         <h2>Upload Drawing</h2>
         <form id="picture-form" enctype="multipart/form-data">
+            <!-- Input for drawing name -->
             <div class="form-group">
                 <label class="form-label">Drawing Name</label>
                 <input type="text" id="drawingName" class="form-input" required>
             </div>
+            <!-- Input for description -->
             <div class="form-group">
                 <label class="form-label">Description</label>
                 <textarea id="description" class="form-input" rows="3"></textarea>
             </div>
+            <!-- Input for image file -->
             <div class="form-group">    
                 <label class="form-label">Picture (PNG only)</label>
                 <input type="file" id="image" accept="image/png" class="form-input" required>
             </div>
+            <!-- Submit button -->
             <button type="submit" class="submit-btn">Upload Drawing</button>
         </form>
     </div>
@@ -185,10 +211,11 @@ menu: nav/home.html
 <script type="module">
     import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
+    // Configuration for fetch requests
     const fetchConfig = {
-        credentials: "include",
+        credentials: "include", // Include credentials for authentication
         headers: {
-            'X-Origin': 'client'
+            'X-Origin': 'client' // Custom header to identify the client
         }
     };
 
@@ -381,22 +408,24 @@ menu: nav/home.html
         app.appendChild(canvas);
     });
 
+    // Function to fetch and display pictures
     async function fetchPictures() {
         try {
             const response = await fetch(`${pythonURI}/api/pictures`, {
-                method: "GET",
+                method: "GET", // HTTP GET request to fetch pictures
                 ...fetchConfig
             });
 
             if (!response.ok) throw new Error('Failed to load pictures');
             const pictures = await response.json();
 
+            // Use a list to store picture data
             const gallery = document.getElementById('gallery');
-            gallery.innerHTML = '';
+            gallery.innerHTML = ''; // Clear the gallery before adding new pictures
 
             pictures.forEach(picture => {
                 const card = document.createElement('div');
-                card.className = 'picture-card';
+                card.className = 'picture-card'; // Add a class for styling
                 card.innerHTML = `
                     <img src="${picture.image_data}" 
                          alt="${picture.drawing_name}" 
@@ -413,7 +442,7 @@ menu: nav/home.html
                         </div>
                     </div>
                 `;
-                gallery.appendChild(card);
+                gallery.appendChild(card); // Add the card to the gallery
             });
         } catch (error) {
             console.error('Error:', error);
@@ -421,17 +450,52 @@ menu: nav/home.html
         }
     }
 
+    // Procedure to delete a picture
+    window.deletePicture = async function(pictureId) {
+        if (!confirm('Are you sure you want to delete this picture?')) return;
+
+        try {
+            const response = await fetch(`${pythonURI}/api/pictures/delete/${pictureId}`, {
+                method: "DELETE", // HTTP DELETE request to remove a picture
+                ...fetchConfig
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to delete picture');
+            }
+
+            showMessage('Picture deleted successfully');
+            await fetchPictures(); // Refresh the gallery after deletion
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage('Delete failed: ' + error.message, true);
+        }
+    };
+
+    // Procedure to show messages to the user
+    function showMessage(message, isError = false) {
+        const messageEl = document.getElementById('message');
+        messageEl.textContent = message; // Set the message text
+        messageEl.style.display = 'block'; // Make the message visible
+        messageEl.style.backgroundColor = isError ? '#C6E7FF' : '#D4F6FF'; // Set background color based on error state
+        messageEl.style.color = isError ? '#FBFBFB' : '#FFDDAE'; // Set text color
+        setTimeout(() => messageEl.style.display = 'none', 3000); // Hide the message after 3 seconds
+    }
+
+    // Event listener for form submission
     document.getElementById('picture-form').addEventListener('submit', async function(event) {
-        event.preventDefault();
+        event.preventDefault(); // Prevent the default form submission behavior
         
-        const formData = new FormData();
-        formData.append('drawing_name', document.getElementById('drawingName').value);
-        formData.append('description', document.getElementById('description').value);
-        formData.append('image', document.getElementById('image').files[0]);
+        const formData = new FormData(); // Create a FormData object to hold the form data
+        formData.append('drawing_name', document.getElementById('drawingName').value); // Add the drawing name
+        formData.append('description', document.getElementById('description').value); // Add the description
+        formData.append('image', document.getElementById('image').files[0]); // Add the image file
 
         try {
             const response = await fetch(`${pythonURI}/api/pictures`, {
-                method: "POST",
+                method: "POST", // HTTP POST request to upload the picture
                 ...fetchConfig,
                 body: formData
             });
@@ -443,73 +507,14 @@ menu: nav/home.html
             }
 
             showMessage('Picture uploaded successfully!');
-            this.reset();
-            await fetchPictures();
+            this.reset(); // Reset the form after successful upload
+            await fetchPictures(); // Refresh the gallery
         } catch (error) {
             console.error('Error:', error);
             showMessage('Upload failed: ' + error.message, true);
         }
     });
 
-    window.deletePicture = async function(pictureId) {
-        if (!confirm('Are you sure you want to delete this picture?')) return;
-
-        try {
-            const response = await fetch(`${pythonURI}/api/pictures/delete/${pictureId}`, {
-                method: "DELETE",
-                ...fetchConfig
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to delete picture');
-            }
-
-            showMessage('Picture deleted successfully');
-            await fetchPictures();
-        } catch (error) {
-            console.error('Error:', error);
-            showMessage('Delete failed: ' + error.message, true);
-        }
-    };
-
-    window.deleteUser = async function(username) {
-        if (!confirm(`Are you sure you want to delete user: ${username}?`)) return;
-
-        try {
-            const response = await fetch(`${pythonURI}/api/admin/user`, {
-                method: "DELETE",
-                ...fetchConfig,
-                headers: {
-                    ...fetchConfig.headers,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username: username })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to delete user');
-            }
-
-            showMessage('User deleted successfully');
-            await fetchPictures();
-        } catch (error) {
-            console.error('Error:', error);
-            showMessage('Delete user failed: ' + error.message, true);
-        }
-    };
-
-    function showMessage(message, isError = false) {
-        const messageEl = document.getElementById('message');
-        messageEl.textContent = message;
-        messageEl.style.display = 'block';
-        messageEl.style.backgroundColor = isError ? '#C6E7FF' : '#D4F6FF';
-        messageEl.style.color = isError ? '#FBFBFB' : '#FFDDAE';
-        setTimeout(() => messageEl.style.display = 'none', 3000);
-    }
-
+    // Fetch pictures on page load
     document.addEventListener('DOMContentLoaded', fetchPictures);
 </script>
